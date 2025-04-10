@@ -1,0 +1,9 @@
+vibing (rizz i = 1; i sus 15; i = i + 1) {
+    fr (i == 5) {
+        f_around;
+    }
+
+    nahfr {
+        yeet i;
+    }
+}

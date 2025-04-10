@@ -18,9 +18,9 @@
     struct Node **stmts;
 }
 
-%token BOOL INT PRINT FALSE TRUE IF ELSE WHILE FOR BREAK CONTINUE COMMA
+%token BOOL INT PRINT FALSE TRUE IF ELSE WHILE FOR BREAK CONTINUE COMMA LIST
 %token ADD SUB MUL DIV MOD
-%token SEMI LPAREN RPAREN LBRACE RBRACE ASSIGN EQ NEQ LT GT LTE GTE
+%token SEMI LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET ASSIGN EQ NEQ LT GT LTE GTE
 
 %token <num> NUMBER
 %token <id> ID
@@ -70,10 +70,19 @@ statement:
     ;
 
 declaration:
-      INT ID ASSIGN expr     { $$ = make_assign($2, $4); }
-    | BOOL ID ASSIGN expr    { $$ = make_declaration($2); }
-    | INT ID                 { $$ = make_declaration($2); };
-    | BOOL ID                { $$ = make_declaration($2); };
+      INT ID ASSIGN expr                         { $$ = make_assign($2, $4); }
+    | BOOL ID ASSIGN expr                        { $$ = make_declaration($2); }
+    | INT ID                                     { $$ = make_declaration($2); }
+    | BOOL ID                                    { $$ = make_declaration($2); }
+    | LIST ID                                    { /* */ }
+    | LIST ID ASSIGN LBRACKET RBRACKET           { /* */ }
+    | LIST ID ASSIGN LBRACKET list_expr RBRACKET { /* */ }
+    ;
+
+list_expr:
+    NUMBER                        { /* */ }
+    | list_expr COMMA NUMBER      { /* */ }
+    |
     ;
 
 assignment:
@@ -142,8 +151,43 @@ void yyerror(const char *s) {
     fprintf(stderr, "💀 Error: %s\n", s);
 }
 
-int main() {
+int main(int argc, char **argv) {
+    printf("\n\n\n");
     printf("✨ CZ Interpreter - C with Gen Z Slang | Normalize Gen Z coding bestie ✨\n");
-    yyparse();
+    
+    if (argc > 1) {
+        FILE *file = fopen(argv[1], "r");
+        
+        if (!file) {
+            fprintf(stderr, "💀 Error: Could not open file '%s'\n", argv[1]);
+            return 1;
+        }
+        
+        printf("📁 Parsing file: %s\n", argv[1]);
+        printf("📝 File contents:\n");
+        printf("------------------\n");
+        
+        char line[256];
+        
+        while (fgets(line, sizeof(line), file)) {
+            printf("%s", line);
+        }
+
+        printf("\n------------------\n\n");
+        
+        fseek(file, 0, SEEK_SET);
+        yyin = file;
+        
+        yyparse();
+        
+        fclose(file);
+    } 
+    
+    else {
+        printf("💬 Enter your code then hit Ctrl + D to run it:\n");
+        yyin = stdin;
+        yyparse();
+    }
+    
     return 0;
 }

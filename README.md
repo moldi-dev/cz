@@ -20,9 +20,14 @@ Make sure you’ve got:
 Building & Running:
 
 ```bash
-make build-run
+make build-run-file FILE=<path_to_your_file>
 ```
-Input your Gen Z program bestie 🔥
+
+or 
+
+```bash
+make build-run-terminal
+```
 
 ## 🔥 Example programs
 

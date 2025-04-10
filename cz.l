@@ -27,7 +27,8 @@
 "mid"       { return SUB; }
 "clapped"   { return MUL; }
 "ratioed"   { return DIV; }
-"wtf"       { return MOD; }      
+"wtf"       { return MOD; }
+"squad"     { return LIST; }      
 
 [0-9]+      { yylval.num = atoi(yytext); return NUMBER; }
 [a-zA-Z]+   { yylval.id = strdup(yytext); return ID; }
@@ -36,6 +37,8 @@
 ")"         { return RPAREN; }
 "{"         { return LBRACE; }
 "}"         { return RBRACE; }
+"["         { return LBRACKET; }
+"]"         { return RBRACKET; }
 "="         { return ASSIGN; }
 "%"         { return MOD; }
 "=="        { return EQ; }
