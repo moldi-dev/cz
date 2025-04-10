@@ -14,6 +14,7 @@
 "cap"       { return FALSE; }
 "nocap"     { return TRUE; }
 "fr"        { return IF; }
+"nahfr"     { return ELSE; }
 "ong"       { return WHILE; }
 "vibing"    { return FOR; }
 "bruh"      { return EQ; }

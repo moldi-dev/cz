@@ -10,7 +10,7 @@
     // ----------------- AST NODE TYPES -----------------
 
     typedef enum { 
-        NODE_PROGRAM, NODE_ASSIGN, NODE_PRINT, NODE_IF, NODE_WHILE, NODE_FOR, 
+        NODE_PROGRAM, NODE_ASSIGN, NODE_PRINT, NODE_IF, NODE_IF_ELSE, NODE_WHILE, NODE_FOR, 
         NODE_BLOCK, NODE_EXPR, NODE_COND, NODE_VAR, NODE_NUM, 
         NODE_BINOP
     } NodeType;
@@ -22,7 +22,9 @@
             struct { char *id; struct Node *expr; } assign;
             struct { struct Node *expr; } print;
             struct { struct Node *cond; struct Node *body; } while_loop;
+            struct { struct Node *init, *cond, *incr, *body; } for_loop;
             struct { struct Node *cond; struct Node *body; } if_stmt;
+            struct { struct Node *cond, *if_branch, *else_branch; } if_else_stmt;
             struct { struct Node **stmts; int count; } block;
             struct { int value; } num;
             struct { char *id; } var;
@@ -55,7 +57,9 @@
     Node *make_assign(char *id, Node *expr);
     Node *make_print(Node *expr);
     Node *make_while(Node *cond, Node *body);
+    Node *make_for(Node *init, Node *cond, Node *incr, Node *body);
     Node *make_if(Node *cond, Node *body);
+    Node *make_if_else(Node *cond, Node *if_branch, Node *else_branch);
     Node *make_block(Node **stmts, int count);
 
 %}
@@ -67,13 +71,13 @@
     struct Node **stmts;
 }
 
-%token BOOL INT PRINT FALSE TRUE IF WHILE FOR
+%token BOOL INT PRINT FALSE TRUE IF ELSE WHILE FOR
 %token ADD SUB MUL DIV MOD
 %token SEMI LPAREN RPAREN LBRACE RBRACE ASSIGN EQ NEQ LT GT LTE GTE
 
 %token <num> NUMBER
 %token <id> ID
-%type <node> expr condition statement print_stmt assignment declaration if_stmt while_loop compound_stmt
+%type <node> expr condition statement print_stmt assignment declaration if_stmt while_loop for_loop compound_stmt
 %type <stmts> stmt_list
 
 %left EQ NEQ LT GT LTE GTE
@@ -113,6 +117,7 @@ statement:
     | print_stmt SEMI       { $$ = $1; }
     | if_stmt               { $$ = $1; }
     | while_loop            { $$ = $1; }
+    | for_loop              { $$ = $1; }
     ;
 
 declaration:
@@ -132,11 +137,20 @@ if_stmt:
     IF LPAREN condition RPAREN compound_stmt {
         $$ = make_if($3, $5);
     }
+    | IF LPAREN condition RPAREN compound_stmt ELSE compound_stmt {
+        $$ = make_if_else($3, $5, $7);
+    }
     ;
 
 while_loop:
     WHILE LPAREN condition RPAREN compound_stmt {
         $$ = make_while($3, $5);
+    }
+    ;
+
+for_loop:
+    FOR LPAREN declaration SEMI condition SEMI assignment RPAREN compound_stmt {
+        $$ = make_for($3, $5, $7, $9);
     }
     ;
 
@@ -225,9 +239,24 @@ int eval(Node *node) {
                 eval_block(node->if_stmt.body);
             return 0;
         }
+        case NODE_IF_ELSE: {
+            if (eval(node->if_else_stmt.cond))
+                eval_block(node->if_else_stmt.if_branch);
+            else
+                eval_block(node->if_else_stmt.else_branch);
+            return 0;
+        }
         case NODE_WHILE: {
             while (eval(node->while_loop.cond))
                 eval_block(node->while_loop.body);
+            return 0;
+        }
+        case NODE_FOR: {
+            eval(node->for_loop.init);
+            while (eval(node->for_loop.cond)) {
+                eval_block(node->for_loop.body);
+                eval(node->for_loop.incr);
+            }
             return 0;
         }
         default: return 0;
@@ -287,11 +316,30 @@ Node *make_if(Node *cond, Node *body) {
     return n;
 }
 
+Node *make_if_else(Node *cond, Node *if_branch, Node *else_branch) {
+    Node *n = malloc(sizeof(Node));
+    n->type = NODE_IF_ELSE;
+    n->if_else_stmt.cond = cond;
+    n->if_else_stmt.if_branch = if_branch;
+    n->if_else_stmt.else_branch = else_branch;
+    return n;
+}
+
 Node *make_while(Node *cond, Node *body) {
     Node *n = malloc(sizeof(Node));
     n->type = NODE_WHILE;
     n->while_loop.cond = cond;
     n->while_loop.body = body;
+    return n;
+}
+
+Node *make_for(Node *init, Node *cond, Node *incr, Node *body) {
+    Node *n = malloc(sizeof(Node));
+    n->type = NODE_FOR;
+    n->for_loop.init = init;
+    n->for_loop.cond = cond;
+    n->for_loop.incr = incr;
+    n->for_loop.body = body;
     return n;
 }
 

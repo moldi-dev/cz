@@ -60,27 +60,28 @@ extern int yydebug;
     FALSE = 261,                   /* FALSE  */
     TRUE = 262,                    /* TRUE  */
     IF = 263,                      /* IF  */
-    WHILE = 264,                   /* WHILE  */
-    FOR = 265,                     /* FOR  */
-    ADD = 266,                     /* ADD  */
-    SUB = 267,                     /* SUB  */
-    MUL = 268,                     /* MUL  */
-    DIV = 269,                     /* DIV  */
-    MOD = 270,                     /* MOD  */
-    SEMI = 271,                    /* SEMI  */
-    LPAREN = 272,                  /* LPAREN  */
-    RPAREN = 273,                  /* RPAREN  */
-    LBRACE = 274,                  /* LBRACE  */
-    RBRACE = 275,                  /* RBRACE  */
-    ASSIGN = 276,                  /* ASSIGN  */
-    EQ = 277,                      /* EQ  */
-    NEQ = 278,                     /* NEQ  */
-    LT = 279,                      /* LT  */
-    GT = 280,                      /* GT  */
-    LTE = 281,                     /* LTE  */
-    GTE = 282,                     /* GTE  */
-    NUMBER = 283,                  /* NUMBER  */
-    ID = 284                       /* ID  */
+    ELSE = 264,                    /* ELSE  */
+    WHILE = 265,                   /* WHILE  */
+    FOR = 266,                     /* FOR  */
+    ADD = 267,                     /* ADD  */
+    SUB = 268,                     /* SUB  */
+    MUL = 269,                     /* MUL  */
+    DIV = 270,                     /* DIV  */
+    MOD = 271,                     /* MOD  */
+    SEMI = 272,                    /* SEMI  */
+    LPAREN = 273,                  /* LPAREN  */
+    RPAREN = 274,                  /* RPAREN  */
+    LBRACE = 275,                  /* LBRACE  */
+    RBRACE = 276,                  /* RBRACE  */
+    ASSIGN = 277,                  /* ASSIGN  */
+    EQ = 278,                      /* EQ  */
+    NEQ = 279,                     /* NEQ  */
+    LT = 280,                      /* LT  */
+    GT = 281,                      /* GT  */
+    LTE = 282,                     /* LTE  */
+    GTE = 283,                     /* GTE  */
+    NUMBER = 284,                  /* NUMBER  */
+    ID = 285                       /* ID  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -95,40 +96,41 @@ extern int yydebug;
 #define FALSE 261
 #define TRUE 262
 #define IF 263
-#define WHILE 264
-#define FOR 265
-#define ADD 266
-#define SUB 267
-#define MUL 268
-#define DIV 269
-#define MOD 270
-#define SEMI 271
-#define LPAREN 272
-#define RPAREN 273
-#define LBRACE 274
-#define RBRACE 275
-#define ASSIGN 276
-#define EQ 277
-#define NEQ 278
-#define LT 279
-#define GT 280
-#define LTE 281
-#define GTE 282
-#define NUMBER 283
-#define ID 284
+#define ELSE 264
+#define WHILE 265
+#define FOR 266
+#define ADD 267
+#define SUB 268
+#define MUL 269
+#define DIV 270
+#define MOD 271
+#define SEMI 272
+#define LPAREN 273
+#define RPAREN 274
+#define LBRACE 275
+#define RBRACE 276
+#define ASSIGN 277
+#define EQ 278
+#define NEQ 279
+#define LT 280
+#define GT 281
+#define LTE 282
+#define GTE 283
+#define NUMBER 284
+#define ID 285
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 63 "cz.y"
+#line 67 "cz.y"
 
     int num;
     char *id;
     struct Node *node;
     struct Node **stmts;
 
-#line 132 "y.tab.h"
+#line 134 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
