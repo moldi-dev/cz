@@ -147,6 +147,14 @@ Node *make_assign(char *id, Node *expr) {
     return n;
 }
 
+Node *make_declaration(char *id) {
+    Node *n = malloc(sizeof(Node));
+    n->type = NODE_DECLARE;
+    n->assign.id = strdup(id);
+    n->num.value = 0; 
+    return n;
+}
+
 Node *make_print(Node *expr) {
     Node *n = malloc(sizeof(Node));
     n->type = NODE_PRINT;

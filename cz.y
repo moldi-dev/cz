@@ -71,7 +71,9 @@ statement:
 
 declaration:
       INT ID ASSIGN expr     { $$ = make_assign($2, $4); }
-    | BOOL ID ASSIGN expr    { $$ = make_assign($2, $4); }
+    | BOOL ID ASSIGN expr    { $$ = make_declaration($2); }
+    | INT ID                 { $$ = make_declaration($2); };
+    | BOOL ID                { $$ = make_declaration($2); };
     ;
 
 assignment:
@@ -99,6 +101,9 @@ while_loop:
 
 for_loop:
     FOR LPAREN declaration SEMI condition SEMI assignment RPAREN compound_stmt {
+        $$ = make_for($3, $5, $7, $9);
+    }
+    | FOR LPAREN assignment SEMI condition SEMI assignment RPAREN compound_stmt {
         $$ = make_for($3, $5, $7, $9);
     }
     ;

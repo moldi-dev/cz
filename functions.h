@@ -15,6 +15,7 @@ Node *make_num(int value);
 Node *make_var(char *id);
 Node *make_binary(int op, Node *left, Node *right);
 Node *make_assign(char *id, Node *expr);
+Node *make_declaration(char *id);
 Node *make_print(Node *expr);
 Node *make_while(Node *cond, Node *body);
 Node *make_for(Node *init, Node *cond, Node *incr, Node *body);

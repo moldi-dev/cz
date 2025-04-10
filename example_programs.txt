@@ -1,5 +1,8 @@
-rizz x = 10;
-rizz y = 5;
+rizz x;
+rizz y;
+
+y = 10;
+x = 5;
 
 yeet x + y;
 
@@ -28,6 +31,15 @@ vibing (rizz i = 1; i sus 15; i = i + 1) {
 
 ----------------------------------------------
 
+rizz i;
+vibing (i = 1; i sus 15; i = i + 1) {
+    fr (i wtf 2 == 0) {
+        yeet i;
+    }
+}
+
+----------------------------------------------
+
 vibing (rizz i = 1; i sus 15; i = i + 1) {
     fr (i == 5) {
         stahp;
@@ -48,6 +60,13 @@ vibing (rizz i = 1; i sus 15; i = i + 1) {
     nahfr {
         yeet i;
     }
+}
+
+----------------------------------------------
+
+vibing (rizz i = 1; i sus 15; i = i + 1) {
+    f_around;
+    yeet i;
 }
 
 ----------------------------------------------
