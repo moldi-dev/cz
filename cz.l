@@ -1,7 +1,7 @@
 %{
-#include "y.tab.h"
-#include <stdio.h>
-#include <stdlib.h>
+    #include "y.tab.h"
+    #include <stdio.h>
+    #include <stdlib.h>
 %}
 
 %%
@@ -16,14 +16,14 @@
 "fr"        { return IF; }
 "ong"       { return WHILE; }
 "vibing"    { return FOR; }
-"bruh"      { return EQUALS; }
+"bruh"      { return EQ; }
+"nah"       { return NEQ; }
 "sus"       { return LT; }       
 "extra"     { return GT; }
 "lit"       { return ADD; }
 "mid"       { return SUB; }
 "clapped"   { return MUL; }
 "ratioed"   { return DIV; }
-"bet"       { return RETURN; }
 "wtf"       { return MOD; }      
 
 [0-9]+      { yylval.num = atoi(yytext); return NUMBER; }
@@ -34,16 +34,17 @@
 "{"         { return LBRACE; }
 "}"         { return RBRACE; }
 "="         { return ASSIGN; }
+"%"         { return MOD; }
 "=="        { return EQ; }
 "!="        { return NEQ; }
 "<"         { return LT; }
 "<="        { return LTE; }
 ">"         { return GT; }
 ">="        { return GTE; }
-"+"         { return PLUS; }
-"-"         { return MINUS; }
-"*"         { return TIMES; }
-"/"         { return DIVIDE; }
+"+"         { return ADD; }
+"-"         { return SUB; }
+"*"         { return MUL; }
+"/"         { return DIV; }
 .           { printf("🔥 Yikes! Invalid token: %s\n", yytext); }
 
 %%

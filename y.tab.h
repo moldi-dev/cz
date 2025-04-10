@@ -62,33 +62,25 @@ extern int yydebug;
     IF = 263,                      /* IF  */
     WHILE = 264,                   /* WHILE  */
     FOR = 265,                     /* FOR  */
-    EQUALS = 266,                  /* EQUALS  */
-    LESS = 267,                    /* LESS  */
-    GREATER = 268,                 /* GREATER  */
-    ADD = 269,                     /* ADD  */
-    SUB = 270,                     /* SUB  */
-    MUL = 271,                     /* MUL  */
-    DIV = 272,                     /* DIV  */
-    RETURN = 273,                  /* RETURN  */
-    MOD = 274,                     /* MOD  */
-    SEMI = 275,                    /* SEMI  */
-    LPAREN = 276,                  /* LPAREN  */
-    RPAREN = 277,                  /* RPAREN  */
-    LBRACE = 278,                  /* LBRACE  */
-    RBRACE = 279,                  /* RBRACE  */
-    ASSIGN = 280,                  /* ASSIGN  */
-    EQ = 281,                      /* EQ  */
-    NEQ = 282,                     /* NEQ  */
-    LT = 283,                      /* LT  */
-    GT = 284,                      /* GT  */
-    PLUS = 285,                    /* PLUS  */
-    MINUS = 286,                   /* MINUS  */
-    TIMES = 287,                   /* TIMES  */
-    DIVIDE = 288,                  /* DIVIDE  */
-    LTE = 289,                     /* LTE  */
-    GTE = 290,                     /* GTE  */
-    NUMBER = 291,                  /* NUMBER  */
-    ID = 292                       /* ID  */
+    ADD = 266,                     /* ADD  */
+    SUB = 267,                     /* SUB  */
+    MUL = 268,                     /* MUL  */
+    DIV = 269,                     /* DIV  */
+    MOD = 270,                     /* MOD  */
+    SEMI = 271,                    /* SEMI  */
+    LPAREN = 272,                  /* LPAREN  */
+    RPAREN = 273,                  /* RPAREN  */
+    LBRACE = 274,                  /* LBRACE  */
+    RBRACE = 275,                  /* RBRACE  */
+    ASSIGN = 276,                  /* ASSIGN  */
+    EQ = 277,                      /* EQ  */
+    NEQ = 278,                     /* NEQ  */
+    LT = 279,                      /* LT  */
+    GT = 280,                      /* GT  */
+    LTE = 281,                     /* LTE  */
+    GTE = 282,                     /* GTE  */
+    NUMBER = 283,                  /* NUMBER  */
+    ID = 284                       /* ID  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -105,44 +97,38 @@ extern int yydebug;
 #define IF 263
 #define WHILE 264
 #define FOR 265
-#define EQUALS 266
-#define LESS 267
-#define GREATER 268
-#define ADD 269
-#define SUB 270
-#define MUL 271
-#define DIV 272
-#define RETURN 273
-#define MOD 274
-#define SEMI 275
-#define LPAREN 276
-#define RPAREN 277
-#define LBRACE 278
-#define RBRACE 279
-#define ASSIGN 280
-#define EQ 281
-#define NEQ 282
-#define LT 283
-#define GT 284
-#define PLUS 285
-#define MINUS 286
-#define TIMES 287
-#define DIVIDE 288
-#define LTE 289
-#define GTE 290
-#define NUMBER 291
-#define ID 292
+#define ADD 266
+#define SUB 267
+#define MUL 268
+#define DIV 269
+#define MOD 270
+#define SEMI 271
+#define LPAREN 272
+#define RPAREN 273
+#define LBRACE 274
+#define RBRACE 275
+#define ASSIGN 276
+#define EQ 277
+#define NEQ 278
+#define LT 279
+#define GT 280
+#define LTE 281
+#define GTE 282
+#define NUMBER 283
+#define ID 284
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 22 "cz.y"
+#line 63 "cz.y"
 
     int num;
     char *id;
+    struct Node *node;
+    struct Node **stmts;
 
-#line 146 "y.tab.h"
+#line 132 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

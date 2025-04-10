@@ -77,18 +77,59 @@
     extern int yylex();
     void yyerror(const char *s);
 
+    // ----------------- AST NODE TYPES -----------------
+
+    typedef enum { 
+        NODE_PROGRAM, NODE_ASSIGN, NODE_PRINT, NODE_IF, NODE_WHILE, NODE_FOR, 
+        NODE_BLOCK, NODE_EXPR, NODE_COND, NODE_VAR, NODE_NUM, 
+        NODE_BINOP
+    } NodeType;
+
+    typedef struct Node {
+        NodeType type;
+        union {
+            struct { struct Node *left, *right; int op; } binary;
+            struct { char *id; struct Node *expr; } assign;
+            struct { struct Node *expr; } print;
+            struct { struct Node *cond; struct Node *body; } while_loop;
+            struct { struct Node *cond; struct Node *body; } if_stmt;
+            struct { struct Node **stmts; int count; } block;
+            struct { int value; } num;
+            struct { char *id; } var;
+        };
+    } Node;
+
+    // ----------------- VARIABLE STORE -----------------
+
     typedef struct {
         char *id;
         int value;
     } variable;
 
-    int get_var_value(char *id);
-    void set_var(char *id, int value);
-
     variable vars[100];
     int var_count = 0;
 
-#line 92 "y.tab.c"
+    int get_var_value(char *id);
+    void set_var(char *id, int value);
+
+    // ----------------- EVALUATION -----------------
+
+    int eval(Node *node);
+    void eval_block(Node *block);
+
+    // ----------------- HELPERS -----------------
+
+    Node *make_num(int value);
+    Node *make_var(char *id);
+    Node *make_binary(int op, Node *left, Node *right);
+    Node *make_assign(char *id, Node *expr);
+    Node *make_print(Node *expr);
+    Node *make_while(Node *cond, Node *body);
+    Node *make_if(Node *cond, Node *body);
+    Node *make_block(Node **stmts, int count);
+
+
+#line 133 "y.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -140,33 +181,25 @@ extern int yydebug;
     IF = 263,                      /* IF  */
     WHILE = 264,                   /* WHILE  */
     FOR = 265,                     /* FOR  */
-    EQUALS = 266,                  /* EQUALS  */
-    LESS = 267,                    /* LESS  */
-    GREATER = 268,                 /* GREATER  */
-    ADD = 269,                     /* ADD  */
-    SUB = 270,                     /* SUB  */
-    MUL = 271,                     /* MUL  */
-    DIV = 272,                     /* DIV  */
-    RETURN = 273,                  /* RETURN  */
-    MOD = 274,                     /* MOD  */
-    SEMI = 275,                    /* SEMI  */
-    LPAREN = 276,                  /* LPAREN  */
-    RPAREN = 277,                  /* RPAREN  */
-    LBRACE = 278,                  /* LBRACE  */
-    RBRACE = 279,                  /* RBRACE  */
-    ASSIGN = 280,                  /* ASSIGN  */
-    EQ = 281,                      /* EQ  */
-    NEQ = 282,                     /* NEQ  */
-    LT = 283,                      /* LT  */
-    GT = 284,                      /* GT  */
-    PLUS = 285,                    /* PLUS  */
-    MINUS = 286,                   /* MINUS  */
-    TIMES = 287,                   /* TIMES  */
-    DIVIDE = 288,                  /* DIVIDE  */
-    LTE = 289,                     /* LTE  */
-    GTE = 290,                     /* GTE  */
-    NUMBER = 291,                  /* NUMBER  */
-    ID = 292                       /* ID  */
+    ADD = 266,                     /* ADD  */
+    SUB = 267,                     /* SUB  */
+    MUL = 268,                     /* MUL  */
+    DIV = 269,                     /* DIV  */
+    MOD = 270,                     /* MOD  */
+    SEMI = 271,                    /* SEMI  */
+    LPAREN = 272,                  /* LPAREN  */
+    RPAREN = 273,                  /* RPAREN  */
+    LBRACE = 274,                  /* LBRACE  */
+    RBRACE = 275,                  /* RBRACE  */
+    ASSIGN = 276,                  /* ASSIGN  */
+    EQ = 277,                      /* EQ  */
+    NEQ = 278,                     /* NEQ  */
+    LT = 279,                      /* LT  */
+    GT = 280,                      /* GT  */
+    LTE = 281,                     /* LTE  */
+    GTE = 282,                     /* GTE  */
+    NUMBER = 283,                  /* NUMBER  */
+    ID = 284                       /* ID  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -183,44 +216,38 @@ extern int yydebug;
 #define IF 263
 #define WHILE 264
 #define FOR 265
-#define EQUALS 266
-#define LESS 267
-#define GREATER 268
-#define ADD 269
-#define SUB 270
-#define MUL 271
-#define DIV 272
-#define RETURN 273
-#define MOD 274
-#define SEMI 275
-#define LPAREN 276
-#define RPAREN 277
-#define LBRACE 278
-#define RBRACE 279
-#define ASSIGN 280
-#define EQ 281
-#define NEQ 282
-#define LT 283
-#define GT 284
-#define PLUS 285
-#define MINUS 286
-#define TIMES 287
-#define DIVIDE 288
-#define LTE 289
-#define GTE 290
-#define NUMBER 291
-#define ID 292
+#define ADD 266
+#define SUB 267
+#define MUL 268
+#define DIV 269
+#define MOD 270
+#define SEMI 271
+#define LPAREN 272
+#define RPAREN 273
+#define LBRACE 274
+#define RBRACE 275
+#define ASSIGN 276
+#define EQ 277
+#define NEQ 278
+#define LT 279
+#define GT 280
+#define LTE 281
+#define GTE 282
+#define NUMBER 283
+#define ID 284
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 22 "cz.y"
+#line 63 "cz.y"
 
     int num;
     char *id;
+    struct Node *node;
+    struct Node **stmts;
 
-#line 224 "y.tab.c"
+#line 251 "y.tab.c"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -251,44 +278,37 @@ enum yysymbol_kind_t
   YYSYMBOL_IF = 8,                         /* IF  */
   YYSYMBOL_WHILE = 9,                      /* WHILE  */
   YYSYMBOL_FOR = 10,                       /* FOR  */
-  YYSYMBOL_EQUALS = 11,                    /* EQUALS  */
-  YYSYMBOL_LESS = 12,                      /* LESS  */
-  YYSYMBOL_GREATER = 13,                   /* GREATER  */
-  YYSYMBOL_ADD = 14,                       /* ADD  */
-  YYSYMBOL_SUB = 15,                       /* SUB  */
-  YYSYMBOL_MUL = 16,                       /* MUL  */
-  YYSYMBOL_DIV = 17,                       /* DIV  */
-  YYSYMBOL_RETURN = 18,                    /* RETURN  */
-  YYSYMBOL_MOD = 19,                       /* MOD  */
-  YYSYMBOL_SEMI = 20,                      /* SEMI  */
-  YYSYMBOL_LPAREN = 21,                    /* LPAREN  */
-  YYSYMBOL_RPAREN = 22,                    /* RPAREN  */
-  YYSYMBOL_LBRACE = 23,                    /* LBRACE  */
-  YYSYMBOL_RBRACE = 24,                    /* RBRACE  */
-  YYSYMBOL_ASSIGN = 25,                    /* ASSIGN  */
-  YYSYMBOL_EQ = 26,                        /* EQ  */
-  YYSYMBOL_NEQ = 27,                       /* NEQ  */
-  YYSYMBOL_LT = 28,                        /* LT  */
-  YYSYMBOL_GT = 29,                        /* GT  */
-  YYSYMBOL_PLUS = 30,                      /* PLUS  */
-  YYSYMBOL_MINUS = 31,                     /* MINUS  */
-  YYSYMBOL_TIMES = 32,                     /* TIMES  */
-  YYSYMBOL_DIVIDE = 33,                    /* DIVIDE  */
-  YYSYMBOL_LTE = 34,                       /* LTE  */
-  YYSYMBOL_GTE = 35,                       /* GTE  */
-  YYSYMBOL_NUMBER = 36,                    /* NUMBER  */
-  YYSYMBOL_ID = 37,                        /* ID  */
-  YYSYMBOL_YYACCEPT = 38,                  /* $accept  */
-  YYSYMBOL_program = 39,                   /* program  */
-  YYSYMBOL_statement = 40,                 /* statement  */
-  YYSYMBOL_declaration = 41,               /* declaration  */
-  YYSYMBOL_assignment = 42,                /* assignment  */
-  YYSYMBOL_print_stmt = 43,                /* print_stmt  */
-  YYSYMBOL_if_stmt = 44,                   /* if_stmt  */
-  YYSYMBOL_while_loop = 45,                /* while_loop  */
-  YYSYMBOL_condition = 46,                 /* condition  */
-  YYSYMBOL_boolean = 47,                   /* boolean  */
-  YYSYMBOL_expr = 48                       /* expr  */
+  YYSYMBOL_ADD = 11,                       /* ADD  */
+  YYSYMBOL_SUB = 12,                       /* SUB  */
+  YYSYMBOL_MUL = 13,                       /* MUL  */
+  YYSYMBOL_DIV = 14,                       /* DIV  */
+  YYSYMBOL_MOD = 15,                       /* MOD  */
+  YYSYMBOL_SEMI = 16,                      /* SEMI  */
+  YYSYMBOL_LPAREN = 17,                    /* LPAREN  */
+  YYSYMBOL_RPAREN = 18,                    /* RPAREN  */
+  YYSYMBOL_LBRACE = 19,                    /* LBRACE  */
+  YYSYMBOL_RBRACE = 20,                    /* RBRACE  */
+  YYSYMBOL_ASSIGN = 21,                    /* ASSIGN  */
+  YYSYMBOL_EQ = 22,                        /* EQ  */
+  YYSYMBOL_NEQ = 23,                       /* NEQ  */
+  YYSYMBOL_LT = 24,                        /* LT  */
+  YYSYMBOL_GT = 25,                        /* GT  */
+  YYSYMBOL_LTE = 26,                       /* LTE  */
+  YYSYMBOL_GTE = 27,                       /* GTE  */
+  YYSYMBOL_NUMBER = 28,                    /* NUMBER  */
+  YYSYMBOL_ID = 29,                        /* ID  */
+  YYSYMBOL_YYACCEPT = 30,                  /* $accept  */
+  YYSYMBOL_program = 31,                   /* program  */
+  YYSYMBOL_stmt_list = 32,                 /* stmt_list  */
+  YYSYMBOL_statement = 33,                 /* statement  */
+  YYSYMBOL_declaration = 34,               /* declaration  */
+  YYSYMBOL_assignment = 35,                /* assignment  */
+  YYSYMBOL_print_stmt = 36,                /* print_stmt  */
+  YYSYMBOL_if_stmt = 37,                   /* if_stmt  */
+  YYSYMBOL_while_loop = 38,                /* while_loop  */
+  YYSYMBOL_compound_stmt = 39,             /* compound_stmt  */
+  YYSYMBOL_condition = 40,                 /* condition  */
+  YYSYMBOL_expr = 41                       /* expr  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -614,21 +634,21 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  2
+#define YYFINAL  24
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   94
+#define YYLAST   75
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  38
+#define YYNTOKENS  30
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  11
+#define YYNNTS  12
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  30
+#define YYNRULES  31
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  67
+#define YYNSTATES  68
 
 /* YYMAXUTOK -- Last valid token kind.  */
-#define YYMAXUTOK   292
+#define YYMAXUTOK   284
 
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
@@ -670,18 +690,17 @@ static const yytype_int8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
       15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
-      25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
-      35,    36,    37
+      25,    26,    27,    28,    29
 };
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
-static const yytype_int8 yyrline[] =
+static const yytype_uint8 yyrline[] =
 {
-       0,    37,    37,    38,    42,    43,    44,    45,    46,    50,
-      51,    55,    59,    63,    67,    71,    72,    73,    74,    75,
-      76,    80,    81,    85,    86,    87,    88,    89,    90,    91,
-      92
+       0,    86,    86,    93,    94,   103,   111,   112,   113,   114,
+     115,   119,   120,   124,   128,   132,   138,   144,   150,   151,
+     152,   153,   154,   155,   159,   160,   161,   162,   163,   164,
+     165,   166
 };
 #endif
 
@@ -698,12 +717,11 @@ static const char *yysymbol_name (yysymbol_kind_t yysymbol) YY_ATTRIBUTE_UNUSED;
 static const char *const yytname[] =
 {
   "\"end of file\"", "error", "\"invalid token\"", "BOOL", "INT", "PRINT",
-  "FALSE", "TRUE", "IF", "WHILE", "FOR", "EQUALS", "LESS", "GREATER",
-  "ADD", "SUB", "MUL", "DIV", "RETURN", "MOD", "SEMI", "LPAREN", "RPAREN",
-  "LBRACE", "RBRACE", "ASSIGN", "EQ", "NEQ", "LT", "GT", "PLUS", "MINUS",
-  "TIMES", "DIVIDE", "LTE", "GTE", "NUMBER", "ID", "$accept", "program",
-  "statement", "declaration", "assignment", "print_stmt", "if_stmt",
-  "while_loop", "condition", "boolean", "expr", YY_NULLPTR
+  "FALSE", "TRUE", "IF", "WHILE", "FOR", "ADD", "SUB", "MUL", "DIV", "MOD",
+  "SEMI", "LPAREN", "RPAREN", "LBRACE", "RBRACE", "ASSIGN", "EQ", "NEQ",
+  "LT", "GT", "LTE", "GTE", "NUMBER", "ID", "$accept", "program",
+  "stmt_list", "statement", "declaration", "assignment", "print_stmt",
+  "if_stmt", "while_loop", "compound_stmt", "condition", "expr", YY_NULLPTR
 };
 
 static const char *
@@ -713,7 +731,7 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 }
 #endif
 
-#define YYPACT_NINF (-35)
+#define YYPACT_NINF (-28)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
@@ -727,13 +745,13 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-     -35,     1,   -35,   -34,   -30,    18,   -13,   -10,    -8,     2,
-     -35,   -35,   -35,   -35,   -35,     6,     7,    18,   -35,   -35,
-     -17,    18,    18,    18,   -35,    13,    18,    61,    18,    18,
-      18,    18,    18,    20,    44,    28,   -17,   -35,   -35,   -35,
-     -17,   -35,   -17,   -17,   -17,   -17,   -17,    29,    18,    18,
-      18,    18,    18,    18,    30,   -35,   -17,   -17,   -17,   -17,
-     -17,   -17,   -35,    25,    32,   -35,   -35
+       8,   -27,   -23,   -10,    -7,    -3,    14,    36,     8,   -28,
+      28,    30,    31,   -28,   -28,    22,    43,   -10,   -28,   -28,
+      11,   -10,   -10,   -10,   -28,   -28,   -28,   -28,   -28,   -10,
+     -10,    27,   -10,   -10,   -10,   -10,   -10,    39,    48,    47,
+      11,    11,    11,   -28,    41,    41,   -28,   -28,   -28,    49,
+     -10,   -10,   -10,   -10,   -10,   -10,    49,     8,   -28,    11,
+      11,    11,    11,    11,    11,   -28,     0,   -28
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -741,27 +759,27 @@ static const yytype_int8 yypact[] =
    means the default is an error.  */
 static const yytype_int8 yydefact[] =
 {
-       2,     0,     1,     0,     0,     0,     0,     0,     0,     0,
-       4,     5,     6,     7,     8,     0,     0,     0,    23,    24,
-      12,     0,     0,     0,     3,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,    11,    22,    21,    10,
-       9,    30,    29,    25,    26,    27,    28,     0,     0,     0,
-       0,     0,     0,     0,     0,     2,    15,    16,    17,    18,
-      19,    20,     2,     0,     0,    13,    14
+       3,     0,     0,     0,     0,     0,     0,     0,     2,     5,
+       0,     0,     0,     9,    10,     0,     0,     0,    24,    25,
+      14,     0,     0,     0,     1,     4,     6,     7,     8,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+      13,    12,    11,    31,    26,    27,    28,    29,    30,     0,
+       0,     0,     0,     0,     0,     0,     0,     3,    15,    18,
+      19,    20,    21,    22,    23,    16,     0,    17
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -35,    -4,   -35,   -35,   -35,   -35,   -35,   -35,    35,   -35,
-      -5
+     -28,   -28,     9,    -8,   -28,   -28,   -28,   -28,   -28,    13,
+      45,    -2
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-       0,     1,     9,    10,    11,    12,    13,    14,    33,    39,
-      34
+       0,     7,     8,     9,    10,    11,    12,    13,    14,    58,
+      37,    38
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -769,61 +787,57 @@ static const yytype_int8 yydefgoto[] =
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-      20,     2,    28,    15,     3,     4,     5,    16,    21,     6,
-       7,    22,    27,    29,    30,    31,    32,    23,    36,    37,
-      38,    40,    24,    42,    43,    44,    45,    46,     3,     4,
-       5,    25,    26,     6,     7,     3,     4,     5,     8,    17,
-       6,     7,    47,    56,    57,    58,    59,    60,    61,    65,
-      54,    63,    55,    62,    18,    19,    66,    35,    64,     0,
-       0,     0,     8,    28,     0,     0,     0,     0,     0,     8,
-      48,    49,    50,    51,    29,    30,    31,    32,    52,    53,
-      28,     0,     0,    41,     0,     0,     0,     0,     0,     0,
-       0,    29,    30,    31,    32
+      25,    20,    15,     1,     2,     3,    16,    17,     4,     5,
+      21,     1,     2,     3,    22,    31,     4,     5,    18,    19,
+      67,    40,    32,    33,    34,    35,    36,    41,    42,     6,
+      44,    45,    46,    47,    48,    23,    24,     6,    32,    33,
+      34,    35,    36,    29,    26,    43,    27,    28,    59,    60,
+      61,    62,    63,    64,    34,    35,    36,    49,    25,    32,
+      33,    34,    35,    36,    30,    56,    66,    39,    57,    65,
+      50,    51,    52,    53,    54,    55
 };
 
 static const yytype_int8 yycheck[] =
 {
-       5,     0,    19,    37,     3,     4,     5,    37,    21,     8,
-       9,    21,    17,    30,    31,    32,    33,    25,    23,     6,
-       7,    26,    20,    28,    29,    30,    31,    32,     3,     4,
-       5,    25,    25,     8,     9,     3,     4,     5,    37,    21,
-       8,     9,    22,    48,    49,    50,    51,    52,    53,    24,
-      22,    55,    23,    23,    36,    37,    24,    22,    62,    -1,
-      -1,    -1,    37,    19,    -1,    -1,    -1,    -1,    -1,    37,
-      26,    27,    28,    29,    30,    31,    32,    33,    34,    35,
-      19,    -1,    -1,    22,    -1,    -1,    -1,    -1,    -1,    -1,
-      -1,    30,    31,    32,    33
+       8,     3,    29,     3,     4,     5,    29,    17,     8,     9,
+      17,     3,     4,     5,    17,    17,     8,     9,    28,    29,
+      20,    23,    11,    12,    13,    14,    15,    29,    30,    29,
+      32,    33,    34,    35,    36,    21,     0,    29,    11,    12,
+      13,    14,    15,    21,    16,    18,    16,    16,    50,    51,
+      52,    53,    54,    55,    13,    14,    15,    18,    66,    11,
+      12,    13,    14,    15,    21,    18,    57,    22,    19,    56,
+      22,    23,    24,    25,    26,    27
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
    state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
-       0,    39,     0,     3,     4,     5,     8,     9,    37,    40,
-      41,    42,    43,    44,    45,    37,    37,    21,    36,    37,
-      48,    21,    21,    25,    20,    25,    25,    48,    19,    30,
-      31,    32,    33,    46,    48,    46,    48,     6,     7,    47,
-      48,    22,    48,    48,    48,    48,    48,    22,    26,    27,
-      28,    29,    34,    35,    22,    23,    48,    48,    48,    48,
-      48,    48,    23,    39,    39,    24,    24
+       0,     3,     4,     5,     8,     9,    29,    31,    32,    33,
+      34,    35,    36,    37,    38,    29,    29,    17,    28,    29,
+      41,    17,    17,    21,     0,    33,    16,    16,    16,    21,
+      21,    41,    11,    12,    13,    14,    15,    40,    41,    40,
+      41,    41,    41,    18,    41,    41,    41,    41,    41,    18,
+      22,    23,    24,    25,    26,    27,    18,    19,    39,    41,
+      41,    41,    41,    41,    41,    39,    32,    20
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    38,    39,    39,    40,    40,    40,    40,    40,    41,
-      41,    42,    43,    44,    45,    46,    46,    46,    46,    46,
-      46,    47,    47,    48,    48,    48,    48,    48,    48,    48,
-      48
+       0,    30,    31,    32,    32,    32,    33,    33,    33,    33,
+      33,    34,    34,    35,    36,    37,    38,    39,    40,    40,
+      40,    40,    40,    40,    41,    41,    41,    41,    41,    41,
+      41,    41
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr2[] =
 {
-       0,     2,     0,     3,     1,     1,     1,     1,     1,     4,
-       4,     3,     2,     7,     7,     3,     3,     3,     3,     3,
-       3,     1,     1,     1,     1,     3,     3,     3,     3,     3,
-       3
+       0,     2,     1,     0,     2,     1,     2,     2,     2,     1,
+       1,     4,     4,     3,     2,     5,     5,     3,     3,     3,
+       3,     3,     3,     3,     1,     1,     3,     3,     3,     3,
+       3,     3
 };
 
 
@@ -1286,128 +1300,209 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-  case 9: /* declaration: INT ID ASSIGN expr  */
-#line 50 "cz.y"
-                         { set_var((yyvsp[-2].id), (yyvsp[0].num)); }
-#line 1293 "y.tab.c"
-    break;
-
-  case 10: /* declaration: BOOL ID ASSIGN boolean  */
-#line 51 "cz.y"
-                             { printf("Bool support coming soon, bestie!\n"); }
-#line 1299 "y.tab.c"
-    break;
-
-  case 11: /* assignment: ID ASSIGN expr  */
-#line 55 "cz.y"
-                   { set_var((yyvsp[-2].id), (yyvsp[0].num)); }
-#line 1305 "y.tab.c"
-    break;
-
-  case 12: /* print_stmt: PRINT expr  */
-#line 59 "cz.y"
-               { printf("📢: %d\n", (yyvsp[0].num)); }
-#line 1311 "y.tab.c"
-    break;
-
-  case 15: /* condition: expr EQ expr  */
-#line 71 "cz.y"
-                 { (yyval.num) = ((yyvsp[-2].num) == (yyvsp[0].num)); }
-#line 1317 "y.tab.c"
-    break;
-
-  case 16: /* condition: expr NEQ expr  */
-#line 72 "cz.y"
-                    { (yyval.num) = ((yyvsp[-2].num) != (yyvsp[0].num)); }
-#line 1323 "y.tab.c"
-    break;
-
-  case 17: /* condition: expr LT expr  */
-#line 73 "cz.y"
-                   { (yyval.num) = ((yyvsp[-2].num) < (yyvsp[0].num)); }
-#line 1329 "y.tab.c"
-    break;
-
-  case 18: /* condition: expr GT expr  */
-#line 74 "cz.y"
-                   { (yyval.num) = ((yyvsp[-2].num) > (yyvsp[0].num)); }
-#line 1335 "y.tab.c"
-    break;
-
-  case 19: /* condition: expr LTE expr  */
-#line 75 "cz.y"
-                    { (yyval.num) = ((yyvsp[-2].num) <= (yyvsp[0].num)); }
-#line 1341 "y.tab.c"
-    break;
-
-  case 20: /* condition: expr GTE expr  */
-#line 76 "cz.y"
-                    { (yyval.num) = ((yyvsp[-2].num) >= (yyvsp[0].num)); }
-#line 1347 "y.tab.c"
-    break;
-
-  case 21: /* boolean: TRUE  */
-#line 80 "cz.y"
-         { (yyval.num) = 1; }
-#line 1353 "y.tab.c"
-    break;
-
-  case 22: /* boolean: FALSE  */
-#line 81 "cz.y"
-            { (yyval.num) = 0; }
-#line 1359 "y.tab.c"
-    break;
-
-  case 23: /* expr: NUMBER  */
-#line 85 "cz.y"
-           { (yyval.num) = (yyvsp[0].num); }
-#line 1365 "y.tab.c"
-    break;
-
-  case 24: /* expr: ID  */
+  case 2: /* program: stmt_list  */
 #line 86 "cz.y"
-         { (yyval.num) = get_var_value((yyvsp[0].id)); }
-#line 1371 "y.tab.c"
+              {
+        Node *block = make_block((yyvsp[0].stmts), -1); // -1 = already counted
+        eval_block(block);
+    }
+#line 1310 "y.tab.c"
     break;
 
-  case 25: /* expr: expr PLUS expr  */
-#line 87 "cz.y"
-                     { (yyval.num) = (yyvsp[-2].num) + (yyvsp[0].num); }
-#line 1377 "y.tab.c"
+  case 3: /* stmt_list: %empty  */
+#line 93 "cz.y"
+                  { (yyval.stmts) = NULL; }
+#line 1316 "y.tab.c"
     break;
 
-  case 26: /* expr: expr MINUS expr  */
-#line 88 "cz.y"
-                      { (yyval.num) = (yyvsp[-2].num) - (yyvsp[0].num); }
-#line 1383 "y.tab.c"
+  case 4: /* stmt_list: stmt_list statement  */
+#line 94 "cz.y"
+                          {
+        int count = 0;
+        while ((yyvsp[-1].stmts) && (yyvsp[-1].stmts)[count]) count++;
+
+        (yyval.stmts) = malloc(sizeof(Node*) * (count + 2));
+        for (int i = 0; i < count; i++) (yyval.stmts)[i] = (yyvsp[-1].stmts)[i];
+        (yyval.stmts)[count] = (yyvsp[0].node);
+        (yyval.stmts)[count + 1] = NULL;
+    }
+#line 1330 "y.tab.c"
     break;
 
-  case 27: /* expr: expr TIMES expr  */
-#line 89 "cz.y"
-                      { (yyval.num) = (yyvsp[-2].num) * (yyvsp[0].num); }
-#line 1389 "y.tab.c"
+  case 5: /* stmt_list: statement  */
+#line 103 "cz.y"
+                {
+        (yyval.stmts) = malloc(sizeof(Node*) * 2);
+        (yyval.stmts)[0] = (yyvsp[0].node);
+        (yyval.stmts)[1] = NULL;
+    }
+#line 1340 "y.tab.c"
     break;
 
-  case 28: /* expr: expr DIVIDE expr  */
-#line 90 "cz.y"
-                       { (yyval.num) = (yyvsp[-2].num) / (yyvsp[0].num); }
-#line 1395 "y.tab.c"
+  case 6: /* statement: declaration SEMI  */
+#line 111 "cz.y"
+                            { (yyval.node) = (yyvsp[-1].node); }
+#line 1346 "y.tab.c"
     break;
 
-  case 29: /* expr: expr MOD expr  */
-#line 91 "cz.y"
-                    { (yyval.num) = (yyvsp[-2].num) % (yyvsp[0].num); }
-#line 1401 "y.tab.c"
+  case 7: /* statement: assignment SEMI  */
+#line 112 "cz.y"
+                            { (yyval.node) = (yyvsp[-1].node); }
+#line 1352 "y.tab.c"
     break;
 
-  case 30: /* expr: LPAREN expr RPAREN  */
-#line 92 "cz.y"
-                         { (yyval.num) = (yyvsp[-1].num); }
-#line 1407 "y.tab.c"
+  case 8: /* statement: print_stmt SEMI  */
+#line 113 "cz.y"
+                            { (yyval.node) = (yyvsp[-1].node); }
+#line 1358 "y.tab.c"
+    break;
+
+  case 9: /* statement: if_stmt  */
+#line 114 "cz.y"
+                            { (yyval.node) = (yyvsp[0].node); }
+#line 1364 "y.tab.c"
+    break;
+
+  case 10: /* statement: while_loop  */
+#line 115 "cz.y"
+                            { (yyval.node) = (yyvsp[0].node); }
+#line 1370 "y.tab.c"
+    break;
+
+  case 11: /* declaration: INT ID ASSIGN expr  */
+#line 119 "cz.y"
+                             { (yyval.node) = make_assign((yyvsp[-2].id), (yyvsp[0].node)); }
+#line 1376 "y.tab.c"
+    break;
+
+  case 12: /* declaration: BOOL ID ASSIGN expr  */
+#line 120 "cz.y"
+                             { (yyval.node) = make_assign((yyvsp[-2].id), (yyvsp[0].node)); }
+#line 1382 "y.tab.c"
+    break;
+
+  case 13: /* assignment: ID ASSIGN expr  */
+#line 124 "cz.y"
+                             { (yyval.node) = make_assign((yyvsp[-2].id), (yyvsp[0].node)); }
+#line 1388 "y.tab.c"
+    break;
+
+  case 14: /* print_stmt: PRINT expr  */
+#line 128 "cz.y"
+                             { (yyval.node) = make_print((yyvsp[0].node)); }
+#line 1394 "y.tab.c"
+    break;
+
+  case 15: /* if_stmt: IF LPAREN condition RPAREN compound_stmt  */
+#line 132 "cz.y"
+                                             {
+        (yyval.node) = make_if((yyvsp[-2].node), (yyvsp[0].node));
+    }
+#line 1402 "y.tab.c"
+    break;
+
+  case 16: /* while_loop: WHILE LPAREN condition RPAREN compound_stmt  */
+#line 138 "cz.y"
+                                                {
+        (yyval.node) = make_while((yyvsp[-2].node), (yyvsp[0].node));
+    }
+#line 1410 "y.tab.c"
+    break;
+
+  case 17: /* compound_stmt: LBRACE stmt_list RBRACE  */
+#line 144 "cz.y"
+                            {
+        (yyval.node) = make_block((yyvsp[-1].stmts), -1);
+    }
+#line 1418 "y.tab.c"
+    break;
+
+  case 18: /* condition: expr EQ expr  */
+#line 150 "cz.y"
+                  { (yyval.node) = make_binary(EQ, (yyvsp[-2].node), (yyvsp[0].node)); }
+#line 1424 "y.tab.c"
+    break;
+
+  case 19: /* condition: expr NEQ expr  */
+#line 151 "cz.y"
+                    { (yyval.node) = make_binary(NEQ, (yyvsp[-2].node), (yyvsp[0].node)); }
+#line 1430 "y.tab.c"
+    break;
+
+  case 20: /* condition: expr LT expr  */
+#line 152 "cz.y"
+                    { (yyval.node) = make_binary(LT, (yyvsp[-2].node), (yyvsp[0].node)); }
+#line 1436 "y.tab.c"
+    break;
+
+  case 21: /* condition: expr GT expr  */
+#line 153 "cz.y"
+                    { (yyval.node) = make_binary(GT, (yyvsp[-2].node), (yyvsp[0].node)); }
+#line 1442 "y.tab.c"
+    break;
+
+  case 22: /* condition: expr LTE expr  */
+#line 154 "cz.y"
+                    { (yyval.node) = make_binary(LTE, (yyvsp[-2].node), (yyvsp[0].node)); }
+#line 1448 "y.tab.c"
+    break;
+
+  case 23: /* condition: expr GTE expr  */
+#line 155 "cz.y"
+                    { (yyval.node) = make_binary(GTE, (yyvsp[-2].node), (yyvsp[0].node)); }
+#line 1454 "y.tab.c"
+    break;
+
+  case 24: /* expr: NUMBER  */
+#line 159 "cz.y"
+                       { (yyval.node) = make_num((yyvsp[0].num)); }
+#line 1460 "y.tab.c"
+    break;
+
+  case 25: /* expr: ID  */
+#line 160 "cz.y"
+                       { (yyval.node) = make_var((yyvsp[0].id)); }
+#line 1466 "y.tab.c"
+    break;
+
+  case 26: /* expr: expr ADD expr  */
+#line 161 "cz.y"
+                       { (yyval.node) = make_binary(ADD, (yyvsp[-2].node), (yyvsp[0].node)); }
+#line 1472 "y.tab.c"
+    break;
+
+  case 27: /* expr: expr SUB expr  */
+#line 162 "cz.y"
+                       { (yyval.node) = make_binary(SUB, (yyvsp[-2].node), (yyvsp[0].node)); }
+#line 1478 "y.tab.c"
+    break;
+
+  case 28: /* expr: expr MUL expr  */
+#line 163 "cz.y"
+                       { (yyval.node) = make_binary(MUL, (yyvsp[-2].node), (yyvsp[0].node)); }
+#line 1484 "y.tab.c"
+    break;
+
+  case 29: /* expr: expr DIV expr  */
+#line 164 "cz.y"
+                       { (yyval.node) = make_binary(DIV, (yyvsp[-2].node), (yyvsp[0].node)); }
+#line 1490 "y.tab.c"
+    break;
+
+  case 30: /* expr: expr MOD expr  */
+#line 165 "cz.y"
+                       { (yyval.node) = make_binary(MOD, (yyvsp[-2].node), (yyvsp[0].node)); }
+#line 1496 "y.tab.c"
+    break;
+
+  case 31: /* expr: LPAREN expr RPAREN  */
+#line 166 "cz.y"
+                         { (yyval.node) = (yyvsp[-1].node); }
+#line 1502 "y.tab.c"
     break;
 
 
-#line 1411 "y.tab.c"
+#line 1506 "y.tab.c"
 
       default: break;
     }
@@ -1600,31 +1695,142 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 95 "cz.y"
+#line 169 "cz.y"
 
 
 int get_var_value(char *id) {
-    for (int i = 0; i < var_count; i++) {
-        if (strcmp(vars[i].id, id) == 0) {
+    for (int i = 0; i < var_count; i++)
+        if (strcmp(vars[i].id, id) == 0)
             return vars[i].value;
-        }
-    }
-
     yyerror("🔥 That var is ghosted (not found)");
     return 0;
 }
 
 void set_var(char *id, int value) {
-    for (int i = 0; i < var_count; i++) {
+    for (int i = 0; i < var_count; i++)
         if (strcmp(vars[i].id, id) == 0) {
             vars[i].value = value;
             return;
         }
-    }
-
     vars[var_count].id = strdup(id);
     vars[var_count].value = value;
     var_count++;
+}
+
+int eval(Node *node) {
+    if (!node) return 0;
+
+    switch (node->type) {
+        case NODE_NUM: return node->num.value;
+        case NODE_VAR: return get_var_value(node->var.id);
+        case NODE_BINOP: {
+            int l = eval(node->binary.left);
+            int r = eval(node->binary.right);
+            switch (node->binary.op) {
+                case ADD: return l + r;
+                case SUB: return l - r;
+                case MUL: return l * r;
+                case DIV: return l / r;
+                case MOD: return l % r;
+                case EQ:  return l == r;
+                case NEQ: return l != r;
+                case LT:  return l < r;
+                case GT:  return l > r;
+                case LTE: return l <= r;
+                case GTE: return l >= r;
+            }
+        }
+        case NODE_ASSIGN: {
+            int val = eval(node->assign.expr);
+            set_var(node->assign.id, val);
+            return val;
+        }
+        case NODE_PRINT: {
+            int val = eval(node->print.expr);
+            printf("📢: %d\n", val);
+            return val;
+        }
+        case NODE_IF: {
+            if (eval(node->if_stmt.cond))
+                eval_block(node->if_stmt.body);
+            return 0;
+        }
+        case NODE_WHILE: {
+            while (eval(node->while_loop.cond))
+                eval_block(node->while_loop.body);
+            return 0;
+        }
+        default: return 0;
+    }
+}
+
+void eval_block(Node *block) {
+    for (int i = 0; block->block.stmts && block->block.stmts[i]; i++)
+        eval(block->block.stmts[i]);
+}
+
+// ------------------ Constructors ------------------
+
+Node *make_num(int value) {
+    Node *n = malloc(sizeof(Node));
+    n->type = NODE_NUM;
+    n->num.value = value;
+    return n;
+}
+
+Node *make_var(char *id) {
+    Node *n = malloc(sizeof(Node));
+    n->type = NODE_VAR;
+    n->var.id = strdup(id);
+    return n;
+}
+
+Node *make_binary(int op, Node *left, Node *right) {
+    Node *n = malloc(sizeof(Node));
+    n->type = NODE_BINOP;
+    n->binary.op = op;
+    n->binary.left = left;
+    n->binary.right = right;
+    return n;
+}
+
+Node *make_assign(char *id, Node *expr) {
+    Node *n = malloc(sizeof(Node));
+    n->type = NODE_ASSIGN;
+    n->assign.id = strdup(id);
+    n->assign.expr = expr;
+    return n;
+}
+
+Node *make_print(Node *expr) {
+    Node *n = malloc(sizeof(Node));
+    n->type = NODE_PRINT;
+    n->print.expr = expr;
+    return n;
+}
+
+Node *make_if(Node *cond, Node *body) {
+    Node *n = malloc(sizeof(Node));
+    n->type = NODE_IF;
+    n->if_stmt.cond = cond;
+    n->if_stmt.body = body;
+    return n;
+}
+
+Node *make_while(Node *cond, Node *body) {
+    Node *n = malloc(sizeof(Node));
+    n->type = NODE_WHILE;
+    n->while_loop.cond = cond;
+    n->while_loop.body = body;
+    return n;
+}
+
+Node *make_block(Node **stmts, int count) {
+    Node *n = malloc(sizeof(Node));
+    n->type = NODE_BLOCK;
+    n->block.stmts = stmts;
+    n->block.count = count;
+    return n;
 }
 
 void yyerror(const char *s) {
@@ -1632,7 +1838,7 @@ void yyerror(const char *s) {
 }
 
 int main() {
-    printf("✨ CZ Interpreter - C with Gen Z Slang | Normalize Gen Z Programming bestie! ✨\n");
+    printf("✨ CZ Interpreter - C with Gen Z Slang | AST mode activated ✨\n");
     yyparse();
     return 0;
 }
