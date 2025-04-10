@@ -14,6 +14,8 @@
 "cap"       { return FALSE; }
 "nocap"     { return TRUE; }
 "fr"        { return IF; }
+"stahp"     { return BREAK; }
+"f_around"  { return CONTINUE; }
 "nahfr"     { return ELSE; }
 "ong"       { return WHILE; }
 "vibing"    { return FOR; }
@@ -46,6 +48,7 @@
 "-"         { return SUB; }
 "*"         { return MUL; }
 "/"         { return DIV; }
+","         { return COMMA; }
 .           { printf("🔥 Yikes! Invalid token: %s\n", yytext); }
 
 %%

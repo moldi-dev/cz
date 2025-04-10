@@ -2,66 +2,13 @@
     #include <stdio.h>
     #include <stdlib.h>
     #include <string.h>
+    
+    #include "functions.h"
+    #include "defines.h"
 
     extern FILE *yyin;
     extern int yylex();
     void yyerror(const char *s);
-
-    // ----------------- AST NODE TYPES -----------------
-
-    typedef enum { 
-        NODE_PROGRAM, NODE_ASSIGN, NODE_PRINT, NODE_IF, NODE_IF_ELSE, NODE_WHILE, NODE_FOR, 
-        NODE_BLOCK, NODE_EXPR, NODE_COND, NODE_VAR, NODE_NUM, 
-        NODE_BINOP
-    } NodeType;
-
-    typedef struct Node {
-        NodeType type;
-        union {
-            struct { struct Node *left, *right; int op; } binary;
-            struct { char *id; struct Node *expr; } assign;
-            struct { struct Node *expr; } print;
-            struct { struct Node *cond; struct Node *body; } while_loop;
-            struct { struct Node *init, *cond, *incr, *body; } for_loop;
-            struct { struct Node *cond; struct Node *body; } if_stmt;
-            struct { struct Node *cond, *if_branch, *else_branch; } if_else_stmt;
-            struct { struct Node **stmts; int count; } block;
-            struct { int value; } num;
-            struct { char *id; } var;
-        };
-    } Node;
-
-    // ----------------- VARIABLE STORE -----------------
-
-    typedef struct {
-        char *id;
-        int value;
-    } variable;
-
-    variable vars[100];
-    int var_count = 0;
-
-    int get_var_value(char *id);
-    void set_var(char *id, int value);
-
-    // ----------------- EVALUATION -----------------
-
-    int eval(Node *node);
-    void eval_block(Node *block);
-
-    // ----------------- HELPERS -----------------
-
-    Node *make_num(int value);
-    Node *make_var(char *id);
-    Node *make_binary(int op, Node *left, Node *right);
-    Node *make_assign(char *id, Node *expr);
-    Node *make_print(Node *expr);
-    Node *make_while(Node *cond, Node *body);
-    Node *make_for(Node *init, Node *cond, Node *incr, Node *body);
-    Node *make_if(Node *cond, Node *body);
-    Node *make_if_else(Node *cond, Node *if_branch, Node *else_branch);
-    Node *make_block(Node **stmts, int count);
-
 %}
 
 %union {
@@ -71,7 +18,7 @@
     struct Node **stmts;
 }
 
-%token BOOL INT PRINT FALSE TRUE IF ELSE WHILE FOR
+%token BOOL INT PRINT FALSE TRUE IF ELSE WHILE FOR BREAK CONTINUE COMMA
 %token ADD SUB MUL DIV MOD
 %token SEMI LPAREN RPAREN LBRACE RBRACE ASSIGN EQ NEQ LT GT LTE GTE
 
@@ -118,6 +65,8 @@ statement:
     | if_stmt               { $$ = $1; }
     | while_loop            { $$ = $1; }
     | for_loop              { $$ = $1; }
+    | BREAK SEMI            { $$ = make_break(); }
+    | CONTINUE SEMI         { $$ = make_continue(); }
     ;
 
 declaration:
@@ -172,6 +121,8 @@ condition:
 expr:
       NUMBER           { $$ = make_num($1); }
     | ID               { $$ = make_var($1); }
+    | TRUE             { $$ = make_num(1); }
+    | FALSE            { $$ = make_num(0); }
     | expr ADD expr    { $$ = make_binary(ADD, $1, $3); }
     | expr SUB expr    { $$ = make_binary(SUB, $1, $3); }
     | expr MUL expr    { $$ = make_binary(MUL, $1, $3); }
@@ -182,181 +133,12 @@ expr:
 
 %%
 
-int get_var_value(char *id) {
-    for (int i = 0; i < var_count; i++)
-        if (strcmp(vars[i].id, id) == 0)
-            return vars[i].value;
-    yyerror("🔥 That var is ghosted (not found)");
-    return 0;
-}
-
-void set_var(char *id, int value) {
-    for (int i = 0; i < var_count; i++)
-        if (strcmp(vars[i].id, id) == 0) {
-            vars[i].value = value;
-            return;
-        }
-    vars[var_count].id = strdup(id);
-    vars[var_count].value = value;
-    var_count++;
-}
-
-int eval(Node *node) {
-    if (!node) return 0;
-
-    switch (node->type) {
-        case NODE_NUM: return node->num.value;
-        case NODE_VAR: return get_var_value(node->var.id);
-        case NODE_BINOP: {
-            int l = eval(node->binary.left);
-            int r = eval(node->binary.right);
-            switch (node->binary.op) {
-                case ADD: return l + r;
-                case SUB: return l - r;
-                case MUL: return l * r;
-                case DIV: return l / r;
-                case MOD: return l % r;
-                case EQ:  return l == r;
-                case NEQ: return l != r;
-                case LT:  return l < r;
-                case GT:  return l > r;
-                case LTE: return l <= r;
-                case GTE: return l >= r;
-            }
-        }
-        case NODE_ASSIGN: {
-            int val = eval(node->assign.expr);
-            set_var(node->assign.id, val);
-            return val;
-        }
-        case NODE_PRINT: {
-            int val = eval(node->print.expr);
-            printf("📢: %d\n", val);
-            return val;
-        }
-        case NODE_IF: {
-            if (eval(node->if_stmt.cond))
-                eval_block(node->if_stmt.body);
-            return 0;
-        }
-        case NODE_IF_ELSE: {
-            if (eval(node->if_else_stmt.cond))
-                eval_block(node->if_else_stmt.if_branch);
-            else
-                eval_block(node->if_else_stmt.else_branch);
-            return 0;
-        }
-        case NODE_WHILE: {
-            while (eval(node->while_loop.cond))
-                eval_block(node->while_loop.body);
-            return 0;
-        }
-        case NODE_FOR: {
-            eval(node->for_loop.init);
-            while (eval(node->for_loop.cond)) {
-                eval_block(node->for_loop.body);
-                eval(node->for_loop.incr);
-            }
-            return 0;
-        }
-        default: return 0;
-    }
-}
-
-void eval_block(Node *block) {
-    for (int i = 0; block->block.stmts && block->block.stmts[i]; i++)
-        eval(block->block.stmts[i]);
-}
-
-// ------------------ Constructors ------------------
-
-Node *make_num(int value) {
-    Node *n = malloc(sizeof(Node));
-    n->type = NODE_NUM;
-    n->num.value = value;
-    return n;
-}
-
-Node *make_var(char *id) {
-    Node *n = malloc(sizeof(Node));
-    n->type = NODE_VAR;
-    n->var.id = strdup(id);
-    return n;
-}
-
-Node *make_binary(int op, Node *left, Node *right) {
-    Node *n = malloc(sizeof(Node));
-    n->type = NODE_BINOP;
-    n->binary.op = op;
-    n->binary.left = left;
-    n->binary.right = right;
-    return n;
-}
-
-Node *make_assign(char *id, Node *expr) {
-    Node *n = malloc(sizeof(Node));
-    n->type = NODE_ASSIGN;
-    n->assign.id = strdup(id);
-    n->assign.expr = expr;
-    return n;
-}
-
-Node *make_print(Node *expr) {
-    Node *n = malloc(sizeof(Node));
-    n->type = NODE_PRINT;
-    n->print.expr = expr;
-    return n;
-}
-
-Node *make_if(Node *cond, Node *body) {
-    Node *n = malloc(sizeof(Node));
-    n->type = NODE_IF;
-    n->if_stmt.cond = cond;
-    n->if_stmt.body = body;
-    return n;
-}
-
-Node *make_if_else(Node *cond, Node *if_branch, Node *else_branch) {
-    Node *n = malloc(sizeof(Node));
-    n->type = NODE_IF_ELSE;
-    n->if_else_stmt.cond = cond;
-    n->if_else_stmt.if_branch = if_branch;
-    n->if_else_stmt.else_branch = else_branch;
-    return n;
-}
-
-Node *make_while(Node *cond, Node *body) {
-    Node *n = malloc(sizeof(Node));
-    n->type = NODE_WHILE;
-    n->while_loop.cond = cond;
-    n->while_loop.body = body;
-    return n;
-}
-
-Node *make_for(Node *init, Node *cond, Node *incr, Node *body) {
-    Node *n = malloc(sizeof(Node));
-    n->type = NODE_FOR;
-    n->for_loop.init = init;
-    n->for_loop.cond = cond;
-    n->for_loop.incr = incr;
-    n->for_loop.body = body;
-    return n;
-}
-
-Node *make_block(Node **stmts, int count) {
-    Node *n = malloc(sizeof(Node));
-    n->type = NODE_BLOCK;
-    n->block.stmts = stmts;
-    n->block.count = count;
-    return n;
-}
-
 void yyerror(const char *s) {
     fprintf(stderr, "💀 Error: %s\n", s);
 }
 
 int main() {
-    printf("✨ CZ Interpreter - C with Gen Z Slang | AST mode activated ✨\n");
+    printf("✨ CZ Interpreter - C with Gen Z Slang | Normalize Gen Z coding bestie ✨\n");
     yyparse();
     return 0;
 }

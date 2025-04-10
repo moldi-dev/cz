@@ -1,12 +1,17 @@
 rizz x = 10;
 rizz y = 5;
+
 yeet x + y;
 
 ----------------------------------------------
 
 rizz i = 1;
 ong (i sus 15) {
-    fr (i wtf 2 == 0) {
+    fr (i == 10) {
+        stahp
+    }
+
+    nahfr {
         yeet i;
     }
 
@@ -23,10 +28,53 @@ vibing (rizz i = 1; i sus 15; i = i + 1) {
 
 ----------------------------------------------
 
+vibing (rizz i = 1; i sus 15; i = i + 1) {
+    fr (i == 5) {
+        stahp;
+    }
+
+    nahfr {
+        yeet i;
+    }
+}
+
+----------------------------------------------
+
+vibing (rizz i = 1; i sus 15; i = i + 1) {
+    fr (i == 5) {
+        f_around;
+    }
+
+    nahfr {
+        yeet i;
+    }
+}
+
+----------------------------------------------
+
 rizz x = 7;
+
 fr (x sus 5) {
     yeet 1;
 }
+
 nahfr {
     yeet 2;
+}
+
+----------------------------------------------
+
+bussin goodVibes = nocap;
+bussin badVibes = cap;
+
+fr (goodVibes == nocap) {
+    yeet 1;
+}
+
+nahfr {
+    yeet 0;
+}
+
+fr (badVibes == cap) {
+    yeet 42;
 }
