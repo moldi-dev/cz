@@ -176,6 +176,18 @@ public class CZBaseListener implements CZListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterStandard_function(CZParser.Standard_functionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitStandard_function(CZParser.Standard_functionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterArguments(CZParser.ArgumentsContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -219,18 +231,6 @@ public class CZBaseListener implements CZListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitPrint_statement(CZParser.Print_statementContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterPrint_arguments(CZParser.Print_argumentsContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitPrint_arguments(CZParser.Print_argumentsContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -392,6 +392,18 @@ public class CZBaseListener implements CZListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterArrayLiteralExpression(CZParser.ArrayLiteralExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitArrayLiteralExpression(CZParser.ArrayLiteralExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterEqualityExpression(CZParser.EqualityExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -471,6 +483,18 @@ public class CZBaseListener implements CZListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitLiteral(CZParser.LiteralContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterArray_literal(CZParser.Array_literalContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitArray_literal(CZParser.Array_literalContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

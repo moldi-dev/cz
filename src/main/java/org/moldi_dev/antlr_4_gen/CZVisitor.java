@@ -92,6 +92,12 @@ public interface CZVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitFunction_call(CZParser.Function_callContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link CZParser#standard_function}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitStandard_function(CZParser.Standard_functionContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link CZParser#arguments}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -115,12 +121,6 @@ public interface CZVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitPrint_statement(CZParser.Print_statementContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link CZParser#print_arguments}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitPrint_arguments(CZParser.Print_argumentsContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link CZParser#read_statement}.
 	 * @param ctx the parse tree
@@ -207,6 +207,13 @@ public interface CZVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitLogicalExpression(CZParser.LogicalExpressionContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code arrayLiteralExpression}
+	 * labeled alternative in {@link CZParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitArrayLiteralExpression(CZParser.ArrayLiteralExpressionContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code equalityExpression}
 	 * labeled alternative in {@link CZParser#expression}.
 	 * @param ctx the parse tree
@@ -254,6 +261,12 @@ public interface CZVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitLiteral(CZParser.LiteralContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CZParser#array_literal}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitArray_literal(CZParser.Array_literalContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link CZParser#boolean_literal}.
 	 * @param ctx the parse tree

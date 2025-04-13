@@ -141,6 +141,16 @@ public interface CZListener extends ParseTreeListener {
 	 */
 	void exitFunction_call(CZParser.Function_callContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link CZParser#standard_function}.
+	 * @param ctx the parse tree
+	 */
+	void enterStandard_function(CZParser.Standard_functionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CZParser#standard_function}.
+	 * @param ctx the parse tree
+	 */
+	void exitStandard_function(CZParser.Standard_functionContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link CZParser#arguments}.
 	 * @param ctx the parse tree
 	 */
@@ -180,16 +190,6 @@ public interface CZListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitPrint_statement(CZParser.Print_statementContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link CZParser#print_arguments}.
-	 * @param ctx the parse tree
-	 */
-	void enterPrint_arguments(CZParser.Print_argumentsContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link CZParser#print_arguments}.
-	 * @param ctx the parse tree
-	 */
-	void exitPrint_arguments(CZParser.Print_argumentsContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link CZParser#read_statement}.
 	 * @param ctx the parse tree
@@ -335,6 +335,18 @@ public interface CZListener extends ParseTreeListener {
 	 */
 	void exitLogicalExpression(CZParser.LogicalExpressionContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code arrayLiteralExpression}
+	 * labeled alternative in {@link CZParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterArrayLiteralExpression(CZParser.ArrayLiteralExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code arrayLiteralExpression}
+	 * labeled alternative in {@link CZParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitArrayLiteralExpression(CZParser.ArrayLiteralExpressionContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code equalityExpression}
 	 * labeled alternative in {@link CZParser#expression}.
 	 * @param ctx the parse tree
@@ -416,6 +428,16 @@ public interface CZListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitLiteral(CZParser.LiteralContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CZParser#array_literal}.
+	 * @param ctx the parse tree
+	 */
+	void enterArray_literal(CZParser.Array_literalContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CZParser#array_literal}.
+	 * @param ctx the parse tree
+	 */
+	void exitArray_literal(CZParser.Array_literalContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link CZParser#boolean_literal}.
 	 * @param ctx the parse tree

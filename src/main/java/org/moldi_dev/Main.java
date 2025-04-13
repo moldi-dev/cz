@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        String fileName = "turing_completeness_test_program.cz";
+        String fileName = args[0];
         String source = readResourceFile(fileName);
 
         System.out.println("✨ CZ Interpreter - C with Gen Z Slang | Normalize Gen Z coding bestie ✨");

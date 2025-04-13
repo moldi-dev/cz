@@ -1,5 +1,9 @@
 grammar CZ;
 
+options {
+    caseInsensitive = true;
+}
+
 @header {
     import java.util.*;
 }
@@ -66,7 +70,23 @@ return_statement
     ;
 
 function_call
-    : IDENTIFIER LEFT_PARANTHESIS arguments? RIGHT_PARANTHESIS
+    : (IDENTIFIER | standard_function) LEFT_PARANTHESIS arguments? RIGHT_PARANTHESIS
+    ;
+
+standard_function
+    : ARRAY_LENGTH
+    | ARRAY_AT
+    | ARRAY_CONTAINS
+    | ARRAY_INDEX_OF
+    | ARRAY_COUNT
+    | ARRAY_SORT
+    | ARRAY_REVERSE
+    | ARRAY_INSERT_FIRST
+    | ARRAY_INSERT_AT
+    | ARRAY_INSERT_LAST
+    | ARRAY_DELETE_FIRST
+    | ARRAY_DELETE_AT
+    | ARRAY_DELETE_LAST
     ;
 
 arguments
@@ -82,11 +102,7 @@ assignment
     ;
 
 print_statement
-    : PRINT LEFT_PARANTHESIS print_arguments? RIGHT_PARANTHESIS
-    ;
-
-print_arguments
-    : expression (COMMA expression)*
+    : PRINT LEFT_PARANTHESIS arguments? RIGHT_PARANTHESIS
     ;
 
 read_statement
@@ -130,6 +146,7 @@ expression
     | function_call                                                                                                 # functionCallExpression
     | IDENTIFIER                                                                                                    # identifierExpression
     | literal                                                                                                       # literalExpression
+    | array_literal                                                                                                 # arrayLiteralExpression
     ;
 
 literal
@@ -138,6 +155,11 @@ literal
     | CHARACTER
     | STRING_LITERAL
     | boolean_literal
+    | array_literal
+    ;
+
+array_literal
+    : LEFT_BRACKET expression (COMMA expression)* RIGHT_BRACKET
     ;
 
 boolean_literal
@@ -147,9 +169,12 @@ boolean_literal
 
 type_
     : INT
+    | ARRAY_INT
     | DOUBLE
+    | ARRAY_DOUBLE
     | CHAR
     | STRING
+    | ARRAY_STRING
     ;
 
 // Lexer rules
@@ -157,7 +182,10 @@ type_
 INT: 'int' | 'rizz';
 DOUBLE: 'double' | 'g';
 CHAR: 'char' | 'fam';
-STRING: 'string' | 'dope';
+STRING: 'string' | 'squad';
+ARRAY_INT: 'array<int>' | 'squad<rizz>';
+ARRAY_DOUBLE: 'array<double>' | 'squad<g>';
+ARRAY_STRING: 'array<string>' | 'squad<squad>';
 PRINT: 'print' | 'yeet';
 READ: 'read' | 'spill_tea';
 IF: 'if' | 'fr';
@@ -183,6 +211,8 @@ LEFT_PARANTHESIS: '(' | 'opentalk';
 RIGHT_PARANTHESIS: ')' | 'closetalk';
 LEFT_BRACE: '{' | 'openjam';
 RIGHT_BRACE: '}' | 'closejam';
+LEFT_BRACKET: '[' | 'openvibe';
+RIGHT_BRACKET: ']' | 'closevibe';
 ASSIGNMENT: '=' | 'vibecheck';
 MODULUS: '%' | 'tralalero_tralala';
 EQUALS: '==' | 'bruh';
@@ -204,6 +234,21 @@ BITWISE_XOR: '^' | 'xorfam';
 BITWISE_NOT: '~' | 'unbit';
 SHIFT_LEFT: '<<' | 'leftslide';
 SHIFT_RIGHT: '>>' | 'rightslide';
+
+// Built-in functions (my own standard library bestie)
+ARRAY_LENGTH: '<MDA>array_length' | '<MDA>squad_countdown'; // returns the array's length
+ARRAY_AT: '<MDA>array_at' | '<MDA>squad_peep'; // returns the element on the given position
+ARRAY_CONTAINS: '<MDA>array_contains' | '<MDA>squad_vibeswith'; // returns true if the array contains the given value
+ARRAY_INDEX_OF: '<MDA>array_index_of' | '<MDA>squad_whereat'; // returns the index of the first occurence for the given value
+ARRAY_COUNT: '<MDA>array_count' | '<MDA>squad_howmany'; // returns the number of occurences for the given value
+ARRAY_SORT: '<MDA>array_sort' | '<MDA>squad_glowup'; // sorts the array, but with the Stalin Sort algorithm, my signature move heheheh >:)
+ARRAY_REVERSE: '<MDA>array_reverse' | '<MDA>squad_flipflop'; // reverses the array
+ARRAY_INSERT_FIRST: '<MDA>array_insert_first' | '<MDA>squad_pushup'; // inserts a new element on the first position in the array
+ARRAY_INSERT_AT: '<MDA>array_insert_at' | '<MDA>squad_dropin'; // inserts a new element at the given position
+ARRAY_INSERT_LAST: '<MDA>array_insert_last' | '<MDA>squad_slidein'; // inserts a new element on the last position in the array
+ARRAY_DELETE_FIRST: '<MDA>array_delete_first' | '<MDA>squad_chopfirst'; // deletes the first element of the array
+ARRAY_DELETE_AT: '<MDA>array_delete_at' | '<MDA>squad_chopspot'; // deletes the element at the given position
+ARRAY_DELETE_LAST: '<MDA>array_delete_last' | '<MDA>squad_choplast'; // deletes the last element of the array
 
 // Literals
 STRING_LITERAL: '"' (~["\\] | EscapeSequence)* '"';
