@@ -38,6 +38,19 @@ statement
     | continue_statement
     | expression SEMICOLON
     | return_statement SEMICOLON
+    | switch_statement
+    ;
+
+switch_statement
+    : SWITCH LEFT_PARANTHESIS expression RIGHT_PARANTHESIS LEFT_BRACE switch_block* default_block? RIGHT_BRACE
+    ;
+
+switch_block
+    : CASE literal COLON statement*
+    ;
+
+default_block
+    : DEFAULT COLON statement*
     ;
 
 break_statement
@@ -81,7 +94,9 @@ read_statement
     ;
 
 if_statement
-    : IF LEFT_PARANTHESIS expression RIGHT_PARANTHESIS block (ELSE block)?
+    : IF LEFT_PARANTHESIS expression RIGHT_PARANTHESIS block
+      (ELSE IF LEFT_PARANTHESIS expression RIGHT_PARANTHESIS block)*
+      (ELSE block)?
     ;
 
 while_statement
@@ -111,6 +126,7 @@ expression
     | left=expression op=(EQUALS | NOT_EQUALS) right=expression                                                     # equalityExpression
     | left=expression op=(BITWISE_AND | BITWISE_OR | BITWISE_XOR) right=expression                                  # bitwiseExpression
     | left=expression op=(LOGICAL_AND | LOGICAL_OR) right=expression                                                # logicalExpression
+    | condition=expression QUESTION trueExpr=expression COLON falseExpr=expression                                  # ternaryExpression
     | function_call                                                                                                 # functionCallExpression
     | IDENTIFIER                                                                                                    # identifierExpression
     | literal                                                                                                       # literalExpression
@@ -154,35 +170,40 @@ TRUE: 'true' | 'nocap';
 FALSE: 'false' | 'cap';
 RETURN: 'return' | 'bounce';
 MAIN: 'main' | 'boss';
+SWITCH: 'switch' | 'switchy';
+CASE: 'case' | 'vibe';
+DEFAULT: 'default' | 'deffie';
 
 // Operators
-SEMICOLON: ';';
-COMMA: ',';
-LEFT_PARANTHESIS: '(';
-RIGHT_PARANTHESIS: ')';
-LEFT_BRACE: '{';
-RIGHT_BRACE: '}';
-ASSIGNMENT: '=';
+QUESTION: '?' | 'fr?';
+COLON: ':' | 'bet';
+SEMICOLON: ';' | 'pointz';
+COMMA: ',' | 'splitz';
+LEFT_PARANTHESIS: '(' | 'opentalk';
+RIGHT_PARANTHESIS: ')' | 'closetalk';
+LEFT_BRACE: '{' | 'openjam';
+RIGHT_BRACE: '}' | 'closejam';
+ASSIGNMENT: '=' | 'vibecheck';
 MODULUS: '%' | 'tralalero_tralala';
 EQUALS: '==' | 'bruh';
-NOT: '!';
+NOT: '!' | 'nope';
 NOT_EQUALS: '!=' | 'nah';
 LESS_THAN: '<' | 'smol';
 GREATER_THAN: '>' | 'big';
-LESS_THAN_OR_EQUAL: '<=';
-GREATER_THAN_OR_EQUAL: '>=';
+LESS_THAN_OR_EQUAL: '<=' | 'smallish';
+GREATER_THAN_OR_EQUAL: '>=' | 'biggish';
 ADDITION: '+' | 'extra';
 SUBTRACTION: '-' | 'mid';
 MULTIPLICATION: '*' | 'clapped';
 DIVISION: '/' | 'ratioed';
-LOGICAL_AND: '&&';
-LOGICAL_OR: '||';
-BITWISE_AND: '&';
-BITWISE_OR: '|';
-BITWISE_XOR: '^';
-BITWISE_NOT: '~';
-SHIFT_LEFT: '<<';
-SHIFT_RIGHT: '>>';
+LOGICAL_AND: '&&' | 'facts';
+LOGICAL_OR: '||' | 'vibes';
+BITWISE_AND: '&' | 'bitfam';
+BITWISE_OR: '|' | 'bitlit';
+BITWISE_XOR: '^' | 'xorfam';
+BITWISE_NOT: '~' | 'unbit';
+SHIFT_LEFT: '<<' | 'leftslide';
+SHIFT_RIGHT: '>>' | 'rightslide';
 
 // Literals
 STRING_LITERAL: '"' (~["\\] | EscapeSequence)* '"';

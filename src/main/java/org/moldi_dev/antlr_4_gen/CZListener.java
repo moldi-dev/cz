@@ -71,6 +71,36 @@ public interface CZListener extends ParseTreeListener {
 	 */
 	void exitStatement(CZParser.StatementContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link CZParser#switch_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterSwitch_statement(CZParser.Switch_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CZParser#switch_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitSwitch_statement(CZParser.Switch_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CZParser#switch_block}.
+	 * @param ctx the parse tree
+	 */
+	void enterSwitch_block(CZParser.Switch_blockContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CZParser#switch_block}.
+	 * @param ctx the parse tree
+	 */
+	void exitSwitch_block(CZParser.Switch_blockContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CZParser#default_block}.
+	 * @param ctx the parse tree
+	 */
+	void enterDefault_block(CZParser.Default_blockContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CZParser#default_block}.
+	 * @param ctx the parse tree
+	 */
+	void exitDefault_block(CZParser.Default_blockContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link CZParser#break_statement}.
 	 * @param ctx the parse tree
 	 */
@@ -269,30 +299,6 @@ public interface CZListener extends ParseTreeListener {
 	 */
 	void exitIdentifierExpression(CZParser.IdentifierExpressionContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code equalityExpression}
-	 * labeled alternative in {@link CZParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterEqualityExpression(CZParser.EqualityExpressionContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code equalityExpression}
-	 * labeled alternative in {@link CZParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitEqualityExpression(CZParser.EqualityExpressionContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code functionCallExpression}
-	 * labeled alternative in {@link CZParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterFunctionCallExpression(CZParser.FunctionCallExpressionContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code functionCallExpression}
-	 * labeled alternative in {@link CZParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitFunctionCallExpression(CZParser.FunctionCallExpressionContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code parenExpression}
 	 * labeled alternative in {@link CZParser#expression}.
 	 * @param ctx the parse tree
@@ -316,6 +322,42 @@ public interface CZListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitMultiplicativeExpression(CZParser.MultiplicativeExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code logicalExpression}
+	 * labeled alternative in {@link CZParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterLogicalExpression(CZParser.LogicalExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code logicalExpression}
+	 * labeled alternative in {@link CZParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitLogicalExpression(CZParser.LogicalExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code equalityExpression}
+	 * labeled alternative in {@link CZParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterEqualityExpression(CZParser.EqualityExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code equalityExpression}
+	 * labeled alternative in {@link CZParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitEqualityExpression(CZParser.EqualityExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code functionCallExpression}
+	 * labeled alternative in {@link CZParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterFunctionCallExpression(CZParser.FunctionCallExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code functionCallExpression}
+	 * labeled alternative in {@link CZParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitFunctionCallExpression(CZParser.FunctionCallExpressionContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code bitwiseExpression}
 	 * labeled alternative in {@link CZParser#expression}.
@@ -353,17 +395,17 @@ public interface CZListener extends ParseTreeListener {
 	 */
 	void exitLiteralExpression(CZParser.LiteralExpressionContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code logicalExpression}
+	 * Enter a parse tree produced by the {@code ternaryExpression}
 	 * labeled alternative in {@link CZParser#expression}.
 	 * @param ctx the parse tree
 	 */
-	void enterLogicalExpression(CZParser.LogicalExpressionContext ctx);
+	void enterTernaryExpression(CZParser.TernaryExpressionContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code logicalExpression}
+	 * Exit a parse tree produced by the {@code ternaryExpression}
 	 * labeled alternative in {@link CZParser#expression}.
 	 * @param ctx the parse tree
 	 */
-	void exitLogicalExpression(CZParser.LogicalExpressionContext ctx);
+	void exitTernaryExpression(CZParser.TernaryExpressionContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link CZParser#literal}.
 	 * @param ctx the parse tree

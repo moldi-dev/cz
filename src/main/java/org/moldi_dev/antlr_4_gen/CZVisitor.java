@@ -50,6 +50,24 @@ public interface CZVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitStatement(CZParser.StatementContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link CZParser#switch_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSwitch_statement(CZParser.Switch_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CZParser#switch_block}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSwitch_block(CZParser.Switch_blockContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CZParser#default_block}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDefault_block(CZParser.Default_blockContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link CZParser#break_statement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -168,20 +186,6 @@ public interface CZVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitIdentifierExpression(CZParser.IdentifierExpressionContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code equalityExpression}
-	 * labeled alternative in {@link CZParser#expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitEqualityExpression(CZParser.EqualityExpressionContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code functionCallExpression}
-	 * labeled alternative in {@link CZParser#expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitFunctionCallExpression(CZParser.FunctionCallExpressionContext ctx);
-	/**
 	 * Visit a parse tree produced by the {@code parenExpression}
 	 * labeled alternative in {@link CZParser#expression}.
 	 * @param ctx the parse tree
@@ -195,6 +199,27 @@ public interface CZVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitMultiplicativeExpression(CZParser.MultiplicativeExpressionContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code logicalExpression}
+	 * labeled alternative in {@link CZParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLogicalExpression(CZParser.LogicalExpressionContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code equalityExpression}
+	 * labeled alternative in {@link CZParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEqualityExpression(CZParser.EqualityExpressionContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code functionCallExpression}
+	 * labeled alternative in {@link CZParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFunctionCallExpression(CZParser.FunctionCallExpressionContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code bitwiseExpression}
 	 * labeled alternative in {@link CZParser#expression}.
@@ -217,12 +242,12 @@ public interface CZVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitLiteralExpression(CZParser.LiteralExpressionContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code logicalExpression}
+	 * Visit a parse tree produced by the {@code ternaryExpression}
 	 * labeled alternative in {@link CZParser#expression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitLogicalExpression(CZParser.LogicalExpressionContext ctx);
+	T visitTernaryExpression(CZParser.TernaryExpressionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link CZParser#literal}.
 	 * @param ctx the parse tree

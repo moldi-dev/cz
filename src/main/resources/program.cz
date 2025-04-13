@@ -1,8 +1,16 @@
 int main() {
-    string str1 = "Hello ";
-    string str2 = "World";
+    string grade = "22";
 
-    print(str1 + str2, "!");
+    switch (grade) {
+        case "5":
+            print("mid");
+            break;
+        case "10":
+            print("peak");
+            break;
+        default:
+            print("not rated");
+    }
 
     return 0;
 }

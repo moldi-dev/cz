@@ -122,14 +122,20 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
     @Override
     public Object visitIf_statement(CZParser.If_statementContext ctx) {
-        boolean condition = (boolean)visit(ctx.expression());
-
-        if (condition) {
+        if ((boolean) visit(ctx.expression(0))) {
             return visit(ctx.block(0));
         }
 
-        else if (ctx.ELSE() != null) {
-            return visit(ctx.block(1));
+        int elseIfCount = ctx.expression().size() - 1;
+
+        for (int i = 0; i < elseIfCount; i++) {
+            if ((boolean) visit(ctx.expression(i + 1))) {
+                return visit(ctx.block(i + 1));
+            }
+        }
+
+        if (ctx.block().size() > ctx.expression().size()) {
+            return visit(ctx.block(ctx.block().size() - 1));
         }
 
         return null;
@@ -448,6 +454,19 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         };
     }
 
+    @Override
+    public Object visitTernaryExpression(CZParser.TernaryExpressionContext ctx) {
+        boolean condition = (boolean) visit(ctx.condition);
+
+        if (condition) {
+            return visit(ctx.trueExpr);
+        }
+
+        else {
+            return visit(ctx.falseExpr);
+        }
+    }
+
     // TODO: implement
     @Override
     public Object visitFunctionCallExpression(CZParser.FunctionCallExpressionContext ctx) {
@@ -500,6 +519,50 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
     @Override
     public Object visitContinue_statement(CZParser.Continue_statementContext ctx) {
         shouldContinue = true;
+        return null;
+    }
+
+    @Override
+    public Object visitSwitch_statement(CZParser.Switch_statementContext ctx) {
+        Object switchValue = visit(ctx.expression());
+        boolean matched = false;
+
+        for (CZParser.Switch_blockContext block : ctx.switch_block()) {
+            Object caseValue = visit(block.literal());
+
+            if (!matched && Objects.equals(switchValue, caseValue)) {
+                matched = true;
+
+                for (CZParser.StatementContext stmt : block.statement()) {
+                    visit(stmt);
+
+                    if (shouldBreak) {
+                        shouldBreak = false;
+                        return null;
+                    }
+
+                    if (shouldContinue) {
+                        shouldContinue = false;
+                    }
+                }
+            }
+        }
+
+        if (!matched && ctx.default_block() != null) {
+            for (CZParser.StatementContext stmt : ctx.default_block().statement()) {
+                visit(stmt);
+
+                if (shouldBreak) {
+                    shouldBreak = false;
+                    return null;
+                }
+
+                if (shouldContinue) {
+                    shouldContinue = false;
+                }
+            }
+        }
+
         return null;
     }
 }
