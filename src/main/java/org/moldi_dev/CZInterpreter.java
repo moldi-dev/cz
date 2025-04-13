@@ -1,13 +1,12 @@
 package org.moldi_dev;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Scanner;
+import java.util.*;
+
 import org.moldi_dev.antlr_4_gen.*;
 
 public class CZInterpreter extends CZBaseVisitor<Object> {
-    private final Map<String, Object> variables = new HashMap<>();
+    private Map<String, Object> variables = new HashMap<>();
+    private final Map<String, Function> functions = new HashMap<>();
     private boolean shouldBreak = false;
     private boolean shouldContinue = false;
 
@@ -22,12 +21,30 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
     @Override
     public Object visitMain_function(CZParser.Main_functionContext ctx) {
-        return visit(ctx.block());
+        try {
+            return visit(ctx.block());
+        }
+
+        catch (ReturnValue rv) {
+            return rv.value;
+        }
     }
 
-    // TODO: implement
     @Override
     public Object visitFunction(CZParser.FunctionContext ctx) {
+        String functionName = ctx.IDENTIFIER().getText();
+        List<String> parameters = new ArrayList<>();
+
+        if (ctx.parameters() != null) {
+            for (CZParser.ParameterContext paramCtx : ctx.parameters().parameter()) {
+                parameters.add(paramCtx.IDENTIFIER().getText());
+            }
+        }
+
+        Function function = new Function(functionName, parameters, ctx.block());
+
+        functions.put(functionName, function);
+
         return null;
     }
 
@@ -41,7 +58,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             }
 
             if (result != null) {
-                return result; // For return statements
+                return result;
             }
         }
 
@@ -100,19 +117,13 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         if (currentValue instanceof Double) {
             double value = scanner.nextDouble();
             variables.put(varName, value);
-        }
-
-        else if (currentValue instanceof String) {
+        } else if (currentValue instanceof String) {
             String value = scanner.nextLine();
             variables.put(varName, value);
-        }
-
-        else if (currentValue instanceof Character) {
+        } else if (currentValue instanceof Character) {
             String input = scanner.nextLine();
             variables.put(varName, input.charAt(0));
-        }
-
-        else {
+        } else {
             int value = scanner.nextInt();
             variables.put(varName, value);
         }
@@ -143,7 +154,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
     @Override
     public Object visitWhile_statement(CZParser.While_statementContext ctx) {
-        while ((boolean)visit(ctx.expression())) {
+        while ((boolean) visit(ctx.expression())) {
             shouldBreak = false;
             shouldContinue = false;
 
@@ -224,14 +235,10 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         return null;
     }
 
-    // TODO: implement
     @Override
     public Object visitReturn_statement(CZParser.Return_statementContext ctx) {
-        if (ctx.expression() != null) {
-            return visit(ctx.expression());
-        }
-
-        return null;
+        Object value = visit(ctx.expression());
+        throw new ReturnValue(value);
     }
 
     @Override
@@ -271,9 +278,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 case CZParser.MODULUS -> l % r;
                 default -> throw new RuntimeException("Invalid operator for doubles");
             };
-        }
-
-        else if (left instanceof Integer && right instanceof Integer) {
+        } else if (left instanceof Integer && right instanceof Integer) {
             int l = (Integer) left;
             int r = (Integer) right;
 
@@ -296,27 +301,19 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         if (ctx.op.getType() == CZParser.ADDITION) {
             if (left instanceof String || right instanceof String || left instanceof Character || right instanceof Character) {
                 return String.valueOf(left) + right;
-            }
-
-            else if (left instanceof Double || right instanceof Double) {
+            } else if (left instanceof Double || right instanceof Double) {
                 double l = (left instanceof Integer) ? ((Integer) left).doubleValue() : (Double) left;
                 double r = (right instanceof Integer) ? ((Integer) right).doubleValue() : (Double) right;
                 return l + r;
-            }
-
-            else {
+            } else {
                 return (Integer) left + (Integer) right;
             }
-        }
-
-        else {
+        } else {
             if (left instanceof Double || right instanceof Double) {
                 double l = (left instanceof Integer) ? ((Integer) left).doubleValue() : (Double) left;
                 double r = (right instanceof Integer) ? ((Integer) right).doubleValue() : (Double) right;
                 return l - r;
-            }
-
-            else {
+            } else {
                 return (Integer) left - (Integer) right;
             }
         }
@@ -357,9 +354,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 case CZParser.GREATER_THAN_OR_EQUAL -> l >= r;
                 default -> false;
             };
-        }
-
-        else if (left instanceof Integer && right instanceof Integer) {
+        } else if (left instanceof Integer && right instanceof Integer) {
             int l = (Integer) left;
             int r = (Integer) right;
 
@@ -370,9 +365,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 case CZParser.GREATER_THAN_OR_EQUAL -> l >= r;
                 default -> false;
             };
-        }
-
-        else if (left instanceof Character && right instanceof Character) {
+        } else if (left instanceof Character && right instanceof Character) {
             char l = (Character) left;
             char r = (Character) right;
 
@@ -383,9 +376,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 case CZParser.GREATER_THAN_OR_EQUAL -> l >= r;
                 default -> false;
             };
-        }
-
-        else if (left instanceof String && right instanceof String) {
+        } else if (left instanceof String && right instanceof String) {
             int cmp = ((String) left).compareTo((String) right);
 
             return switch (ctx.op.getType()) {
@@ -460,17 +451,55 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
         if (condition) {
             return visit(ctx.trueExpr);
-        }
-
-        else {
+        } else {
             return visit(ctx.falseExpr);
         }
     }
 
-    // TODO: implement
     @Override
     public Object visitFunctionCallExpression(CZParser.FunctionCallExpressionContext ctx) {
-        return null;
+        String functionName = ctx.function_call().IDENTIFIER().getText();
+        Function function = functions.get(functionName);
+
+        if (function == null) {
+            throw new RuntimeException("Function " + functionName + " not defined");
+        }
+
+        List<Object> argumentValues = new ArrayList<>();
+
+        if (ctx.function_call().arguments() != null) {
+            for (CZParser.ExpressionContext exprCtx : ctx.function_call().arguments().expression()) {
+                argumentValues.add(visit(exprCtx));
+            }
+        }
+
+        if (argumentValues.size() != function.getParameterNames().size()) {
+            throw new RuntimeException("Argument count mismatch for function " + functionName);
+        }
+
+        Map<String, Object> functionVariables = new HashMap<>();
+
+        for (int i = 0; i < function.getParameterNames().size(); i++) {
+            functionVariables.put(function.getParameterNames().get(i), argumentValues.get(i));
+        }
+
+        Map<String, Object> previousVariables = new HashMap<>(variables);
+        variables.clear();
+        variables.putAll(functionVariables);
+
+        Object result = null;
+
+        try {
+            result = visit(function.getBody());
+        }
+
+        catch (ReturnValue rv) {
+            result = rv.value;
+        }
+
+        variables = previousVariables;
+
+        return result;
     }
 
     @Override
@@ -489,21 +518,13 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
     public Object visitLiteral(CZParser.LiteralContext ctx) {
         if (ctx.INTEGER_NUMBER() != null) {
             return Integer.parseInt(ctx.INTEGER_NUMBER().getText());
-        }
-
-        else if (ctx.DOUBLE_NUMBER() != null) {
+        } else if (ctx.DOUBLE_NUMBER() != null) {
             return Double.parseDouble(ctx.DOUBLE_NUMBER().getText());
-        }
-
-        else if (ctx.CHARACTER() != null) {
+        } else if (ctx.CHARACTER() != null) {
             return ctx.CHARACTER().getText().charAt(1);
-        }
-
-        else if (ctx.STRING_LITERAL() != null) {
+        } else if (ctx.STRING_LITERAL() != null) {
             return ctx.STRING_LITERAL().getText().substring(1, ctx.STRING_LITERAL().getText().length() - 1);
-        }
-
-        else if (ctx.boolean_literal() != null) {
+        } else if (ctx.boolean_literal() != null) {
             return ctx.boolean_literal().TRUE() != null;
         }
 

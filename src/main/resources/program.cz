@@ -1,16 +1,11 @@
-int main() {
-    string grade = "22";
+int sum(int a, int b) {
+    print("Sum in sum function: ", a + b);
+    return a + b;
+}
 
-    switch (grade) {
-        case "5":
-            print("mid");
-            break;
-        case "10":
-            print("peak");
-            break;
-        default:
-            print("not rated");
-    }
+int main() {
+    int s = sum(2, 3);
+    print("Sum in main function: ", s);
 
     return 0;
 }
