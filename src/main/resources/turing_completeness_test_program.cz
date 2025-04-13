@@ -1,0 +1,34 @@
+int fibonacci_sum_recursively(int n) {
+    if (n == 0) {
+        return 0;
+    }
+
+    if (n == 1) {
+        return 1;
+    }
+
+    return fibonacci_sum_recursively(n - 1) + fibonacci_sum_recursively(n - 2);
+}
+
+int fibonacci_sum_iteratively(int n) {
+    int a = 0;
+    int b = 1;
+    int sum = 0;
+
+    for (int i = 1; i <= n; i++) {
+        sum = a + b;
+        a = b;
+        b = sum;
+    }
+
+    return sum;
+}
+
+int main() {
+    int n = 10;
+
+    print(fibonacci_sum_iteratively(n));
+    print(fibonacci_sum_recursively(n));
+
+    return 0;
+}
