@@ -345,6 +345,18 @@ public interface CZListener extends ParseTreeListener {
 	 */
 	void exitLogicalExpression(CZParser.LogicalExpressionContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code powerExpression}
+	 * labeled alternative in {@link CZParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterPowerExpression(CZParser.PowerExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code powerExpression}
+	 * labeled alternative in {@link CZParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitPowerExpression(CZParser.PowerExpressionContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code arrayLiteralExpression}
 	 * labeled alternative in {@link CZParser#expression}.
 	 * @param ctx the parse tree

@@ -16,6 +16,30 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         functions = new HashMap<>();
 
         // Built-in functions (my standard library hehehe)
+        functions.put("<MDA>sine", new Function("<MDA>sine", List.of("x"), null, false));
+        functions.put("<MDA>vibe_sway", new Function("<MDA>vibe_sway", List.of("x"), null, false));
+
+        functions.put("<MDA>cosine", new Function("<MDA>cosine", List.of("x"), null, false));
+        functions.put("<MDA>side_chill", new Function("<MDA>side_chill", List.of("x"), null, false));
+
+        functions.put("<MDA>tangent", new Function("<MDA>tangent", List.of("x"), null, false));
+        functions.put("<MDA>angle_tea", new Function("<MDA>angle_tea", List.of("x"), null, false));
+
+        functions.put("<MDA>cotangent", new Function("<MDA>cotangent", List.of("x"), null, false));
+        functions.put("<MDA>cotan_drip", new Function("<MDA>cotan_drip", List.of("x"), null, false));
+
+        functions.put("<MDA>arcsine", new Function("<MDA>arcsine", List.of("x"), null, false));
+        functions.put("<MDA>vibe_rewind", new Function("<MDA>vibe_rewind", List.of("x"), null, false));
+
+        functions.put("<MDA>arccosine", new Function("<MDA>arccosine", List.of("x"), null, false));
+        functions.put("<MDA>side_throwback", new Function("<MDA>side_throwback", List.of("x"), null, false));
+
+        functions.put("<MDA>arctangent", new Function("<MDA>arctangent", List.of("x"), null, false));
+        functions.put("<MDA>angle_flash", new Function("<MDA>angle_flash", List.of("x"), null, false));
+
+        functions.put("<MDA>arccotangent", new Function("<MDA>arccotangent", List.of("x"), null, false));
+        functions.put("<MDA>cotan_flashback", new Function("<MDA>cotan_flashback", List.of("x"), null, false));
+
         functions.put("<MDA>array_length", new Function("<MDA>array_length", List.of("arr"), null, false));
         functions.put("<MDA>squad_countdown", new Function("<MDA>squad_countdown", List.of("arr"), null, false));
 
@@ -55,7 +79,6 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         functions.put("<MDA>array_delete_last", new Function("<MDA>array_delete_last", List.of("arr"), null, false));
         functions.put("<MDA>squad_choplast", new Function("<MDA>squad_choplast", List.of("arr"), null, false));
     }
-
 
     @Override
     public Object visitProgram(CZParser.ProgramContext ctx) {
@@ -446,6 +469,28 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
     }
 
     @Override
+    public Object visitPowerExpression(CZParser.PowerExpressionContext ctx) {
+        Object left = visit(ctx.left);
+        Object right = visit(ctx.right);
+
+        if (left instanceof Double || right instanceof Double) {
+            double l = (left instanceof Integer) ? ((Integer) left).doubleValue() : (Double) left;
+            double r = (right instanceof Integer) ? ((Integer) right).doubleValue() : (Double) right;
+
+            return Math.pow(l, r);
+        }
+
+        else if (left instanceof Integer && right instanceof Integer) {
+            int l = (Integer) left;
+            int r = (Integer) right;
+
+            return (int) Math.pow(l, r);
+        }
+
+        throw new RuntimeException("Invalid operand types for power expression");
+    }
+
+    @Override
     public Object visitMultiplicativeExpression(CZParser.MultiplicativeExpressionContext ctx) {
         Object left = visit(ctx.left);
         Object right = visit(ctx.right);
@@ -638,6 +683,12 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         }
     }
 
+    private double toDouble(Object value) {
+        if (value instanceof Integer) return ((Integer) value).doubleValue();
+        if (value instanceof Double) return (Double) value;
+        throw new RuntimeException("Expected numeric value but got: " + value);
+    }
+
     @Override
     public Object visitFunctionCallExpression(CZParser.FunctionCallExpressionContext ctx) {
         String functionName = ctx.function_call().IDENTIFIER() != null ? ctx.function_call().IDENTIFIER().getText() : ctx.function_call().standard_function().getText();
@@ -653,6 +704,35 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         }
 
         switch (functionName) {
+            case "<MDA>sine":
+            case "<MDA>vibe_sway":
+                return Math.sin(toDouble(visit(ctx.function_call().arguments().expression(0))));
+            case "<MDA>cosine":
+            case "<MDA>side_chill":
+                return Math.cos(toDouble(visit(ctx.function_call().arguments().expression(0))));
+            case "<MDA>tangent":
+            case "<MDA>angle_tea":
+                return Math.tan(toDouble(visit(ctx.function_call().arguments().expression(0))));
+            case "<MDA>cotangent":
+            case "<MDA>cotan_drip": {
+                double x = toDouble(visit(ctx.function_call().arguments().expression(0)));
+                if (x == 0) throw new ArithmeticException("Cotangent undefined at 0");
+                return 1.0 / Math.tan(x);
+            }
+            case "<MDA>arcsine":
+            case "<MDA>vibe_rewind":
+                return Math.asin(toDouble(visit(ctx.function_call().arguments().expression(0))));
+            case "<MDA>arccosine":
+            case "<MDA>side_throwback":
+                return Math.acos(toDouble(visit(ctx.function_call().arguments().expression(0))));
+            case "<MDA>arctangent":
+            case "<MDA>angle_flash":
+                return Math.atan(toDouble(visit(ctx.function_call().arguments().expression(0))));
+            case "<MDA>arccotangent":
+            case "<MDA>cotan_flashback": {
+                double x = toDouble(visit(ctx.function_call().arguments().expression(0)));
+                return Math.atan(1.0 / x);
+            }
             case "<MDA>array_length":
             case "<MDA>squad_countdown": {
                 Object array = visit(ctx.function_call().arguments().expression(0));

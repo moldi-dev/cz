@@ -213,6 +213,13 @@ public interface CZVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitLogicalExpression(CZParser.LogicalExpressionContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code powerExpression}
+	 * labeled alternative in {@link CZParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPowerExpression(CZParser.PowerExpressionContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code arrayLiteralExpression}
 	 * labeled alternative in {@link CZParser#expression}.
 	 * @param ctx the parse tree

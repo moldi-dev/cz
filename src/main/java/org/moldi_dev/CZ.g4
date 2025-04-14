@@ -91,6 +91,14 @@ standard_function
     | ARRAY_DELETE_FIRST
     | ARRAY_DELETE_AT
     | ARRAY_DELETE_LAST
+    | SINE
+    | COSINE
+    | TANGENT
+    | COTANGENT
+    | ARCSINE
+    | ARCCOSINE
+    | ARCTANGENT
+    | ARCCOTANGENT
     ;
 
 arguments
@@ -137,20 +145,21 @@ block
     ;
 
 expression
-    : LEFT_PARANTHESIS expression RIGHT_PARANTHESIS                                                                 # parenExpression
-    | op=(NOT | BITWISE_NOT) expression                                                                             # unaryExpression
-    | left=expression op=(MULTIPLICATION | DIVISION | MODULUS) right=expression                                     # multiplicativeExpression
-    | left=expression op=(ADDITION | SUBTRACTION) right=expression                                                  # additiveExpression
-    | left=expression op=(SHIFT_LEFT | SHIFT_RIGHT) right=expression                                                # shiftExpression
-    | left=expression op=(LESS_THAN | GREATER_THAN | LESS_THAN_OR_EQUAL | GREATER_THAN_OR_EQUAL) right=expression   # relationalExpression
-    | left=expression op=(EQUALS | NOT_EQUALS) right=expression                                                     # equalityExpression
-    | left=expression op=(BITWISE_AND | BITWISE_OR | BITWISE_XOR) right=expression                                  # bitwiseExpression
-    | left=expression op=(LOGICAL_AND | LOGICAL_OR) right=expression                                                # logicalExpression
-    | condition=expression QUESTION trueExpr=expression COLON falseExpr=expression                                  # ternaryExpression
-    | function_call                                                                                                 # functionCallExpression
-    | IDENTIFIER                                                                                                    # identifierExpression
-    | literal                                                                                                       # literalExpression
-    | array_literal                                                                                                 # arrayLiteralExpression
+    : LEFT_PARANTHESIS expression RIGHT_PARANTHESIS                                                                              # parenExpression
+    | op=(NOT | BITWISE_NOT) expression                                                                                          # unaryExpression
+    | left=expression op=(MULTIPLICATION | DIVISION | MODULUS) right=expression                                                  # multiplicativeExpression
+    | <rightassoc> left=expression op=POWER right=expression                                                                     # powerExpression
+    | left=expression op=(ADDITION | SUBTRACTION) right=expression                                                               # additiveExpression
+    | left=expression op=(SHIFT_LEFT | SHIFT_RIGHT) right=expression                                                             # shiftExpression
+    | left=expression op=(LESS_THAN | GREATER_THAN | LESS_THAN_OR_EQUAL | GREATER_THAN_OR_EQUAL) right=expression                # relationalExpression
+    | left=expression op=(EQUALS | NOT_EQUALS) right=expression                                                                  # equalityExpression
+    | left=expression op=(BITWISE_AND | BITWISE_OR | BITWISE_XOR) right=expression                                               # bitwiseExpression
+    | left=expression op=(LOGICAL_AND | LOGICAL_OR) right=expression                                                             # logicalExpression
+    | condition=expression QUESTION trueExpr=expression COLON falseExpr=expression                                               # ternaryExpression
+    | function_call                                                                                                              # functionCallExpression
+    | IDENTIFIER                                                                                                                 # identifierExpression
+    | literal                                                                                                                    # literalExpression
+    | array_literal                                                                                                              # arrayLiteralExpression
     ;
 
 literal
@@ -229,6 +238,7 @@ GREATER_THAN_OR_EQUAL: '>=' | 'biggish';
 ADDITION: '+' | 'extra';
 SUBTRACTION: '-' | 'mid';
 MULTIPLICATION: '*' | 'clapped';
+POWER: '**';
 DIVISION: '/' | 'ratioed';
 LOGICAL_AND: '&&' | 'facts';
 LOGICAL_OR: '||' | 'vibes';
@@ -240,6 +250,15 @@ SHIFT_LEFT: '<<' | 'leftslide';
 SHIFT_RIGHT: '>>' | 'rightslide';
 
 // Built-in functions (my own standard library bestie)
+SINE: '<MDA>sine' | '<MDA>vibe_sway';
+COSINE: '<MDA>cosine' | '<MDA>side_chill';
+TANGENT: '<MDA>tangent' | '<MDA>angle_tea';
+COTANGENT: '<MDA>cotangent' | '<MDA>cotan_drip';
+ARCSINE: '<MDA>arcsine' | '<MDA>vibe_rewind';
+ARCCOSINE: '<MDA>arccosine' | '<MDA>side_throwback';
+ARCTANGENT: '<MDA>arctangent' | '<MDA>angle_flash';
+ARCCOTANGENT: '<MDA>arccotangent' | '<MDA>cotan_flashback';
+
 ARRAY_LENGTH: '<MDA>array_length' | '<MDA>squad_countdown'; // returns the array's length
 ARRAY_AT: '<MDA>array_at' | '<MDA>squad_peep'; // returns the element on the given position
 ARRAY_CONTAINS: '<MDA>array_contains' | '<MDA>squad_vibeswith'; // returns true if the array contains the given value
