@@ -1,8 +1,9 @@
-int func() {
-    return 0;
-}
+#vibe_define PI 3.1415
+#vibe_define greeting "sup bestie"
 
-int main() {
-    print(func());
-    return 0;
-}
+rizz boss opentalk closetalk openjam
+    yeet opentalk greeting closetalk pointz
+    yeet opentalk PI tung_tung_tung_sahur 2 closetalk pointz
+
+    bounce cap pointz
+closejam

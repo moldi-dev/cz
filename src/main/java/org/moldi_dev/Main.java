@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) throws Exception {
+        CZInterpreter interpreter = new CZInterpreter();
+
         String fileName = args[0];
         String source = readResourceFile(fileName);
 
@@ -29,7 +31,6 @@ public class Main {
 
         ParseTree tree = parser.program();
 
-        CZInterpreter interpreter = new CZInterpreter();
         interpreter.visit(tree);
     }
 

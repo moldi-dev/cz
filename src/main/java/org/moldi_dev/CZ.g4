@@ -10,7 +10,11 @@ options {
 
 // Parser rules
 program
-    : function_declaration* function* main_function function* EOF
+    : define_directive* function_declaration* function* main_function function* EOF
+    ;
+
+define_directive
+    : DEFINE IDENTIFIER (INTEGER_NUMBER | DOUBLE_NUMBER | STRING_LITERAL | CHARACTER | boolean_literal)
     ;
 
 main_function
@@ -218,6 +222,7 @@ MAIN: 'main' | 'boss';
 SWITCH: 'switch' | 'switchy';
 CASE: 'case' | 'vibe';
 DEFAULT: 'default' | 'deffie';
+DEFINE: '#define' | '#vibe_define';
 
 // Operators
 QUESTION: '?' | 'fr?';

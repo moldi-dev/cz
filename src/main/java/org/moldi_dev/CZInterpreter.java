@@ -8,12 +8,14 @@ import java.util.*;
 public class CZInterpreter extends CZBaseVisitor<Object> {
     private Map<String, Object> variables;
     private final Map<String, Function> functions;
+    private final Map<String, String> macros;
     private boolean shouldBreak = false;
     private boolean shouldContinue = false;
 
     public CZInterpreter() {
         variables = new HashMap<>();
         functions = new HashMap<>();
+        macros = new HashMap<>();
 
         // Built-in functions (my standard library hehehe)
         functions.put("<MDA>sine", new Function("<MDA>sine", List.of("x"), null, false));
@@ -80,8 +82,55 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         functions.put("<MDA>squad_choplast", new Function("<MDA>squad_choplast", List.of("arr"), null, false));
     }
 
+    private Object parseMacroValue(String value) {
+        value = value.trim();
+
+        if (value.equals("true") || value.equals("false")) {
+            return Boolean.parseBoolean(value);
+        }
+
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException ignored) {
+        }
+
+        try {
+            return Double.parseDouble(value);
+        } catch (NumberFormatException ignored) {
+        }
+
+        if ((value.startsWith("\"") && value.endsWith("\"")) ||
+                (value.startsWith("'") && value.endsWith("'"))) {
+            return value.substring(1, value.length() - 1);
+        }
+
+        return value;
+    }
+
     @Override
     public Object visitProgram(CZParser.ProgramContext ctx) {
+        for (CZParser.Define_directiveContext defineCtx : ctx.define_directive()) {
+            String macroName = defineCtx.IDENTIFIER().getText();
+            String macroValue;
+
+            if (defineCtx.INTEGER_NUMBER() != null) {
+                macroValue = defineCtx.INTEGER_NUMBER().getText();
+                macros.put(macroName, macroValue);
+            } else if (defineCtx.DOUBLE_NUMBER() != null) {
+                macroValue = defineCtx.DOUBLE_NUMBER().getText();
+                macros.put(macroName, macroValue);
+            } else if (defineCtx.STRING_LITERAL() != null) {
+                macroValue = defineCtx.STRING_LITERAL().getText();
+                macros.put(macroName, macroValue);
+            } else if (defineCtx.CHARACTER() != null) {
+                macroValue = defineCtx.CHARACTER().getText();
+                macros.put(macroName, macroValue);
+            } else if (defineCtx.boolean_literal() != null) {
+                macroValue = defineCtx.boolean_literal().getText();
+                macros.put(macroName, macroValue);
+            }
+        }
+
         for (CZParser.Function_declarationContext declCtx : ctx.function_declaration()) {
             visit(declCtx);
         }
@@ -99,6 +148,14 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         }
 
         return result;
+    }
+
+    @Override
+    public Object visitDefine_directive(CZParser.Define_directiveContext ctx) {
+        String name = ctx.IDENTIFIER().getText();
+        String value = ctx.getChild(2).getText();
+        macros.put(name, value);
+        return null;
     }
 
     @Override
@@ -478,9 +535,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             double r = (right instanceof Integer) ? ((Integer) right).doubleValue() : (Double) right;
 
             return Math.pow(l, r);
-        }
-
-        else if (left instanceof Integer && right instanceof Integer) {
+        } else if (left instanceof Integer && right instanceof Integer) {
             int l = (Integer) left;
             int r = (Integer) right;
 
@@ -970,6 +1025,11 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
     @Override
     public Object visitIdentifierExpression(CZParser.IdentifierExpressionContext ctx) {
         String varName = ctx.IDENTIFIER().getText();
+
+        if (macros.containsKey(varName)) {
+            String value = macros.get(varName);
+            return parseMacroValue(value);
+        }
 
         return variables.getOrDefault(varName, 0);
     }
