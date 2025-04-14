@@ -18,7 +18,7 @@ public class Main {
 
         System.out.println("✨ CZ Interpreter - C with Gen Z Slang | Normalize Gen Z coding bestie ✨");
 
-        System.out.print("📁 Parsing file: " + fileName + "\n");
+        System.out.println("📁 Parsing file: " + fileName);
         System.out.println("📁 File contents:");
         System.out.println("-----------------------------------------------------------------------");
         System.out.println(source);

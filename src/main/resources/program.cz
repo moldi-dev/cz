@@ -1,9 +1,10 @@
-#vibe_define PI 3.1415
-#vibe_define greeting "sup bestie"
+int main() {
+    array<bool> b = [false, true, false];
 
-rizz boss opentalk closetalk openjam
-    yeet opentalk greeting closetalk pointz
-    yeet opentalk PI tung_tung_tung_sahur 2 closetalk pointz
+    bool v = <MDA>array_at(b, 1);
 
-    bounce cap pointz
-closejam
+    print(v);
+
+    return 0;
+}
+

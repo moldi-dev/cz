@@ -5,23 +5,25 @@ import java.util.List;
 
 public class Function {
     private String functionName;
-    private List<String> parameterNames;
+    private List<Variable> parameters;
     private CZParser.Function_blockContext body;
     private boolean isDeclaredOnly;
+    private VariableType returnType;
 
-    public Function(String functionName, List<String> parameterNames, CZParser.Function_blockContext body, boolean isDeclaredOnly) {
+    public Function(String functionName, List<Variable> parameters, CZParser.Function_blockContext body, boolean isDeclaredOnly, VariableType returnType) {
         this.functionName = functionName;
-        this.parameterNames = parameterNames;
+        this.parameters = parameters;
         this.body = body;
         this.isDeclaredOnly = isDeclaredOnly;
+        this.returnType = returnType;
     }
 
     public String getFunctionName() {
         return functionName;
     }
 
-    public List<String> getParameterNames() {
-        return parameterNames;
+    public List<Variable> getParameters() {
+        return parameters;
     }
 
     public CZParser.Function_blockContext getBody() {
@@ -32,12 +34,16 @@ public class Function {
         return isDeclaredOnly;
     }
 
+    public VariableType getReturnType() {
+        return returnType;
+    }
+
     public void setFunctionName(String functionName) {
         this.functionName = functionName;
     }
 
-    public void setParameterNames(List<String> parameterNames) {
-        this.parameterNames = parameterNames;
+    public void setParameters(List<Variable> parameters) {
+        this.parameters = parameters;
     }
 
     public void setBody(CZParser.Function_blockContext body) {
@@ -46,5 +52,9 @@ public class Function {
 
     public void setIsDeclaredOnly(boolean isDeclaredOnly) {
         this.isDeclaredOnly = isDeclaredOnly;
+    }
+
+    public void setReturnType(VariableType returnType) {
+        this.returnType = returnType;
     }
 }

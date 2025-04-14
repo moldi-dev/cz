@@ -16,9 +16,7 @@ CZ (C-Zee or C-Zed, idk and idc) is a *spicy remix* of the C programming languag
 - **Built-in Gen Z Standard Library**: A set of "built-in" functions designed to work with arrays and bring some flavor into your life. You can now do things like:
     - `array_length` (Get the length of an array, duh!)
     - `array_at` (Get an element at a specific index — called "squad_peep" in CZ)
-    - `array_contains` (Check if a value is in the array — or "squad_vibeswith")
-    - `array_sort` (Sort an array using the "Stalin Sort" algorithm, because why not? — or "squad_glowup")
-    - `array_reverse` (Reverse your squad’s order — “squad_flipflop”)
+    - `sine` (Get the sine value of a number 👀)
     - and more!
 
 - **Mixes Modern Syntax with Classic C**: While you’re using slang, you still get all the power and structure of C! You can define functions, work with variables, and even use loops — all with *spicy* names.
