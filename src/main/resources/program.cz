@@ -1,5 +1,8 @@
-int main() {
-    print(2 * (9 ** (1.0 / 2.0)));
+int func() {
+    return 0;
+}
 
+int main() {
+    print(func());
     return 0;
 }

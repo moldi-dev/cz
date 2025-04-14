@@ -104,7 +104,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
     @Override
     public Object visitMain_function(CZParser.Main_functionContext ctx) {
         try {
-            return visit(ctx.block());
+            return visit(ctx.function_block());
         } catch (ReturnValue rv) {
             return rv.getValue();
         }
@@ -142,7 +142,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             }
         }
 
-        Function function = new Function(functionName, parameters, ctx.block(), false);
+        Function function = new Function(functionName, parameters, ctx.function_block(), false);
 
         functions.put(functionName, function);
 

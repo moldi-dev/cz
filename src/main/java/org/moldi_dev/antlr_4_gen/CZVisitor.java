@@ -32,6 +32,12 @@ public interface CZVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitFunction(CZParser.FunctionContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link CZParser#function_block}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFunction_block(CZParser.Function_blockContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link CZParser#function_declaration}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

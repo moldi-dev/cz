@@ -14,11 +14,15 @@ program
     ;
 
 main_function
-    : INT MAIN LEFT_PARANTHESIS RIGHT_PARANTHESIS block
+    : INT MAIN LEFT_PARANTHESIS RIGHT_PARANTHESIS function_block
     ;
 
 function
-    : type_ IDENTIFIER LEFT_PARANTHESIS parameters? RIGHT_PARANTHESIS block
+    : type_ IDENTIFIER LEFT_PARANTHESIS parameters? RIGHT_PARANTHESIS function_block
+    ;
+
+function_block
+    : LEFT_BRACE statement* return_statement SEMICOLON RIGHT_BRACE
     ;
 
 function_declaration
@@ -70,7 +74,7 @@ continue_statement
     ;
 
 return_statement
-    : RETURN expression?
+    : RETURN expression
     ;
 
 function_call
@@ -238,7 +242,7 @@ GREATER_THAN_OR_EQUAL: '>=' | 'biggish';
 ADDITION: '+' | 'extra';
 SUBTRACTION: '-' | 'mid';
 MULTIPLICATION: '*' | 'clapped';
-POWER: '**';
+POWER: '**' | 'tung_tung_tung_sahur';
 DIVISION: '/' | 'ratioed';
 LOGICAL_AND: '&&' | 'facts';
 LOGICAL_OR: '||' | 'vibes';

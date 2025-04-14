@@ -6,10 +6,10 @@ import java.util.List;
 public class Function {
     private String functionName;
     private List<String> parameterNames;
-    private CZParser.BlockContext body;
+    private CZParser.Function_blockContext body;
     private boolean isDeclaredOnly;
 
-    public Function(String functionName, List<String> parameterNames, CZParser.BlockContext body, boolean isDeclaredOnly) {
+    public Function(String functionName, List<String> parameterNames, CZParser.Function_blockContext body, boolean isDeclaredOnly) {
         this.functionName = functionName;
         this.parameterNames = parameterNames;
         this.body = body;
@@ -24,7 +24,7 @@ public class Function {
         return parameterNames;
     }
 
-    public CZParser.BlockContext getBody() {
+    public CZParser.Function_blockContext getBody() {
         return body;
     }
 
@@ -40,7 +40,7 @@ public class Function {
         this.parameterNames = parameterNames;
     }
 
-    public void setBody(CZParser.BlockContext body) {
+    public void setBody(CZParser.Function_blockContext body) {
         this.body = body;
     }
 
