@@ -41,6 +41,16 @@ public interface CZListener extends ParseTreeListener {
 	 */
 	void exitFunction(CZParser.FunctionContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link CZParser#function_declaration}.
+	 * @param ctx the parse tree
+	 */
+	void enterFunction_declaration(CZParser.Function_declarationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CZParser#function_declaration}.
+	 * @param ctx the parse tree
+	 */
+	void exitFunction_declaration(CZParser.Function_declarationContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link CZParser#parameters}.
 	 * @param ctx the parse tree
 	 */

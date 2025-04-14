@@ -10,7 +10,7 @@ options {
 
 // Parser rules
 program
-    : function* main_function EOF
+    : function_declaration* function* main_function function* EOF
     ;
 
 main_function
@@ -19,6 +19,10 @@ main_function
 
 function
     : type_ IDENTIFIER LEFT_PARANTHESIS parameters? RIGHT_PARANTHESIS block
+    ;
+
+function_declaration
+    : type_ IDENTIFIER LEFT_PARANTHESIS parameters? RIGHT_PARANTHESIS SEMICOLON
     ;
 
 parameters

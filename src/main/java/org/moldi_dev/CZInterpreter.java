@@ -1,12 +1,13 @@
 package org.moldi_dev;
 
-import java.util.*;
+import org.moldi_dev.antlr_4_gen.CZBaseVisitor;
+import org.moldi_dev.antlr_4_gen.CZParser;
 
-import org.moldi_dev.antlr_4_gen.*;
+import java.util.*;
 
 public class CZInterpreter extends CZBaseVisitor<Object> {
     private Map<String, Object> variables;
-    private Map<String, Function> functions;
+    private final Map<String, Function> functions;
     private boolean shouldBreak = false;
     private boolean shouldContinue = false;
 
@@ -14,27 +15,97 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         variables = new HashMap<>();
         functions = new HashMap<>();
 
-        functions.put("<MDA>array_length", new Function("<MDA>array_length", List.of("array"), null));
+        // Built-in functions (my standard library hehehe)
+        functions.put("<MDA>array_length", new Function("<MDA>array_length", List.of("arr"), null, false));
+        functions.put("<MDA>squad_countdown", new Function("<MDA>squad_countdown", List.of("arr"), null, false));
+
+        functions.put("<MDA>array_at", new Function("<MDA>array_at", List.of("arr", "index"), null, false));
+        functions.put("<MDA>squad_peep", new Function("<MDA>squad_peep", List.of("arr", "index"), null, false));
+
+        functions.put("<MDA>array_contains", new Function("<MDA>array_contains", List.of("arr", "value"), null, false));
+        functions.put("<MDA>squad_vibeswith", new Function("<MDA>squad_vibeswith", List.of("arr", "value"), null, false));
+
+        functions.put("<MDA>array_index_of", new Function("<MDA>array_index_of", List.of("arr", "value"), null, false));
+        functions.put("<MDA>squad_whereat", new Function("<MDA>squad_whereat", List.of("arr", "value"), null, false));
+
+        functions.put("<MDA>array_count", new Function("<MDA>array_count", List.of("arr", "value"), null, false));
+        functions.put("<MDA>squad_howmany", new Function("<MDA>squad_howmany", List.of("arr", "value"), null, false));
+
+        functions.put("<MDA>array_sort", new Function("<MDA>array_sort", List.of("arr"), null, false));
+        functions.put("<MDA>squad_glowup", new Function("<MDA>squad_glowup", List.of("arr"), null, false));
+
+        functions.put("<MDA>array_reverse", new Function("<MDA>array_reverse", List.of("arr"), null, false));
+        functions.put("<MDA>squad_flipflop", new Function("<MDA>squad_flipflop", List.of("arr"), null, false));
+
+        functions.put("<MDA>array_insert_first", new Function("<MDA>array_insert_first", List.of("arr", "value"), null, false));
+        functions.put("<MDA>squad_pushup", new Function("<MDA>squad_pushup", List.of("arr", "value"), null, false));
+
+        functions.put("<MDA>array_insert_at", new Function("<MDA>array_insert_at", List.of("arr", "index", "value"), null, false));
+        functions.put("<MDA>squad_dropin", new Function("<MDA>squad_dropin", List.of("arr", "index", "value"), null, false));
+
+        functions.put("<MDA>array_insert_last", new Function("<MDA>array_insert_last", List.of("arr", "value"), null, false));
+        functions.put("<MDA>squad_slidein", new Function("<MDA>squad_slidein", List.of("arr", "value"), null, false));
+
+        functions.put("<MDA>array_delete_first", new Function("<MDA>array_delete_first", List.of("arr"), null, false));
+        functions.put("<MDA>squad_chopfirst", new Function("<MDA>squad_chopfirst", List.of("arr"), null, false));
+
+        functions.put("<MDA>array_delete_at", new Function("<MDA>array_delete_at", List.of("arr", "index"), null, false));
+        functions.put("<MDA>squad_chopspot", new Function("<MDA>squad_chopspot", List.of("arr", "index"), null, false));
+
+        functions.put("<MDA>array_delete_last", new Function("<MDA>array_delete_last", List.of("arr"), null, false));
+        functions.put("<MDA>squad_choplast", new Function("<MDA>squad_choplast", List.of("arr"), null, false));
     }
+
 
     @Override
     public Object visitProgram(CZParser.ProgramContext ctx) {
+        for (CZParser.Function_declarationContext declCtx : ctx.function_declaration()) {
+            visit(declCtx);
+        }
+
         for (CZParser.FunctionContext functionCtx : ctx.function()) {
             visit(functionCtx);
         }
 
-        return visit(ctx.main_function());
+        Object result = visit(ctx.main_function());
+
+        for (Function function : functions.values()) {
+            if (function.getIsDeclaredOnly()) {
+                throw new RuntimeException("Function '" + function.getFunctionName() + "' declared but not defined.");
+            }
+        }
+
+        return result;
     }
 
     @Override
     public Object visitMain_function(CZParser.Main_functionContext ctx) {
         try {
             return visit(ctx.block());
+        } catch (ReturnValue rv) {
+            return rv.getValue();
+        }
+    }
+
+    @Override
+    public Object visitFunction_declaration(CZParser.Function_declarationContext ctx) {
+        String functionName = ctx.IDENTIFIER().getText();
+        List<String> parameters = new ArrayList<>();
+
+        if (ctx.parameters() != null) {
+            for (CZParser.ParameterContext paramCtx : ctx.parameters().parameter()) {
+                parameters.add(paramCtx.IDENTIFIER().getText());
+            }
         }
 
-        catch (ReturnValue rv) {
-            return rv.value;
+        Function existing = functions.get(functionName);
+
+        if (existing == null || existing.getIsDeclaredOnly()) {
+            Function prototype = new Function(functionName, parameters, null, true);
+            functions.put(functionName, prototype);
         }
+
+        return null;
     }
 
     @Override
@@ -48,7 +119,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             }
         }
 
-        Function function = new Function(functionName, parameters, ctx.block());
+        Function function = new Function(functionName, parameters, ctx.block(), false);
 
         functions.put(functionName, function);
 
@@ -89,66 +160,48 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 for (Object obj : (List<?>) value) {
                     if (obj instanceof Integer) {
                         arrayList.add((Integer) obj);
-                    }
-
-                    else {
+                    } else {
                         throw new RuntimeException("Type mismatch: Expected Integer values.");
                     }
                 }
 
                 variables.put(varName, arrayList);
-            }
-
-            else {
+            } else {
                 variables.put(varName, new ArrayList<Integer>());
             }
-        }
-
-        else if (type.equals("array<double>") || type.equals("squad<g>")) {
+        } else if (type.equals("array<double>") || type.equals("squad<g>")) {
             if (value != null) {
                 List<Double> arrayList = new ArrayList<>();
 
                 for (Object obj : (List<?>) value) {
                     if (obj instanceof Double) {
                         arrayList.add((Double) obj);
-                    }
-
-                    else {
+                    } else {
                         throw new RuntimeException("Type mismatch: Expected Double values.");
                     }
                 }
 
                 variables.put(varName, arrayList);
-            }
-
-            else {
+            } else {
                 variables.put(varName, new ArrayList<Double>());
             }
-        }
-
-        else if (type.equals("array<string>") || type.equals("squad<squad>")) {
+        } else if (type.equals("array<string>") || type.equals("squad<squad>")) {
             if (value != null) {
                 List<String> arrayList = new ArrayList<>();
 
                 for (Object obj : (List<?>) value) {
                     if (obj instanceof String) {
                         arrayList.add((String) obj);
-                    }
-
-                    else {
+                    } else {
                         throw new RuntimeException("Type mismatch: Expected String values.");
                     }
                 }
 
                 variables.put(varName, arrayList);
-            }
-
-            else {
+            } else {
                 variables.put(varName, new ArrayList<String>());
             }
-        }
-
-        else {
+        } else {
             variables.put(varName, value);
         }
 
@@ -175,9 +228,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 }
 
                 variables.put(varName, intList);
-            }
-
-            else if (arrayVar.getFirst() instanceof Double && value instanceof List<?>) {
+            } else if (arrayVar.getFirst() instanceof Double && value instanceof List<?>) {
                 List<Double> doubleList = (List<Double>) value;
 
                 if (!doubleList.isEmpty() && doubleList.getFirst() == null) {
@@ -185,9 +236,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 }
 
                 variables.put(varName, doubleList);
-            }
-
-            else if (arrayVar.getFirst() instanceof String && value instanceof List<?>) {
+            } else if (arrayVar.getFirst() instanceof String && value instanceof List<?>) {
                 List<String> stringList = (List<String>) value;
 
                 if (!stringList.isEmpty() && stringList.getFirst() == null) {
@@ -195,14 +244,10 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 }
 
                 variables.put(varName, stringList);
-            }
-
-            else {
+            } else {
                 throw new RuntimeException("Type mismatch: Array type mismatch or assignment value type incorrect.");
             }
-        }
-
-        else {
+        } else {
             variables.put(varName, value);
         }
 
@@ -229,9 +274,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                     }
 
                     output.append("]");
-                }
-
-                else {
+                } else {
                     output.append(value);
                 }
             }
@@ -253,25 +296,17 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         if (currentValue instanceof Double) {
             double value = scanner.nextDouble();
             variables.put(varName, value);
-        }
-
-        else if (currentValue instanceof String) {
+        } else if (currentValue instanceof String) {
             String value = scanner.nextLine();
             variables.put(varName, value);
-        }
-
-        else if (currentValue instanceof Character) {
+        } else if (currentValue instanceof Character) {
             String input = scanner.nextLine();
             variables.put(varName, input.charAt(0));
-        }
-
-        else if (currentValue instanceof Integer) {
+        } else if (currentValue instanceof Integer) {
             int value = scanner.nextInt();
             scanner.nextLine();
             variables.put(varName, value);
-        }
-
-        else {
+        } else {
             throw new RuntimeException("Type mismatch for the read operation");
         }
 
@@ -607,6 +642,16 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
     public Object visitFunctionCallExpression(CZParser.FunctionCallExpressionContext ctx) {
         String functionName = ctx.function_call().IDENTIFIER() != null ? ctx.function_call().IDENTIFIER().getText() : ctx.function_call().standard_function().getText();
 
+        Function f = functions.get(functionName);
+
+        if (f == null) {
+            throw new RuntimeException("Function '" + functionName + "' is not declared.");
+        }
+
+        if (f.getIsDeclaredOnly()) {
+            throw new RuntimeException("Function '" + functionName + "' is declared but not defined.");
+        }
+
         switch (functionName) {
             case "<MDA>array_length":
             case "<MDA>squad_countdown": {
@@ -614,9 +659,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
                 if (array instanceof List) {
                     return ((List<?>) array).size();
-                }
-
-                else {
+                } else {
                     throw new RuntimeException("array_length requires an array argument");
                 }
             }
@@ -626,18 +669,13 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
                 int index = (int) visit(ctx.function_call().arguments().expression(1));
 
-                if (array instanceof List) {
-                    List<?> list = (List<?>) array;
+                if (array instanceof List<?> list) {
                     if (index >= 0 && index < list.size()) {
                         return list.get(index);
-                    }
-
-                    else {
+                    } else {
                         throw new RuntimeException("Index out of bounds for array_at");
                     }
-                }
-
-                else {
+                } else {
                     throw new RuntimeException("array_at requires an array argument");
                 }
             }
@@ -646,12 +684,9 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 Object array = visit(ctx.function_call().arguments().expression(0));
                 Object value = visit(ctx.function_call().arguments().expression(1));
 
-                if (array instanceof List) {
-                    List<?> list = (List<?>) array;
+                if (array instanceof List<?> list) {
                     return list.contains(value);
-                }
-
-                else {
+                } else {
                     throw new RuntimeException("array_contains requires an array argument");
                 }
             }
@@ -660,12 +695,9 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 Object array = visit(ctx.function_call().arguments().expression(0));
                 Object value = visit(ctx.function_call().arguments().expression(1));
 
-                if (array instanceof List) {
-                    List<?> list = (List<?>) array;
+                if (array instanceof List<?> list) {
                     return list.indexOf(value);
-                }
-
-                else {
+                } else {
                     throw new RuntimeException("array_index_of requires an array argument");
                 }
             }
@@ -674,12 +706,9 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 Object array = visit(ctx.function_call().arguments().expression(0));
                 Object value = visit(ctx.function_call().arguments().expression(1));
 
-                if (array instanceof List) {
-                    List<?> list = (List<?>) array;
-                    return (long) list.stream().filter(item -> Objects.equals(item, value)).count();
-                }
-
-                else {
+                if (array instanceof List<?> list) {
+                    return list.stream().filter(item -> Objects.equals(item, value)).count();
+                } else {
                     throw new RuntimeException("array_count requires an array argument");
                 }
             }
@@ -704,9 +733,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                     }
 
                     return stalinSortedList;
-                }
-
-                else {
+                } else {
                     throw new RuntimeException("array_sort requires an array argument");
                 }
             }
@@ -714,13 +741,10 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             case "<MDA>squad_flipflop": {
                 Object array = visit(ctx.function_call().arguments().expression(0));
 
-                if (array instanceof List) {
-                    List<?> list = (List<?>) array;
+                if (array instanceof List<?> list) {
                     Collections.reverse(list);
                     return list;
-                }
-
-                else {
+                } else {
                     throw new RuntimeException("array_reverse requires an array argument");
                 }
             }
@@ -733,9 +757,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                     List<Object> list = (List<Object>) array;
                     list.addFirst(value);
                     return list;
-                }
-
-                else {
+                } else {
                     throw new RuntimeException("array_insert_first requires an array argument");
                 }
             }
@@ -751,14 +773,10 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                     if (index >= 0 && index <= list.size()) {
                         list.add(index, value);
                         return list;
-                    }
-
-                    else {
+                    } else {
                         throw new RuntimeException("Index out of bounds for array_insert_at");
                     }
-                }
-
-                else {
+                } else {
                     throw new RuntimeException("array_insert_at requires an array argument");
                 }
             }
@@ -771,9 +789,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                     List<Object> list = (List<Object>) array;
                     list.add(value);
                     return list;
-                }
-
-                else {
+                } else {
                     throw new RuntimeException("array_insert_last requires an array argument");
                 }
             }
@@ -787,14 +803,10 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                     if (!list.isEmpty()) {
                         list.removeFirst();
                         return list;
-                    }
-
-                    else {
+                    } else {
                         throw new RuntimeException("array_delete_first requires a non-empty array");
                     }
-                }
-
-                else {
+                } else {
                     throw new RuntimeException("array_delete_first requires an array argument");
                 }
             }
@@ -810,14 +822,10 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                     if (index >= 0 && index < list.size()) {
                         list.remove(index);
                         return list;
-                    }
-
-                    else {
+                    } else {
                         throw new RuntimeException("Index out of bounds for array_delete_at");
                     }
-                }
-
-                else {
+                } else {
                     throw new RuntimeException("array_delete_at requires an array argument");
                 }
             }
@@ -831,14 +839,10 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                     if (!list.isEmpty()) {
                         list.removeLast();
                         return list;
-                    }
-
-                    else {
+                    } else {
                         throw new RuntimeException("array_delete_last requires a non-empty array");
                     }
-                }
-
-                else {
+                } else {
                     throw new RuntimeException("array_delete_last requires an array argument");
                 }
             }
@@ -874,10 +878,8 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
                 try {
                     result = visit(function.getBody());
-                }
-
-                catch (ReturnValue rv) {
-                    result = rv.value;
+                } catch (ReturnValue rv) {
+                    result = rv.getValue();
                 }
 
                 variables = previousVariables;
@@ -901,25 +903,15 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
     public Object visitLiteral(CZParser.LiteralContext ctx) {
         if (ctx.INTEGER_NUMBER() != null) {
             return Integer.parseInt(ctx.INTEGER_NUMBER().getText());
-        }
-
-        else if (ctx.DOUBLE_NUMBER() != null) {
+        } else if (ctx.DOUBLE_NUMBER() != null) {
             return Double.parseDouble(ctx.DOUBLE_NUMBER().getText());
-        }
-
-        else if (ctx.CHARACTER() != null) {
+        } else if (ctx.CHARACTER() != null) {
             return ctx.CHARACTER().getText().charAt(1);
-        }
-
-        else if (ctx.STRING_LITERAL() != null) {
+        } else if (ctx.STRING_LITERAL() != null) {
             return ctx.STRING_LITERAL().getText().substring(1, ctx.STRING_LITERAL().getText().length() - 1);
-        }
-
-        else if (ctx.boolean_literal() != null) {
+        } else if (ctx.boolean_literal() != null) {
             return ctx.boolean_literal().TRUE() != null;
-        }
-
-        else if (ctx.array_literal() != null) {
+        } else if (ctx.array_literal() != null) {
             return visit(ctx.array_literal());
         }
 

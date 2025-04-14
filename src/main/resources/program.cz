@@ -1,121 +1,33 @@
-string array_prettyprint(array<int> arr) {
-    string out = "[";
-    int i = 0;
-    int len = <MDA>array_length(arr);
+int func1();
+int func4();
 
-    while (i < len) {
-        out = out + <MDA>array_at(arr, i);
-        if (i < len - 1) {
-            out = out + ", ";
-        }
-        i = i + 1;
-    }
-
-    out = out + "]";
-    return out;
+int func2() {
+    return 2;
 }
 
-int array_max(array<int> arr) {
-    array<int> sorted = <MDA>array_sort(arr);
-    return <MDA>array_at(sorted, <MDA>array_length(sorted) - 1);
-}
-
-int array_middle(array<int> arr) {
-    int m = <MDA>array_length(arr) / 2;
-    return <MDA>array_at(arr, m);
-}
-
-int array_replace(array<int> arr, int idx, int val) {
-    <MDA>array_delete_at(arr, idx);
-    <MDA>array_insert_at(arr, idx, val);
-    return 0;
-}
-
-array<int> array_dedup(array<int> arr) {
-    array<int> result;
-    int len = <MDA>array_length(arr);
-
-    if (len == 0) {
-        return result;
-    }
-
-    <MDA>array_insert_last(result, <MDA>array_at(arr, 0));
-
-    int i = 1;
-
-    while (i < len) {
-        int curr = <MDA>array_at(arr, i);
-        int last = <MDA>array_at(result, <MDA>array_length(result) - 1);
-
-        if (curr != last) {
-            <MDA>array_insert_last(result, curr);
-        }
-
-        i = i + 1;
-    }
-
-    return result;
+int func1() {
+    return 1;
 }
 
 int main() {
-    array<int> numbers;
+    print(func1());
+    print(func2());
+    print(func3());
+    print(func4());
 
-    <MDA>array_insert_last(numbers, 3);
-    <MDA>array_insert_last(numbers, 1);
-    <MDA>array_insert_last(numbers, 4);
-    <MDA>array_insert_last(numbers, 1);
-    <MDA>array_insert_last(numbers, 5);
-    <MDA>array_insert_last(numbers, 9);
-    <MDA>array_insert_last(numbers, 2);
-    <MDA>array_insert_last(numbers, 6);
-    <MDA>array_insert_last(numbers, 5);
+    array<int> arr = [3, 2, 1];
+    array<int> sorted_arr = <MDA>array_sort(arr);
 
-    int len = <MDA>array_length(numbers);
-    print(len);
-
-    int third = <MDA>array_at(numbers, 2);
-    print(third);
-
-    int hasNine = <MDA>array_contains(numbers, 9);
-    print(hasNine);
-
-    int indexOfFive = <MDA>array_index_of(numbers, 5);
-    print(indexOfFive);
-
-    int countOnes = <MDA>array_count(numbers, 1);
-    print(countOnes);
-
-    array<int> sorted = <MDA>array_sort(numbers);
-    print(array_prettyprint(sorted));
-
-    array<int> reversed = <MDA>array_reverse(numbers);
-    print(array_prettyprint(reversed));
-
-    <MDA>array_insert_first(numbers, 42);
-    <MDA>array_insert_at(numbers, 2, 99);
-    <MDA>array_insert_last(numbers, 7);
-
-    print("After insertions:");
-    print(array_prettyprint(numbers));
-
-    <MDA>array_delete_first(numbers);
-    <MDA>array_delete_at(numbers, 3);
-    <MDA>array_delete_last(numbers);
-
-    print("After deletions:");
-    print(array_prettyprint(numbers));
-
-    int maxVal = array_max(numbers);
-    print(maxVal);
-
-    array<int> deduped = array_dedup(numbers);
-    print(array_prettyprint(deduped));
-
-    int middle = array_middle(numbers);
-    print(middle);
-
-    array_replace(numbers, 0, 100);
-    print(array_prettyprint(numbers));
+    print("Sorted array: ", sorted_arr);
+    print("Sorted array length: ", <MDA>array_length(sorted_arr));
 
     return 0;
+}
+
+int func3() {
+    return 3;
+}
+
+int func4() {
+    return 4;
 }

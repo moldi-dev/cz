@@ -7,11 +7,13 @@ public class Function {
     private String functionName;
     private List<String> parameterNames;
     private CZParser.BlockContext body;
+    private boolean isDeclaredOnly;
 
-    public Function(String functionName, List<String> parameterNames, CZParser.BlockContext body) {
+    public Function(String functionName, List<String> parameterNames, CZParser.BlockContext body, boolean isDeclaredOnly) {
         this.functionName = functionName;
         this.parameterNames = parameterNames;
         this.body = body;
+        this.isDeclaredOnly = isDeclaredOnly;
     }
 
     public String getFunctionName() {
@@ -26,6 +28,10 @@ public class Function {
         return body;
     }
 
+    public boolean getIsDeclaredOnly() {
+        return isDeclaredOnly;
+    }
+
     public void setFunctionName(String functionName) {
         this.functionName = functionName;
     }
@@ -36,5 +42,9 @@ public class Function {
 
     public void setBody(CZParser.BlockContext body) {
         this.body = body;
+    }
+
+    public void setIsDeclaredOnly(boolean isDeclaredOnly) {
+        this.isDeclaredOnly = isDeclaredOnly;
     }
 }
