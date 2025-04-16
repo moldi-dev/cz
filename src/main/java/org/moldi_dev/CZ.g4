@@ -86,9 +86,7 @@ function_call
     ;
 
 standard_function
-    : ARRAY_LENGTH
-    | ARRAY_AT
-    | SINE
+    : SINE
     | COSINE
     | TANGENT
     | COTANGENT
@@ -96,6 +94,19 @@ standard_function
     | ARCCOSINE
     | ARCTANGENT
     | ARCCOTANGENT
+    | ARRAY_LENGTH
+    | ARRAY_GET_AT
+    | ARRAY_SET_AT
+    | ARRAY_COPY
+    | ARRAY_CONTAINS
+    | ARRAY_INDEX_OF
+    | ARRAY_COUNT
+    | ARRAY_INSERT_FIRST
+    | ARRAY_INSERT_AT
+    | ARRAY_INSERT_LAST
+    | ARRAY_DELETE_FIRST
+    | ARRAY_DELETE_AT
+    | ARRAY_DELETE_LAST
     ;
 
 arguments
@@ -260,15 +271,25 @@ ARCSINE: '<MDA>arcsine' | '<MDA>vibe_rewind';
 ARCCOSINE: '<MDA>arccosine' | '<MDA>side_throwback';
 ARCTANGENT: '<MDA>arctangent' | '<MDA>angle_flash';
 ARCCOTANGENT: '<MDA>arccotangent' | '<MDA>cotan_flashback';
-
-ARRAY_LENGTH: '<MDA>array_length' | '<MDA>squad_countdown'; // returns the array's length
-ARRAY_AT: '<MDA>array_at' | '<MDA>squad_peep'; // returns the element on the given position
+ARRAY_LENGTH: '<MDA>array_length' | '<MDA>squad_countdown'; // <MDA>array_length :: array<T> => INTEGER
+ARRAY_GET_AT: '<MDA>array_get_at' | '<MDA>squad_peep'; // <MDA>array_get_at :: array<T>, INTEGER => INTEGER
+ARRAY_SET_AT: '<MDA>array_set_at' | '<MDA>squad_seep'; // <MDA>array_set_at :: array<T>, INTEGER, T => array<T>
+ARRAY_COPY: '<MDA>array_copy' | '<MDA>squad_join'; // <MDA>array_copy :: array<T> => array<T>
+ARRAY_CONTAINS: '<MDA>array_contains' | '<MDA>squad_vibeswith'; // <MDA>array_set_at :: array<T>, T => BOOLEAN
+ARRAY_INDEX_OF: '<MDA>array_index_of' | '<MDA>squad_whereat'; // <MDA>array_index_of :: array<T>, T => INTEGER
+ARRAY_COUNT: '<MDA>array_count' | '<MDA>squad_howmany'; // <MDA>array_count :: array<T>, T => INTEGER
+ARRAY_INSERT_FIRST: '<MDA>array_insert_first' | '<MDA>squad_pushup'; // <MDA>array_insert_first :: array<T>, T => array<T>
+ARRAY_INSERT_AT: '<MDA>array_insert_at' | '<MDA>squad_dropin'; // <MDA>array_insert_at :: array<T>, INTEGER, T => array<T>
+ARRAY_INSERT_LAST: '<MDA>array_insert_last' | '<MDA>squad_slidein'; //<MDA>array_insert_last :: array<T>, T => array<T>
+ARRAY_DELETE_FIRST: '<MDA>array_delete_first' | '<MDA>squad_chopfirst'; // <MDA>array_delete_first :: array<T> => array<T>
+ARRAY_DELETE_AT: '<MDA>array_delete_at' | '<MDA>squad_chopspot'; // <MDA>array_delete_at :: array<T>, INTEGER => array<T>
+ARRAY_DELETE_LAST: '<MDA>array_delete_last' | '<MDA>squad_choplast'; //<MDA>array_delete_last :: array<T> => array<T>
 
 // Literals
 STRING_LITERAL: '"' (~["\\] | EscapeSequence)* '"';
 CHARACTER: '\'' (~['\\] | EscapeSequence) '\'';
-INTEGER_NUMBER: [0-9]+;
-DOUBLE_NUMBER: [0-9]+ '.' [0-9]+;
+INTEGER_NUMBER: '-'? [0-9]+;
+DOUBLE_NUMBER: '-'? [0-9]+ '.' [0-9]+;
 
 IDENTIFIER: [a-zA-Z][a-zA-Z0-9_]*;
 

@@ -19,35 +19,152 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         macros = new HashMap<>();
 
         // Built-in functions (my standard library hehehe)
-        functions.put("<MDA>sine", new Function("<MDA>sine", List.of(new Variable("x", VariableType.DOUBLE, null)), null, false, VariableType.DOUBLE));
-        functions.put("<MDA>vibe_sway", new Function("<MDA>vibe_sway", List.of(new Variable("x", VariableType.DOUBLE, null)), null, false, VariableType.DOUBLE));
+        functions.put("<MDA>sine", new Function("<MDA>sine",
+                List.of(new Variable("x", VariableType.DOUBLE, null)),
+                null, false, VariableType.DOUBLE));
+        functions.put("<MDA>vibe_sway", new Function("<MDA>vibe_sway",
+                List.of(new Variable("x", VariableType.DOUBLE, null)),
+                null, false, VariableType.DOUBLE));
 
-        functions.put("<MDA>cosine", new Function("<MDA>cosine", List.of(new Variable("x", VariableType.DOUBLE, null)), null, false, VariableType.DOUBLE));
-        functions.put("<MDA>side_chill", new Function("<MDA>side_chill", List.of(new Variable("x", VariableType.DOUBLE, null)), null, false, VariableType.DOUBLE));
+        functions.put("<MDA>cosine", new Function("<MDA>cosine",
+                List.of(new Variable("x", VariableType.DOUBLE, null)),
+                null, false, VariableType.DOUBLE));
+        functions.put("<MDA>side_chill", new Function("<MDA>side_chill",
+                List.of(new Variable("x", VariableType.DOUBLE, null)),
+                null, false, VariableType.DOUBLE));
 
-        functions.put("<MDA>tangent", new Function("<MDA>tangent", List.of(new Variable("x", VariableType.DOUBLE, null)), null, false, VariableType.DOUBLE));
-        functions.put("<MDA>angle_tea", new Function("<MDA>angle_tea", List.of(new Variable("x", VariableType.DOUBLE, null)), null, false,VariableType.DOUBLE));
+        functions.put("<MDA>tangent", new Function("<MDA>tangent",
+                List.of(new Variable("x", VariableType.DOUBLE, null)),
+                null, false, VariableType.DOUBLE));
+        functions.put("<MDA>angle_tea", new Function("<MDA>angle_tea",
+                List.of(new Variable("x", VariableType.DOUBLE, null)),
+                null, false,VariableType.DOUBLE));
 
-        functions.put("<MDA>cotangent", new Function("<MDA>cotangent", List.of(new Variable("x", VariableType.DOUBLE, null)), null, false, VariableType.DOUBLE));
-        functions.put("<MDA>cotan_drip", new Function("<MDA>cotan_drip", List.of(new Variable("x", VariableType.DOUBLE, null)), null, false, VariableType.DOUBLE));
+        functions.put("<MDA>cotangent", new Function("<MDA>cotangent",
+                List.of(new Variable("x", VariableType.DOUBLE, null)),
+                null, false, VariableType.DOUBLE));
+        functions.put("<MDA>cotan_drip", new Function("<MDA>cotan_drip",
+                List.of(new Variable("x", VariableType.DOUBLE, null)),
+                null, false, VariableType.DOUBLE));
 
-        functions.put("<MDA>arcsine", new Function("<MDA>arcsine", List.of(new Variable("x", VariableType.DOUBLE, null)), null, false, VariableType.DOUBLE));
-        functions.put("<MDA>vibe_rewind", new Function("<MDA>vibe_rewind", List.of(new Variable("x", VariableType.DOUBLE, null)), null, false, VariableType.DOUBLE));
+        functions.put("<MDA>arcsine", new Function("<MDA>arcsine",
+                List.of(new Variable("x", VariableType.DOUBLE, null)),
+                null, false, VariableType.DOUBLE));
+        functions.put("<MDA>vibe_rewind", new Function("<MDA>vibe_rewind",
+                List.of(new Variable("x", VariableType.DOUBLE, null)),
+                null, false, VariableType.DOUBLE));
 
-        functions.put("<MDA>arccosine", new Function("<MDA>arccosine", List.of(new Variable("x", VariableType.DOUBLE, null)), null, false, VariableType.DOUBLE));
-        functions.put("<MDA>side_throwback", new Function("<MDA>side_throwback", List.of(new Variable("x", VariableType.DOUBLE, null)), null, false, VariableType.DOUBLE));
+        functions.put("<MDA>arccosine", new Function("<MDA>arccosine",
+                List.of(new Variable("x", VariableType.DOUBLE, null)),
+                null, false, VariableType.DOUBLE));
+        functions.put("<MDA>side_throwback", new Function("<MDA>side_throwback",
+                List.of(new Variable("x", VariableType.DOUBLE, null)),
+                null, false, VariableType.DOUBLE));
 
-        functions.put("<MDA>arctangent", new Function("<MDA>arctangent", List.of(new Variable("x", VariableType.DOUBLE, null)), null, false, VariableType.DOUBLE));
-        functions.put("<MDA>angle_flash", new Function("<MDA>angle_flash", List.of(new Variable("x", VariableType.DOUBLE, null)), null, false, VariableType.DOUBLE));
+        functions.put("<MDA>arctangent", new Function("<MDA>arctangent",
+                List.of(new Variable("x", VariableType.DOUBLE, null)),
+                null, false, VariableType.DOUBLE));
+        functions.put("<MDA>angle_flash", new Function("<MDA>angle_flash",
+                List.of(new Variable("x", VariableType.DOUBLE, null)),
+                null, false, VariableType.DOUBLE));
 
-        functions.put("<MDA>arccotangent", new Function("<MDA>arccotangent", List.of(new Variable("x", VariableType.DOUBLE, null)), null, false, VariableType.DOUBLE));
-        functions.put("<MDA>cotan_flashback", new Function("<MDA>cotan_flashback", List.of(new Variable("x", VariableType.DOUBLE, null)), null, false, VariableType.DOUBLE));
+        functions.put("<MDA>arccotangent", new Function("<MDA>arccotangent",
+                List.of(new Variable("x", VariableType.DOUBLE, null)),
+                null, false, VariableType.DOUBLE));
+        functions.put("<MDA>cotan_flashback", new Function("<MDA>cotan_flashback",
+                List.of(new Variable("x", VariableType.DOUBLE, null)),
+                null, false, VariableType.DOUBLE));
 
-        functions.put("<MDA>array_length", new Function("<MDA>array_length", List.of(new Variable("arr", VariableType.ANY, null)), null, false, VariableType.INTEGER));
-        functions.put("<MDA>squad_countdown", new Function("<MDA>squad_countdown", List.of(new Variable("arr", VariableType.ANY, null)), null, false, VariableType.INTEGER));
+        functions.put("<MDA>array_length", new Function("<MDA>array_length",
+                List.of(new Variable("arr", VariableType.ANY, null)),
+                null, false, VariableType.INTEGER));
+        functions.put("<MDA>squad_countdown", new Function("<MDA>squad_countdown",
+                List.of(new Variable("arr", VariableType.ANY, null)),
+                null, false, VariableType.INTEGER));
 
-        functions.put("<MDA>array_at", new Function("<MDA>array_at", List.of(new Variable("arr", VariableType.ANY, null), new Variable("index", VariableType.INTEGER, null)), null, false, VariableType.ANY));
-        functions.put("<MDA>squad_peep", new Function("<MDA>squad_peep", List.of(new Variable("arr", VariableType.ANY, null), new Variable("index", VariableType.INTEGER, null)), null, false, VariableType.ANY));
+        functions.put("<MDA>array_get_at", new Function("<MDA>array_get_at",
+                List.of(new Variable("arr", VariableType.ANY, null), new Variable("index", VariableType.INTEGER, null)),
+                null, false, VariableType.ANY));
+        functions.put("<MDA>squad_peep", new Function("<MDA>squad_peep",
+                List.of(new Variable("arr", VariableType.ANY, null), new Variable("index", VariableType.INTEGER, null)),
+                null, false, VariableType.ANY));
+
+        functions.put("<MDA>array_set_at", new Function("<MDA>array_set_at",
+                List.of(new Variable("arr", VariableType.ANY, null), new Variable("index", VariableType.INTEGER, null), new Variable("value", VariableType.ANY, null)),
+                null, false, VariableType.ANY));
+        functions.put("<MDA>squad_seep", new Function("<MDA>squad_seep",
+                List.of(new Variable("arr", VariableType.ANY, null), new Variable("index", VariableType.INTEGER, null), new Variable("value", VariableType.ANY, null)),
+                null, false, VariableType.ANY));
+
+        functions.put("<MDA>array_copy", new Function("<MDA>array_copy",
+                List.of(new Variable("arr", VariableType.ANY, null)),
+                null, false, VariableType.ANY));
+        functions.put("<MDA>squad_join", new Function("<MDA>squad_join",
+                List.of(new Variable("arr", VariableType.ANY, null)),
+                null, false, VariableType.ANY));
+
+        functions.put("<MDA>array_contains", new Function("<MDA>array_contains",
+                List.of(new Variable("arr", VariableType.ANY, null), new Variable("value", VariableType.ANY, null)),
+                null, false, VariableType.BOOLEAN));
+        functions.put("<MDA>squad_vibeswith", new Function("<MDA>squad_vibeswith",
+                List.of(new Variable("arr", VariableType.ANY, null), new Variable("value", VariableType.ANY, null)),
+                null, false, VariableType.BOOLEAN));
+
+        functions.put("<MDA>array_index_of", new Function("<MDA>array_index_of",
+                List.of(new Variable("arr", VariableType.ANY, null), new Variable("value", VariableType.ANY, null)),
+                null, false, VariableType.INTEGER));
+        functions.put("<MDA>squad_whereat", new Function("<MDA>squad_whereat",
+                List.of(new Variable("arr", VariableType.ANY, null), new Variable("value", VariableType.ANY, null)),
+                null, false, VariableType.INTEGER));
+
+        functions.put("<MDA>array_count", new Function("<MDA>array_count",
+                List.of(new Variable("arr", VariableType.ANY, null), new Variable("value", VariableType.ANY, null)),
+                null, false, VariableType.INTEGER));
+        functions.put("<MDA>squad_howmany", new Function("<MDA>squad_howmany",
+                List.of(new Variable("arr", VariableType.ANY, null), new Variable("value", VariableType.ANY, null)),
+                null, false, VariableType.INTEGER));
+
+        functions.put("<MDA>array_insert_first", new Function("<MDA>array_insert_first",
+                List.of(new Variable("arr", VariableType.ANY, null), new Variable("value", VariableType.ANY, null)),
+                null, false, VariableType.ANY));
+        functions.put("<MDA>squad_pushup", new Function("<MDA>squad_pushup",
+                List.of(new Variable("arr", VariableType.ANY, null), new Variable("value", VariableType.ANY, null)),
+                null, false, VariableType.ANY));
+
+        functions.put("<MDA>array_insert_at", new Function("<MDA>array_insert_at",
+                List.of(new Variable("arr", VariableType.ANY, null), new Variable("index", VariableType.INTEGER, null), new Variable("value", VariableType.ANY, null)),
+                null, false, VariableType.ANY));
+        functions.put("<MDA>squad_dropin", new Function("<MDA>squad_dropin",
+                List.of(new Variable("arr", VariableType.ANY, null), new Variable("index", VariableType.INTEGER, null), new Variable("value", VariableType.ANY, null)),
+                null, false, VariableType.ANY));
+
+        functions.put("<MDA>array_insert_last", new Function("<MDA>array_insert_last",
+                List.of(new Variable("arr", VariableType.ANY, null), new Variable("value", VariableType.ANY, null)),
+                null, false, VariableType.ANY));
+        functions.put("<MDA>squad_slidein", new Function("<MDA>squad_slidein",
+                List.of(new Variable("arr", VariableType.ANY, null), new Variable("value", VariableType.ANY, null)),
+                null, false, VariableType.ANY));
+
+        functions.put("<MDA>array_delete_first", new Function("<MDA>array_delete_first",
+                List.of(new Variable("arr", VariableType.ANY, null)),
+                null, false, VariableType.ANY));
+        functions.put("<MDA>squad_chopfirst", new Function("<MDA>squad_chopfirst",
+                List.of(new Variable("arr", VariableType.ANY, null)),
+                null, false, VariableType.ANY));
+
+        functions.put("<MDA>array_delete_at", new Function("<MDA>array_delete_at",
+                List.of(new Variable("arr", VariableType.ANY, null), new Variable("index", VariableType.INTEGER, null)),
+                null, false, VariableType.ANY));
+        functions.put("<MDA>squad_chopspot", new Function("<MDA>squad_chopspot",
+                List.of(new Variable("arr", VariableType.ANY, null), new Variable("index", VariableType.INTEGER, null)),
+                null, false, VariableType.ANY));
+
+        functions.put("<MDA>array_delete_last", new Function("<MDA>array_delete_last",
+                List.of(new Variable("arr", VariableType.ANY, null)),
+                null, false, VariableType.ANY));
+        functions.put("<MDA>squad_choplast", new Function("<MDA>squad_choplast",
+                List.of(new Variable("arr", VariableType.ANY, null)),
+                null, false, VariableType.ANY));
     }
 
     private Object parseMacroValue(String value) {
@@ -373,14 +490,31 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             }
 
             case INTEGER_ARRAY: {
+                if (value instanceof Variable v && v.getType().equals(var.getType()) && v.getValue() instanceof List<?>) {
+                    value = v.getValue();
+                }
+
                 if (value instanceof List<?> rawList) {
-                    if (!rawList.isEmpty() && rawList.stream().allMatch(item -> item instanceof Integer)) {
-                        List<Integer> intList = (List<Integer>) rawList;
-                        variables.put(varName, new Variable(varName, var.getType(), intList));
+                    if (rawList.isEmpty()) {
+                        throw new RuntimeException("Empty list: expected an array of elements for array " + varName);
                     }
 
-                    else if (rawList.isEmpty()) {
-                        throw new RuntimeException("Empty list: expected an array of elements for array " + varName);
+                    if (rawList.stream().allMatch(item ->
+                            item instanceof Integer ||
+                                    (item instanceof Variable v && v.getType().equals(VariableType.INTEGER) && v.getValue() instanceof Integer))) {
+
+                        List<Integer> extracted = new ArrayList<>();
+
+                        for (Object item : rawList) {
+                            if (item instanceof Integer i) {
+                                extracted.add(i);
+                            } else {
+                                Variable v = (Variable) item;
+                                extracted.add((Integer) v.getValue());
+                            }
+                        }
+
+                        variables.put(varName, new Variable(varName, var.getType(), extracted));
                     }
 
                     else {
@@ -390,79 +524,124 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 }
 
                 else {
-                    throw new RuntimeException("Empty list: expected an array of elements for array " + varName);
+                    throw new RuntimeException("Invalid value: expected a list for array " + varName);
                 }
 
                 break;
             }
 
             case DOUBLE_ARRAY: {
+                if (value instanceof Variable v && v.getType().equals(var.getType()) && v.getValue() instanceof List<?>) {
+                    value = v.getValue();
+                }
+
                 if (value instanceof List<?> rawList) {
-                    if (!rawList.isEmpty() && rawList.stream().allMatch(item -> item instanceof Double)) {
-                        List<Double> doubleList = (List<Double>) rawList;
-                        variables.put(varName, new Variable(varName, var.getType(), doubleList));
+                    if (rawList.isEmpty()) {
+                        throw new RuntimeException("Empty list: expected an array of elements for array " + varName);
                     }
 
-                    else if (rawList.isEmpty()) {
-                        throw new RuntimeException("Empty list: expected an array of elements for array " + varName);
+                    if (rawList.stream().allMatch(item ->
+                            item instanceof Double ||
+                                    (item instanceof Variable v && v.getType().equals(VariableType.DOUBLE) && v.getValue() instanceof Double))) {
+
+                        List<Double> extracted = new ArrayList<>();
+
+                        for (Object item : rawList) {
+                            if (item instanceof Double d) {
+                                extracted.add(d);
+                            } else {
+                                Variable v = (Variable) item;
+                                extracted.add((Double) v.getValue());
+                            }
+                        }
+
+                        variables.put(varName, new Variable(varName, var.getType(), extracted));
                     }
 
                     else {
                         VariableType valueType = (value instanceof Variable v) ? v.getType() : TypeChecker.inferTypeFromValue(value);
                         throw new RuntimeException("Type mismatch for variable " + varName + ": expected " + VariableType.DOUBLE_ARRAY + " but got " + valueType);
                     }
-                }
-
-                else {
-                    throw new RuntimeException("Empty list: expected an array of elements for array " + varName);
+                } else {
+                    throw new RuntimeException("Invalid value: expected a list for array " + varName);
                 }
 
                 break;
             }
 
             case STRING_ARRAY: {
+                if (value instanceof Variable v && v.getType().equals(var.getType()) && v.getValue() instanceof List<?>) {
+                    value = v.getValue();
+                }
+
                 if (value instanceof List<?> rawList) {
-                    if (!rawList.isEmpty() && rawList.stream().allMatch(item -> item instanceof String)) {
-                        List<String> stringList = (List<String>) rawList;
-                        variables.put(varName, new Variable(varName, var.getType(), stringList));
+                    if (rawList.isEmpty()) {
+                        throw new RuntimeException("Empty list: expected an array of elements for array " + varName);
                     }
 
-                    else if (rawList.isEmpty()) {
-                        throw new RuntimeException("Empty list: expected an array of elements for array " + varName);
+                    if (rawList.stream().allMatch(item ->
+                            item instanceof String ||
+                                    (item instanceof Variable v && v.getType().equals(VariableType.STRING) && v.getValue() instanceof String))) {
+
+                        List<String> extracted = new ArrayList<>();
+
+                        for (Object item : rawList) {
+                            if (item instanceof String s) {
+                                extracted.add(s);
+                            } else {
+                                Variable v = (Variable) item;
+                                extracted.add((String) v.getValue());
+                            }
+                        }
+
+                        variables.put(varName, new Variable(varName, var.getType(), extracted));
                     }
 
                     else {
                         VariableType valueType = (value instanceof Variable v) ? v.getType() : TypeChecker.inferTypeFromValue(value);
                         throw new RuntimeException("Type mismatch for variable " + varName + ": expected " + VariableType.STRING_ARRAY + " but got " + valueType);
                     }
-                }
-
-                else {
-                    throw new RuntimeException("Empty list: expected an array of elements for array " + varName);
+                } else {
+                    throw new RuntimeException("Invalid value: expected a list for array " + varName);
                 }
 
                 break;
             }
 
             case BOOLEAN_ARRAY: {
+                if (value instanceof Variable v && v.getType().equals(var.getType()) && v.getValue() instanceof List<?>) {
+                    value = v.getValue();
+                }
+
                 if (value instanceof List<?> rawList) {
-                    if (!rawList.isEmpty() && rawList.stream().allMatch(item -> item instanceof Boolean)) {
-                        List<Boolean> boolList = (List<Boolean>) rawList;
-                        variables.put(varName, new Variable(varName, var.getType(), boolList));
+                    if (rawList.isEmpty()) {
+                        throw new RuntimeException("Empty list: expected an array of elements for array " + varName);
                     }
 
-                    else if (rawList.isEmpty()) {
-                        throw new RuntimeException("Empty list: expected an array of elements for array " + varName);
+                    if (rawList.stream().allMatch(item ->
+                            item instanceof Boolean ||
+                                    (item instanceof Variable v && v.getType().equals(VariableType.BOOLEAN) && v.getValue() instanceof Boolean))) {
+
+                        List<Boolean> extracted = new ArrayList<>();
+
+                        for (Object item : rawList) {
+                            if (item instanceof Boolean b) {
+                                extracted.add(b);
+                            } else {
+                                Variable v = (Variable) item;
+                                extracted.add((Boolean) v.getValue());
+                            }
+                        }
+
+                        variables.put(varName, new Variable(varName, var.getType(), extracted));
                     }
 
                     else {
                         VariableType valueType = (value instanceof Variable v) ? v.getType() : TypeChecker.inferTypeFromValue(value);
                         throw new RuntimeException("Type mismatch for variable " + varName + ": expected " + VariableType.BOOLEAN_ARRAY + " but got " + valueType);
                     }
-                }
-
-                else {
-                    throw new RuntimeException("Empty list: expected an array of elements for array " + varName);
+                } else {
+                    throw new RuntimeException("Invalid value: expected a list for array " + varName);
                 }
 
                 break;
@@ -491,7 +670,14 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                     output.append("[");
 
                     for (int i = 0; i < arrayValue.size(); i++) {
-                        output.append(arrayValue.get(i));
+                        if (arrayValue.get(i) instanceof Variable variable) {
+                            output.append(variable.getValue());
+                        }
+
+                        else {
+                            output.append(arrayValue.get(i));
+                        }
+
                         if (i < arrayValue.size() - 1) {
                             output.append(", ");
                         }
@@ -1187,7 +1373,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 }
             }
 
-            case "<MDA>array_at":
+            case "<MDA>array_get_at":
             case "<MDA>squad_peep": {
                 Object array = visit(ctx.function_call().arguments().expression(0));
                 Object index = visit(ctx.function_call().arguments().expression(1));
@@ -1217,6 +1403,346 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 }
 
                 return list.get(idx);
+            }
+
+            case "<MDA>array_set_at":
+            case "<MDA>squad_seep": {
+                Object array = visit(ctx.function_call().arguments().expression(0));
+                Object index = visit(ctx.function_call().arguments().expression(1));
+                Object value = visit(ctx.function_call().arguments().expression(2));
+
+                Variable variable;
+
+                if (!(array instanceof Variable var) || !(var.getValue() instanceof List<?> list)) {
+                    throw new RuntimeException("The standard 'array_set_at' function requires the first argument to be an array variable");
+                } else {
+                    variable = var;
+                }
+
+                int idx;
+                if (index instanceof Integer) {
+                    idx = (Integer) index;
+                } else if (index instanceof Variable var2 && var2.getType() == VariableType.INTEGER && var2.getValue() instanceof Integer i) {
+                    idx = i;
+                } else {
+                    VariableType gotType = (index instanceof Variable v) ? v.getType() : TypeChecker.inferTypeFromValue(index);
+                    throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().get(2).getName()
+                            + "' in function " + functionName + ": expected " + VariableType.INTEGER + " but got " + gotType);
+                }
+
+                if (idx < 0 || idx >= list.size()) {
+                    throw new RuntimeException("Index out of bounds in function " + functionName + ": tried to access index " + idx + " of array with size " + list.size());
+                }
+
+                VariableType expectedType = TypeChecker.inferTypeFromArrayType(variable.getType());
+
+                VariableType valueType = value instanceof Variable vValue ? vValue.getType() : TypeChecker.inferTypeFromValue(value);
+
+                if (!valueType.equals(expectedType)) {
+                    throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().get(2).getName()
+                            + "' in function " + functionName + ": expected " + expectedType + " but got " + valueType);
+                }
+
+                List<Object> typedList = (List<Object>) list;
+                typedList.set(idx, value);
+
+                return typedList;
+            }
+
+            case "<MDA>array_copy":
+            case "<MDA>squad_join": {
+                Object array = visit(ctx.function_call().arguments().expression(0));
+
+                if (array instanceof Variable var && var.getValue() instanceof List<?> list) {
+                    return new ArrayList<>(list);
+                }
+
+                else {
+                    throw new RuntimeException("The 'array_copy' function requires an array variable");
+                }
+            }
+
+            case "<MDA>array_contains":
+            case "<MDA>squad_vibeswith": {
+                Object array = visit(ctx.function_call().arguments().expression(0));
+                Object value = visit(ctx.function_call().arguments().expression(1));
+
+                Variable variable;
+
+                if (!(array instanceof Variable var) || !(var.getValue() instanceof List<?> list)) {
+                    throw new RuntimeException("The standard 'array_contains' function requires the first argument to be an array variable");
+                } else {
+                    variable = var;
+                }
+
+                VariableType expectedType = TypeChecker.inferTypeFromArrayType(variable.getType());
+
+                VariableType valueType = value instanceof Variable vValue ? vValue.getType() : TypeChecker.inferTypeFromValue(value);
+
+                if (!valueType.equals(expectedType)) {
+                    throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().get(1).getName()
+                            + "' in function " + functionName + ": expected " + expectedType + " but got " + valueType);
+                }
+
+                List<Object> typedList = (List<Object>) list;
+
+                if (value instanceof Variable vValue) {
+                    value = vValue.getValue();
+                }
+
+                return typedList.contains(value);
+            }
+
+            case "<MDA>array_index_of":
+            case "<MDA>squad_whereat": {
+                Object array = visit(ctx.function_call().arguments().expression(0));
+                Object value = visit(ctx.function_call().arguments().expression(1));
+
+                Variable variable;
+
+                if (!(array instanceof Variable var) || !(var.getValue() instanceof List<?> list)) {
+                    throw new RuntimeException("The standard 'array_index_of' function requires the first argument to be an array variable");
+                } else {
+                    variable = var;
+                }
+
+                VariableType expectedType = TypeChecker.inferTypeFromArrayType(variable.getType());
+
+                VariableType valueType = value instanceof Variable vValue ? vValue.getType() : TypeChecker.inferTypeFromValue(value);
+
+                if (!valueType.equals(expectedType)) {
+                    throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().get(1).getName()
+                            + "' in function " + functionName + ": expected " + expectedType + " but got " + valueType);
+                }
+
+                List<Object> typedList = (List<Object>) list;
+
+                if (value instanceof Variable vValue) {
+                    value = vValue.getValue();
+                }
+
+                return typedList.indexOf(value);
+            }
+
+            case "<MDA>array_count":
+            case "<MDA>squad_howmany": {
+                Object array = visit(ctx.function_call().arguments().expression(0));
+                Object value = visit(ctx.function_call().arguments().expression(1));
+
+                Variable variable;
+
+                if (!(array instanceof Variable var) || !(var.getValue() instanceof List<?> list)) {
+                    throw new RuntimeException("The standard 'array_count' function requires the first argument to be an array variable");
+                } else {
+                    variable = var;
+                }
+
+                VariableType expectedType = TypeChecker.inferTypeFromArrayType(variable.getType());
+
+                VariableType valueType = value instanceof Variable vValue ? vValue.getType() : TypeChecker.inferTypeFromValue(value);
+
+                if (!valueType.equals(expectedType)) {
+                    throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().get(1).getName()
+                            + "' in function " + functionName + ": expected " + expectedType + " but got " + valueType);
+                }
+
+                List<Object> typedList = (List<Object>) list;
+
+                int count = 0;
+
+                if (value instanceof Variable vValue) {
+                    value = vValue.getValue();
+                }
+
+                for (Object item : typedList) {
+                    if (item.equals(value)) {
+                        count++;
+                    }
+                }
+
+                return count;
+            }
+
+            case "<MDA>array_insert_first":
+            case "<MDA>squad_pushup": {
+                Object array = visit(ctx.function_call().arguments().expression(0));
+                Object value = visit(ctx.function_call().arguments().expression(1));
+
+                Variable variable;
+
+                if (!(array instanceof Variable var) || !(var.getValue() instanceof List<?> list)) {
+                    throw new RuntimeException("The standard 'array_insert_first' function requires the first argument to be an array variable");
+                } else {
+                    variable = var;
+                }
+
+                VariableType expectedType = TypeChecker.inferTypeFromArrayType(variable.getType());
+
+                VariableType valueType = value instanceof Variable vValue ? vValue.getType() : TypeChecker.inferTypeFromValue(value);
+
+                if (!valueType.equals(expectedType)) {
+                    throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().get(1).getName()
+                            + "' in function " + functionName + ": expected " + expectedType + " but got " + valueType);
+                }
+
+                List<Object> typedList = (List<Object>) list;
+
+                if (value instanceof Variable vValue) {
+                    value = vValue.getValue();
+                }
+
+                typedList.addFirst(value);
+
+                return typedList;
+            }
+
+            case "<MDA>array_insert_at":
+            case "<MDA>squad_dropin": {
+                Object array = visit(ctx.function_call().arguments().expression(0));
+                Object index = visit(ctx.function_call().arguments().expression(1));
+                Object value = visit(ctx.function_call().arguments().expression(2));
+
+                Variable variable;
+
+                if (!(array instanceof Variable var) || !(var.getValue() instanceof List<?> list)) {
+                    throw new RuntimeException("The standard 'array_insert_at' function requires the first argument to be an array variable");
+                } else {
+                    variable = var;
+                }
+
+                int idx;
+                if (index instanceof Integer) {
+                    idx = (Integer) index;
+                } else if (index instanceof Variable var2 && var2.getType() == VariableType.INTEGER && var2.getValue() instanceof Integer i) {
+                    idx = i;
+                } else {
+                    VariableType gotType = (index instanceof Variable v) ? v.getType() : TypeChecker.inferTypeFromValue(index);
+                    throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().get(1).getName()
+                            + "' in function " + functionName + ": expected " + VariableType.INTEGER + " but got " + gotType);
+                }
+
+                if (idx < 0 || idx > list.size()) {
+                    throw new RuntimeException("Index out of bounds in function " + functionName + ": tried to insert at index " + idx + " in array of size " + list.size());
+                }
+
+                VariableType expectedType = TypeChecker.inferTypeFromArrayType(variable.getType());
+                VariableType actualType = (value instanceof Variable vValue) ? vValue.getType() : TypeChecker.inferTypeFromValue(value);
+
+                if (!actualType.equals(expectedType)) {
+                    throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().get(2).getName()
+                            + "' in function " + functionName + ": expected " + expectedType + " but got " + actualType);
+                }
+
+                List<Object> typedList = (List<Object>) list;
+
+                if (value instanceof Variable vValue) {
+                    value = vValue.getValue();
+                }
+
+                typedList.add(idx, value);
+
+                return typedList;
+            }
+
+            case "<MDA>array_insert_last":
+            case "<MDA>squad_slidein": {
+                Object array = visit(ctx.function_call().arguments().expression(0));
+                Object value = visit(ctx.function_call().arguments().expression(1));
+
+                Variable variable;
+
+                if (!(array instanceof Variable var) || !(var.getValue() instanceof List<?> list)) {
+                    throw new RuntimeException("The standard 'array_insert_last' function requires the first argument to be an array variable");
+                } else {
+                    variable = var;
+                }
+
+                VariableType expectedType = TypeChecker.inferTypeFromArrayType(variable.getType());
+                VariableType valueType = (value instanceof Variable v) ? v.getType() : TypeChecker.inferTypeFromValue(value);
+
+                if (!valueType.equals(expectedType)) {
+                    throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().get(1).getName()
+                            + "' in function " + functionName + ": expected " + expectedType + " but got " + valueType);
+                }
+
+                List<Object> typedList = (List<Object>) list;
+
+                if (value instanceof Variable vValue) {
+                    value = vValue.getValue();
+                }
+
+                typedList.add(value);
+
+                return typedList;
+            }
+
+            case "<MDA>array_delete_first":
+            case "<MDA>squad_chopfirst": {
+                Object array = visit(ctx.function_call().arguments().expression(0));
+
+                if (!(array instanceof Variable var) || !(var.getValue() instanceof List<?> list)) {
+                    throw new RuntimeException("The standard 'array_delete_first' function requires the first argument to be an array variable");
+                }
+
+                List<Object> typedList = (List<Object>) list;
+
+                if (typedList.isEmpty()) {
+                    throw new RuntimeException("Cannot delete first element of an empty array in function " + functionName);
+                }
+
+                typedList.removeFirst();
+
+                return typedList;
+            }
+
+            case "<MDA>array_delete_at":
+            case "<MDA>squad_chopspot": {
+                Object array = visit(ctx.function_call().arguments().expression(0));
+                Object index = visit(ctx.function_call().arguments().expression(1));
+
+                if (!(array instanceof Variable var) || !(var.getValue() instanceof List<?> list)) {
+                    throw new RuntimeException("The standard 'array_delete_at' function requires the first argument to be an array variable");
+                }
+
+                int idx;
+                if (index instanceof Integer) {
+                    idx = (Integer) index;
+                } else if (index instanceof Variable var2 && var2.getType() == VariableType.INTEGER && var2.getValue() instanceof Integer i) {
+                    idx = i;
+                } else {
+                    VariableType gotType = (index instanceof Variable v) ? v.getType() : TypeChecker.inferTypeFromValue(index);
+                    throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().get(1).getName()
+                            + "' in function " + functionName + ": expected " + VariableType.INTEGER + " but got " + gotType);
+                }
+
+                List<Object> typedList = (List<Object>) list;
+
+                if (idx < 0 || idx >= typedList.size()) {
+                    throw new RuntimeException("Index out of bounds in function " + functionName + ": tried to delete at index " + idx + " from array of size " + typedList.size());
+                }
+
+                typedList.remove(idx);
+
+                return typedList;
+            }
+
+            case "<MDA>array_delete_last":
+            case "<MDA>squad_choplast": {
+                Object array = visit(ctx.function_call().arguments().expression(0));
+
+                if (!(array instanceof Variable var) || !(var.getValue() instanceof List<?> list)) {
+                    throw new RuntimeException("The standard 'array_delete_last' function requires the first argument to be an array variable");
+                }
+
+                List<Object> typedList = (List<Object>) list;
+
+                if (typedList.isEmpty()) {
+                    throw new RuntimeException("Cannot delete last element of an empty array in function " + functionName);
+                }
+
+                typedList.removeLast();
+
+                return typedList;
             }
 
             default: {

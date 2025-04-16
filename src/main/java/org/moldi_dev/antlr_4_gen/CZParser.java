@@ -31,9 +31,11 @@ public class CZParser extends Parser {
 		POWER=48, DIVISION=49, LOGICAL_AND=50, LOGICAL_OR=51, BITWISE_AND=52, 
 		BITWISE_OR=53, BITWISE_XOR=54, BITWISE_NOT=55, SHIFT_LEFT=56, SHIFT_RIGHT=57, 
 		SINE=58, COSINE=59, TANGENT=60, COTANGENT=61, ARCSINE=62, ARCCOSINE=63, 
-		ARCTANGENT=64, ARCCOTANGENT=65, ARRAY_LENGTH=66, ARRAY_AT=67, STRING_LITERAL=68, 
-		CHARACTER=69, INTEGER_NUMBER=70, DOUBLE_NUMBER=71, IDENTIFIER=72, COMMENT=73, 
-		WS=74, UNEXPECTED_CHAR=75;
+		ARCTANGENT=64, ARCCOTANGENT=65, ARRAY_LENGTH=66, ARRAY_GET_AT=67, ARRAY_SET_AT=68, 
+		ARRAY_COPY=69, ARRAY_CONTAINS=70, ARRAY_INDEX_OF=71, ARRAY_COUNT=72, ARRAY_INSERT_FIRST=73, 
+		ARRAY_INSERT_AT=74, ARRAY_INSERT_LAST=75, ARRAY_DELETE_FIRST=76, ARRAY_DELETE_AT=77, 
+		ARRAY_DELETE_LAST=78, STRING_LITERAL=79, CHARACTER=80, INTEGER_NUMBER=81, 
+		DOUBLE_NUMBER=82, IDENTIFIER=83, COMMENT=84, WS=85, UNEXPECTED_CHAR=86;
 	public static final int
 		RULE_program = 0, RULE_define_directive = 1, RULE_main_function = 2, RULE_function = 3, 
 		RULE_function_block = 4, RULE_function_declaration = 5, RULE_parameters = 6, 
@@ -76,8 +78,11 @@ public class CZParser extends Parser {
 			"LOGICAL_OR", "BITWISE_AND", "BITWISE_OR", "BITWISE_XOR", "BITWISE_NOT", 
 			"SHIFT_LEFT", "SHIFT_RIGHT", "SINE", "COSINE", "TANGENT", "COTANGENT", 
 			"ARCSINE", "ARCCOSINE", "ARCTANGENT", "ARCCOTANGENT", "ARRAY_LENGTH", 
-			"ARRAY_AT", "STRING_LITERAL", "CHARACTER", "INTEGER_NUMBER", "DOUBLE_NUMBER", 
-			"IDENTIFIER", "COMMENT", "WS", "UNEXPECTED_CHAR"
+			"ARRAY_GET_AT", "ARRAY_SET_AT", "ARRAY_COPY", "ARRAY_CONTAINS", "ARRAY_INDEX_OF", 
+			"ARRAY_COUNT", "ARRAY_INSERT_FIRST", "ARRAY_INSERT_AT", "ARRAY_INSERT_LAST", 
+			"ARRAY_DELETE_FIRST", "ARRAY_DELETE_AT", "ARRAY_DELETE_LAST", "STRING_LITERAL", 
+			"CHARACTER", "INTEGER_NUMBER", "DOUBLE_NUMBER", "IDENTIFIER", "COMMENT", 
+			"WS", "UNEXPECTED_CHAR"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -1070,7 +1075,7 @@ public class CZParser extends Parser {
 			setState(195);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & -252201006822072322L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 511L) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & -252201006822072322L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 1048575L) != 0)) {
 				{
 				{
 				setState(192);
@@ -1137,7 +1142,7 @@ public class CZParser extends Parser {
 			setState(203);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & -252201006822072322L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 511L) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & -252201006822072322L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 1048575L) != 0)) {
 				{
 				{
 				setState(200);
@@ -1356,7 +1361,18 @@ public class CZParser extends Parser {
 			case ARCTANGENT:
 			case ARCCOTANGENT:
 			case ARRAY_LENGTH:
-			case ARRAY_AT:
+			case ARRAY_GET_AT:
+			case ARRAY_SET_AT:
+			case ARRAY_COPY:
+			case ARRAY_CONTAINS:
+			case ARRAY_INDEX_OF:
+			case ARRAY_COUNT:
+			case ARRAY_INSERT_FIRST:
+			case ARRAY_INSERT_AT:
+			case ARRAY_INSERT_LAST:
+			case ARRAY_DELETE_FIRST:
+			case ARRAY_DELETE_AT:
+			case ARRAY_DELETE_LAST:
 				{
 				setState(216);
 				standard_function();
@@ -1370,7 +1386,7 @@ public class CZParser extends Parser {
 			setState(221);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			if (((((_la - 18)) & ~0x3f) == 0 && ((1L << (_la - 18)) & 36027834948456451L) != 0)) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & -252201011122536448L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 1048575L) != 0)) {
 				{
 				setState(220);
 				arguments();
@@ -1394,8 +1410,6 @@ public class CZParser extends Parser {
 
 	@SuppressWarnings("CheckReturnValue")
 	public static class Standard_functionContext extends ParserRuleContext {
-		public TerminalNode ARRAY_LENGTH() { return getToken(CZParser.ARRAY_LENGTH, 0); }
-		public TerminalNode ARRAY_AT() { return getToken(CZParser.ARRAY_AT, 0); }
 		public TerminalNode SINE() { return getToken(CZParser.SINE, 0); }
 		public TerminalNode COSINE() { return getToken(CZParser.COSINE, 0); }
 		public TerminalNode TANGENT() { return getToken(CZParser.TANGENT, 0); }
@@ -1404,6 +1418,19 @@ public class CZParser extends Parser {
 		public TerminalNode ARCCOSINE() { return getToken(CZParser.ARCCOSINE, 0); }
 		public TerminalNode ARCTANGENT() { return getToken(CZParser.ARCTANGENT, 0); }
 		public TerminalNode ARCCOTANGENT() { return getToken(CZParser.ARCCOTANGENT, 0); }
+		public TerminalNode ARRAY_LENGTH() { return getToken(CZParser.ARRAY_LENGTH, 0); }
+		public TerminalNode ARRAY_GET_AT() { return getToken(CZParser.ARRAY_GET_AT, 0); }
+		public TerminalNode ARRAY_SET_AT() { return getToken(CZParser.ARRAY_SET_AT, 0); }
+		public TerminalNode ARRAY_COPY() { return getToken(CZParser.ARRAY_COPY, 0); }
+		public TerminalNode ARRAY_CONTAINS() { return getToken(CZParser.ARRAY_CONTAINS, 0); }
+		public TerminalNode ARRAY_INDEX_OF() { return getToken(CZParser.ARRAY_INDEX_OF, 0); }
+		public TerminalNode ARRAY_COUNT() { return getToken(CZParser.ARRAY_COUNT, 0); }
+		public TerminalNode ARRAY_INSERT_FIRST() { return getToken(CZParser.ARRAY_INSERT_FIRST, 0); }
+		public TerminalNode ARRAY_INSERT_AT() { return getToken(CZParser.ARRAY_INSERT_AT, 0); }
+		public TerminalNode ARRAY_INSERT_LAST() { return getToken(CZParser.ARRAY_INSERT_LAST, 0); }
+		public TerminalNode ARRAY_DELETE_FIRST() { return getToken(CZParser.ARRAY_DELETE_FIRST, 0); }
+		public TerminalNode ARRAY_DELETE_AT() { return getToken(CZParser.ARRAY_DELETE_AT, 0); }
+		public TerminalNode ARRAY_DELETE_LAST() { return getToken(CZParser.ARRAY_DELETE_LAST, 0); }
 		public Standard_functionContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1432,7 +1459,7 @@ public class CZParser extends Parser {
 			{
 			setState(225);
 			_la = _input.LA(1);
-			if ( !(((((_la - 58)) & ~0x3f) == 0 && ((1L << (_la - 58)) & 1023L) != 0)) ) {
+			if ( !(((((_la - 58)) & ~0x3f) == 0 && ((1L << (_la - 58)) & 2097151L) != 0)) ) {
 			_errHandler.recoverInline(this);
 			}
 			else {
@@ -1680,7 +1707,7 @@ public class CZParser extends Parser {
 			setState(248);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			if (((((_la - 18)) & ~0x3f) == 0 && ((1L << (_la - 18)) & 36027834948456451L) != 0)) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & -252201011122536448L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 1048575L) != 0)) {
 				{
 				setState(247);
 				arguments();
@@ -1997,7 +2024,7 @@ public class CZParser extends Parser {
 			setState(291);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			if (((((_la - 18)) & ~0x3f) == 0 && ((1L << (_la - 18)) & 36027834948456451L) != 0)) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & -252201011122536448L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 1048575L) != 0)) {
 				{
 				setState(290);
 				expression(0);
@@ -2145,7 +2172,7 @@ public class CZParser extends Parser {
 			setState(308);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & -252201006822072322L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 511L) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & -252201006822072322L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 1048575L) != 0)) {
 				{
 				{
 				setState(305);
@@ -3184,7 +3211,7 @@ public class CZParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\u0004\u0001K\u0181\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002"+
+		"\u0004\u0001V\u0181\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002"+
 		"\u0002\u0007\u0002\u0002\u0003\u0007\u0003\u0002\u0004\u0007\u0004\u0002"+
 		"\u0005\u0007\u0005\u0002\u0006\u0007\u0006\u0002\u0007\u0007\u0007\u0002"+
 		"\b\u0007\b\u0002\t\u0007\t\u0002\n\u0007\n\u0002\u000b\u0007\u000b\u0002"+
@@ -3245,7 +3272,7 @@ public class CZParser extends Parser {
 		"\t\u001d\u0001\u001d\u0001\u001d\u0001\u001e\u0001\u001e\u0001\u001f\u0001"+
 		"\u001f\u0001\u001f\u0000\u00016 \u0000\u0002\u0004\u0006\b\n\f\u000e\u0010"+
 		"\u0012\u0014\u0016\u0018\u001a\u001c\u001e \"$&(*,.02468:<>\u0000\u000b"+
-		"\u0001\u0000:C\u0002\u0000\'\'77\u0003\u0000%%//11\u0001\u0000-.\u0001"+
+		"\u0001\u0000:N\u0002\u0000\'\'77\u0003\u0000%%//11\u0001\u0000-.\u0001"+
 		"\u000089\u0001\u0000),\u0002\u0000&&((\u0001\u000046\u0001\u000023\u0001"+
 		"\u0000\u0012\u0013\u0001\u0000\u0001\t\u019c\u0000C\u0001\u0000\u0000"+
 		"\u0000\u0002[\u0001\u0000\u0000\u0000\u0004d\u0001\u0000\u0000\u0000\u0006"+
@@ -3273,14 +3300,14 @@ public class CZParser extends Parser {
 		"\u0003\u0000TS\u0001\u0000\u0000\u0000UX\u0001\u0000\u0000\u0000VT\u0001"+
 		"\u0000\u0000\u0000VW\u0001\u0000\u0000\u0000WY\u0001\u0000\u0000\u0000"+
 		"XV\u0001\u0000\u0000\u0000YZ\u0005\u0000\u0000\u0001Z\u0001\u0001\u0000"+
-		"\u0000\u0000[\\\u0005\u0019\u0000\u0000\\b\u0005H\u0000\u0000]c\u0005"+
-		"F\u0000\u0000^c\u0005G\u0000\u0000_c\u0005D\u0000\u0000`c\u0005E\u0000"+
+		"\u0000\u0000[\\\u0005\u0019\u0000\u0000\\b\u0005S\u0000\u0000]c\u0005"+
+		"Q\u0000\u0000^c\u0005R\u0000\u0000_c\u0005O\u0000\u0000`c\u0005P\u0000"+
 		"\u0000ac\u0003<\u001e\u0000b]\u0001\u0000\u0000\u0000b^\u0001\u0000\u0000"+
 		"\u0000b_\u0001\u0000\u0000\u0000b`\u0001\u0000\u0000\u0000ba\u0001\u0000"+
 		"\u0000\u0000c\u0003\u0001\u0000\u0000\u0000de\u0005\u0001\u0000\u0000"+
 		"ef\u0005\u0015\u0000\u0000fg\u0005\u001e\u0000\u0000gh\u0005\u001f\u0000"+
 		"\u0000hi\u0003\b\u0004\u0000i\u0005\u0001\u0000\u0000\u0000jk\u0003>\u001f"+
-		"\u0000kl\u0005H\u0000\u0000ln\u0005\u001e\u0000\u0000mo\u0003\f\u0006"+
+		"\u0000kl\u0005S\u0000\u0000ln\u0005\u001e\u0000\u0000mo\u0003\f\u0006"+
 		"\u0000nm\u0001\u0000\u0000\u0000no\u0001\u0000\u0000\u0000op\u0001\u0000"+
 		"\u0000\u0000pq\u0005\u001f\u0000\u0000qr\u0003\b\u0004\u0000r\u0007\u0001"+
 		"\u0000\u0000\u0000sw\u0005 \u0000\u0000tv\u0003\u0010\b\u0000ut\u0001"+
@@ -3288,7 +3315,7 @@ public class CZParser extends Parser {
 		"wx\u0001\u0000\u0000\u0000xz\u0001\u0000\u0000\u0000yw\u0001\u0000\u0000"+
 		"\u0000z{\u0003\u001c\u000e\u0000{|\u0005\u001c\u0000\u0000|}\u0005!\u0000"+
 		"\u0000}\t\u0001\u0000\u0000\u0000~\u007f\u0003>\u001f\u0000\u007f\u0080"+
-		"\u0005H\u0000\u0000\u0080\u0082\u0005\u001e\u0000\u0000\u0081\u0083\u0003"+
+		"\u0005S\u0000\u0000\u0080\u0082\u0005\u001e\u0000\u0000\u0081\u0083\u0003"+
 		"\f\u0006\u0000\u0082\u0081\u0001\u0000\u0000\u0000\u0082\u0083\u0001\u0000"+
 		"\u0000\u0000\u0083\u0084\u0001\u0000\u0000\u0000\u0084\u0085\u0005\u001f"+
 		"\u0000\u0000\u0085\u0086\u0005\u001c\u0000\u0000\u0086\u000b\u0001\u0000"+
@@ -3297,7 +3324,7 @@ public class CZParser extends Parser {
 		"\u0000\u0000\u008b\u008e\u0001\u0000\u0000\u0000\u008c\u008a\u0001\u0000"+
 		"\u0000\u0000\u008c\u008d\u0001\u0000\u0000\u0000\u008d\r\u0001\u0000\u0000"+
 		"\u0000\u008e\u008c\u0001\u0000\u0000\u0000\u008f\u0090\u0003>\u001f\u0000"+
-		"\u0090\u0091\u0005H\u0000\u0000\u0091\u000f\u0001\u0000\u0000\u0000\u0092"+
+		"\u0090\u0091\u0005S\u0000\u0000\u0091\u000f\u0001\u0000\u0000\u0000\u0092"+
 		"\u0093\u0003$\u0012\u0000\u0093\u0094\u0005\u001c\u0000\u0000\u0094\u00ac"+
 		"\u0001\u0000\u0000\u0000\u0095\u0096\u0003&\u0013\u0000\u0096\u0097\u0005"+
 		"\u001c\u0000\u0000\u0097\u00ac\u0001\u0000\u0000\u0000\u0098\u0099\u0003"+
@@ -3339,7 +3366,7 @@ public class CZParser extends Parser {
 		"\u00d1\u00d2\u0005\u0011\u0000\u0000\u00d2\u00d3\u0005\u001c\u0000\u0000"+
 		"\u00d3\u001b\u0001\u0000\u0000\u0000\u00d4\u00d5\u0005\u0014\u0000\u0000"+
 		"\u00d5\u00d6\u00036\u001b\u0000\u00d6\u001d\u0001\u0000\u0000\u0000\u00d7"+
-		"\u00da\u0005H\u0000\u0000\u00d8\u00da\u0003 \u0010\u0000\u00d9\u00d7\u0001"+
+		"\u00da\u0005S\u0000\u0000\u00d8\u00da\u0003 \u0010\u0000\u00d9\u00d7\u0001"+
 		"\u0000\u0000\u0000\u00d9\u00d8\u0001\u0000\u0000\u0000\u00da\u00db\u0001"+
 		"\u0000\u0000\u0000\u00db\u00dd\u0005\u001e\u0000\u0000\u00dc\u00de\u0003"+
 		"\"\u0011\u0000\u00dd\u00dc\u0001\u0000\u0000\u0000\u00dd\u00de\u0001\u0000"+
@@ -3350,16 +3377,16 @@ public class CZParser extends Parser {
 		"\u00e4\u0001\u0000\u0000\u0000\u00e7\u00ea\u0001\u0000\u0000\u0000\u00e8"+
 		"\u00e6\u0001\u0000\u0000\u0000\u00e8\u00e9\u0001\u0000\u0000\u0000\u00e9"+
 		"#\u0001\u0000\u0000\u0000\u00ea\u00e8\u0001\u0000\u0000\u0000\u00eb\u00ec"+
-		"\u0003>\u001f\u0000\u00ec\u00ef\u0005H\u0000\u0000\u00ed\u00ee\u0005$"+
+		"\u0003>\u001f\u0000\u00ec\u00ef\u0005S\u0000\u0000\u00ed\u00ee\u0005$"+
 		"\u0000\u0000\u00ee\u00f0\u00036\u001b\u0000\u00ef\u00ed\u0001\u0000\u0000"+
 		"\u0000\u00ef\u00f0\u0001\u0000\u0000\u0000\u00f0%\u0001\u0000\u0000\u0000"+
-		"\u00f1\u00f2\u0005H\u0000\u0000\u00f2\u00f3\u0005$\u0000\u0000\u00f3\u00f4"+
+		"\u00f1\u00f2\u0005S\u0000\u0000\u00f2\u00f3\u0005$\u0000\u0000\u00f3\u00f4"+
 		"\u00036\u001b\u0000\u00f4\'\u0001\u0000\u0000\u0000\u00f5\u00f6\u0005"+
 		"\n\u0000\u0000\u00f6\u00f8\u0005\u001e\u0000\u0000\u00f7\u00f9\u0003\""+
 		"\u0011\u0000\u00f8\u00f7\u0001\u0000\u0000\u0000\u00f8\u00f9\u0001\u0000"+
 		"\u0000\u0000\u00f9\u00fa\u0001\u0000\u0000\u0000\u00fa\u00fb\u0005\u001f"+
 		"\u0000\u0000\u00fb)\u0001\u0000\u0000\u0000\u00fc\u00fd\u0005\u000b\u0000"+
-		"\u0000\u00fd\u00fe\u0005\u001e\u0000\u0000\u00fe\u00ff\u0005H\u0000\u0000"+
+		"\u0000\u00fd\u00fe\u0005\u001e\u0000\u0000\u00fe\u00ff\u0005S\u0000\u0000"+
 		"\u00ff\u0100\u0005\u001f\u0000\u0000\u0100+\u0001\u0000\u0000\u0000\u0101"+
 		"\u0102\u0005\f\u0000\u0000\u0102\u0103\u0005\u001e\u0000\u0000\u0103\u0104"+
 		"\u00036\u001b\u0000\u0104\u0105\u0005\u001f\u0000\u0000\u0105\u010f\u0003"+
@@ -3394,7 +3421,7 @@ public class CZParser extends Parser {
 		"\u0000\u013a\u013b\u0005\u001e\u0000\u0000\u013b\u013c\u00036\u001b\u0000"+
 		"\u013c\u013d\u0005\u001f\u0000\u0000\u013d\u0145\u0001\u0000\u0000\u0000"+
 		"\u013e\u013f\u0007\u0001\u0000\u0000\u013f\u0145\u00036\u001b\u000e\u0140"+
-		"\u0145\u0003\u001e\u000f\u0000\u0141\u0145\u0005H\u0000\u0000\u0142\u0145"+
+		"\u0145\u0003\u001e\u000f\u0000\u0141\u0145\u0005S\u0000\u0000\u0142\u0145"+
 		"\u00038\u001c\u0000\u0143\u0145\u0003:\u001d\u0000\u0144\u0139\u0001\u0000"+
 		"\u0000\u0000\u0144\u013e\u0001\u0000\u0000\u0000\u0144\u0140\u0001\u0000"+
 		"\u0000\u0000\u0144\u0141\u0001\u0000\u0000\u0000\u0144\u0142\u0001\u0000"+
@@ -3419,8 +3446,8 @@ public class CZParser extends Parser {
 		"\u0001\u0000\u0000\u0000\u0164\u015e\u0001\u0000\u0000\u0000\u0165\u0168"+
 		"\u0001\u0000\u0000\u0000\u0166\u0164\u0001\u0000\u0000\u0000\u0166\u0167"+
 		"\u0001\u0000\u0000\u0000\u01677\u0001\u0000\u0000\u0000\u0168\u0166\u0001"+
-		"\u0000\u0000\u0000\u0169\u0170\u0005F\u0000\u0000\u016a\u0170\u0005G\u0000"+
-		"\u0000\u016b\u0170\u0005E\u0000\u0000\u016c\u0170\u0005D\u0000\u0000\u016d"+
+		"\u0000\u0000\u0000\u0169\u0170\u0005Q\u0000\u0000\u016a\u0170\u0005R\u0000"+
+		"\u0000\u016b\u0170\u0005P\u0000\u0000\u016c\u0170\u0005O\u0000\u0000\u016d"+
 		"\u0170\u0003<\u001e\u0000\u016e\u0170\u0003:\u001d\u0000\u016f\u0169\u0001"+
 		"\u0000\u0000\u0000\u016f\u016a\u0001\u0000\u0000\u0000\u016f\u016b\u0001"+
 		"\u0000\u0000\u0000\u016f\u016c\u0001\u0000\u0000\u0000\u016f\u016d\u0001"+

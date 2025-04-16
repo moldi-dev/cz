@@ -31,8 +31,13 @@ public class TypeChecker {
         return VariableType.ANY;
     }
 
-    public static boolean isListOfType(Object value, Class<?> clazz) {
-        if (!(value instanceof List<?> list)) return false;
-        return !list.isEmpty() && list.stream().allMatch(clazz::isInstance);
+    public static VariableType inferTypeFromArrayType(VariableType arrayType) {
+        return switch (arrayType) {
+            case INTEGER_ARRAY -> VariableType.INTEGER;
+            case DOUBLE_ARRAY -> VariableType.DOUBLE;
+            case STRING_ARRAY -> VariableType.STRING_ARRAY;
+            case BOOLEAN_ARRAY -> VariableType.BOOLEAN_ARRAY;
+            default -> VariableType.ANY;
+        };
     }
 }
