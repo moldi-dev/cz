@@ -18,11 +18,11 @@ define_directive
     ;
 
 main_function
-    : INT MAIN LEFT_PARANTHESIS RIGHT_PARANTHESIS function_block
+    : INT MAIN LEFT_PARENTHESIS RIGHT_PARENTHESIS function_block
     ;
 
 function
-    : type_ IDENTIFIER LEFT_PARANTHESIS parameters? RIGHT_PARANTHESIS function_block
+    : type_ IDENTIFIER LEFT_PARENTHESIS parameters? RIGHT_PARENTHESIS function_block
     ;
 
 function_block
@@ -30,7 +30,7 @@ function_block
     ;
 
 function_declaration
-    : type_ IDENTIFIER LEFT_PARANTHESIS parameters? RIGHT_PARANTHESIS SEMICOLON
+    : type_ IDENTIFIER LEFT_PARENTHESIS parameters? RIGHT_PARENTHESIS SEMICOLON
     ;
 
 parameters
@@ -58,7 +58,7 @@ statement
     ;
 
 switch_statement
-    : SWITCH LEFT_PARANTHESIS expression RIGHT_PARANTHESIS LEFT_BRACE switch_block* default_block? RIGHT_BRACE
+    : SWITCH LEFT_PARENTHESIS expression RIGHT_PARENTHESIS LEFT_BRACE switch_block* default_block? RIGHT_BRACE
     ;
 
 switch_block
@@ -82,18 +82,18 @@ return_statement
     ;
 
 function_call
-    : (IDENTIFIER | standard_function) LEFT_PARANTHESIS arguments? RIGHT_PARANTHESIS
+    : (IDENTIFIER | standard_function) LEFT_PARENTHESIS arguments? RIGHT_PARENTHESIS
     ;
 
 standard_function
     : SINE
     | COSINE
-    | TANGENT
-    | COTANGENT
-    | ARCSINE
-    | ARCCOSINE
-    | ARCTANGENT
-    | ARCCOTANGENT
+    | HYPERBOLIC_SINE
+    | HYPERBOLIC_COSINE
+    | DEGREES_TO_RADIANS
+    | RADIANS_TO_DEGREES
+    | EXPONENTIAL
+    | LOGARITHM
     | ARRAY_LENGTH
     | ARRAY_GET_AT
     | ARRAY_SET_AT
@@ -107,6 +107,16 @@ standard_function
     | ARRAY_DELETE_FIRST
     | ARRAY_DELETE_AT
     | ARRAY_DELETE_LAST
+    | STRING_SLICE
+    | STRING_SPLIT
+    | STRING_SUBSTRING
+    | INT_TO_DOUBLE
+    | DOUBLE_TO_INT
+    | BOOLEAN_TO_INT
+    | STRING_TO_INT
+    | STRING_TO_DOUBLE
+    | INT_TO_STRING
+    | DOUBLE_TO_STRING
     ;
 
 arguments
@@ -122,25 +132,25 @@ assignment
     ;
 
 print_statement
-    : PRINT LEFT_PARANTHESIS arguments? RIGHT_PARANTHESIS
+    : PRINT LEFT_PARENTHESIS arguments? RIGHT_PARENTHESIS
     ;
 
 read_statement
-    : READ LEFT_PARANTHESIS IDENTIFIER RIGHT_PARANTHESIS
+    : READ LEFT_PARENTHESIS IDENTIFIER RIGHT_PARENTHESIS
     ;
 
 if_statement
-    : IF LEFT_PARANTHESIS expression RIGHT_PARANTHESIS block
-      (ELSE IF LEFT_PARANTHESIS expression RIGHT_PARANTHESIS block)*
+    : IF LEFT_PARENTHESIS expression RIGHT_PARENTHESIS block
+      (ELSE IF LEFT_PARENTHESIS expression RIGHT_PARENTHESIS block)*
       (ELSE block)?
     ;
 
 while_statement
-    : WHILE LEFT_PARANTHESIS expression RIGHT_PARANTHESIS block
+    : WHILE LEFT_PARENTHESIS expression RIGHT_PARENTHESIS block
     ;
 
 for_statement
-    : FOR LEFT_PARANTHESIS for_init? SEMICOLON expression? SEMICOLON assignment? RIGHT_PARANTHESIS block
+    : FOR LEFT_PARENTHESIS for_init? SEMICOLON expression? SEMICOLON assignment? RIGHT_PARENTHESIS block
     ;
 
 for_init
@@ -153,7 +163,7 @@ block
     ;
 
 expression
-    : LEFT_PARANTHESIS expression RIGHT_PARANTHESIS                                                                              # parenExpression
+    : LEFT_PARENTHESIS expression RIGHT_PARENTHESIS                                                                              # parenExpression
     | op=(NOT | BITWISE_NOT) expression                                                                                          # unaryExpression
     | left=expression op=(MULTIPLICATION | DIVISION | MODULUS) right=expression                                                  # multiplicativeExpression
     | <rightassoc> left=expression op=POWER right=expression                                                                     # powerExpression
@@ -233,8 +243,8 @@ QUESTION: '?' | 'fr?';
 COLON: ':' | 'bet';
 SEMICOLON: ';' | 'pointz';
 COMMA: ',' | 'splitz';
-LEFT_PARANTHESIS: '(' | 'opentalk';
-RIGHT_PARANTHESIS: ')' | 'closetalk';
+LEFT_PARENTHESIS: '(' | 'opentalk';
+RIGHT_PARENTHESIS: ')' | 'closetalk';
 LEFT_BRACE: '{' | 'openjam';
 RIGHT_BRACE: '}' | 'closejam';
 LEFT_BRACKET: '[' | 'openvibe';
@@ -263,14 +273,15 @@ SHIFT_LEFT: '<<' | 'leftslide';
 SHIFT_RIGHT: '>>' | 'rightslide';
 
 // Built-in functions (my own standard library bestie)
-SINE: '<MDA>sine' | '<MDA>vibe_sway';
-COSINE: '<MDA>cosine' | '<MDA>side_chill';
-TANGENT: '<MDA>tangent' | '<MDA>angle_tea';
-COTANGENT: '<MDA>cotangent' | '<MDA>cotan_drip';
-ARCSINE: '<MDA>arcsine' | '<MDA>vibe_rewind';
-ARCCOSINE: '<MDA>arccosine' | '<MDA>side_throwback';
-ARCTANGENT: '<MDA>arctangent' | '<MDA>angle_flash';
-ARCCOTANGENT: '<MDA>arccotangent' | '<MDA>cotan_flashback';
+SINE: '<MDA>sine' | '<MDA>vibe_sway'; // <MDA>sine :: DOUBLE => DOUBLE
+COSINE: '<MDA>cosine' | '<MDA>side_chill'; // <MDA>cosine :: DOUBLE => DOUBLE
+HYPERBOLIC_SINE: '<MDA>hyperbolic_sine' | '<MDA>vibe_overload'; // <MDA>hyperbolic_sine :: DOUBLE => DOUBLE
+HYPERBOLIC_COSINE: '<MDA>hyperbolic_cosine' | '<MDA>side_overload'; // <MDA>hyperbolic_cosine :: DOUBLE => DOUBLE
+DEGREES_TO_RADIANS: '<MDA>degrees_to_radians' | '<MDA>degz2radz'; // <MDA>degrees_to_radians :: DOUBLE => DOUBLE
+RADIANS_TO_DEGREES: '<MDA>radians_to_degrees' | '<MDA>radz2degz'; // <MDA>radians_to_degrees :: DOUBLE => DOUBLE
+EXPONENTIAL: '<MDA>exponential' | '<MDA>brr_brr_patapim'; // <MDA>exponential :: DOUBLE => DOUBLE
+LOGARITHM: '<MDA>logarithm' | '<MDA>vibe_log'; // <MDA>logarithm :: DOUBLE, INTEGER => DOUBLE
+
 ARRAY_LENGTH: '<MDA>array_length' | '<MDA>squad_countdown'; // <MDA>array_length :: array<T> => INTEGER
 ARRAY_GET_AT: '<MDA>array_get_at' | '<MDA>squad_peep'; // <MDA>array_get_at :: array<T>, INTEGER => INTEGER
 ARRAY_SET_AT: '<MDA>array_set_at' | '<MDA>squad_seep'; // <MDA>array_set_at :: array<T>, INTEGER, T => array<T>
@@ -280,10 +291,22 @@ ARRAY_INDEX_OF: '<MDA>array_index_of' | '<MDA>squad_whereat'; // <MDA>array_inde
 ARRAY_COUNT: '<MDA>array_count' | '<MDA>squad_howmany'; // <MDA>array_count :: array<T>, T => INTEGER
 ARRAY_INSERT_FIRST: '<MDA>array_insert_first' | '<MDA>squad_pushup'; // <MDA>array_insert_first :: array<T>, T => array<T>
 ARRAY_INSERT_AT: '<MDA>array_insert_at' | '<MDA>squad_dropin'; // <MDA>array_insert_at :: array<T>, INTEGER, T => array<T>
-ARRAY_INSERT_LAST: '<MDA>array_insert_last' | '<MDA>squad_slidein'; //<MDA>array_insert_last :: array<T>, T => array<T>
+ARRAY_INSERT_LAST: '<MDA>array_insert_last' | '<MDA>squad_slidein'; // <MDA>array_insert_last :: array<T>, T => array<T>
 ARRAY_DELETE_FIRST: '<MDA>array_delete_first' | '<MDA>squad_chopfirst'; // <MDA>array_delete_first :: array<T> => array<T>
 ARRAY_DELETE_AT: '<MDA>array_delete_at' | '<MDA>squad_chopspot'; // <MDA>array_delete_at :: array<T>, INTEGER => array<T>
 ARRAY_DELETE_LAST: '<MDA>array_delete_last' | '<MDA>squad_choplast'; //<MDA>array_delete_last :: array<T> => array<T>
+
+STRING_SLICE: '<MDA>string_slice' | '<MDA>squad_cut'; // <MDA>string_slice :: STRING, INTEGER, INTEGER => STRING
+STRING_SPLIT: '<MDA>string_split' | '<MDA>squad_slay'; // <MDA>string_split :: STRING, CHARACTER => array<STRING>
+STRING_SUBSTRING: '<MDA>string_substring' | '<MDA>squad_subquad'; // <MDA>string_substring :: STRING, STRING => BOOLEAN
+
+INT_TO_DOUBLE: '<MDA>int_to_double' | '<MDA>rizz2g'; // <MDA>int_to_double :: INTEGER => DOUBLE
+DOUBLE_TO_INT: '<MDA>double_to_int' | '<MDA>g2rizz'; // <MDA>double_to_int :: DOUBLE => INTEGER
+BOOLEAN_TO_INT: '<MDA>boolean_to_int' | '<MDA>cappin2rizz'; // <MDA>boolean_to_int :: BOOLEAN => INTEGER
+STRING_TO_INT: '<MDA>string_to_int' | '<MDA>squad2rizz'; // <MDA>string_to_int :: STRING => INTEGER
+STRING_TO_DOUBLE: '<MDA>string_to_double' | '<MDA>squad2g'; // <MDA>string_to_double :: STRING => DOUBLE
+INT_TO_STRING: '<MDA>int_to_string' | '<MDA>rizz2squad'; // <MDA>int_to_string :: INTEGER => STRING
+DOUBLE_TO_STRING: '<MDA>double_to_string' | '<MDA>g2squad'; // <MDA>double_to_string :: DOUBLE => STRING
 
 // Literals
 STRING_LITERAL: '"' (~["\\] | EscapeSequence)* '"';

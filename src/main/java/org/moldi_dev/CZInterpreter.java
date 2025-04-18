@@ -5,11 +5,12 @@ import org.moldi_dev.antlr_4_gen.CZBaseVisitor;
 import org.moldi_dev.antlr_4_gen.CZParser;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 public class CZInterpreter extends CZBaseVisitor<Object> {
-    private Map<String, Variable> variables;
     private final Map<String, Function> functions;
     private final Map<String, String> macros;
+    private Map<String, Variable> variables;
     private boolean shouldBreak = false;
     private boolean shouldContinue = false;
 
@@ -19,152 +20,316 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         macros = new HashMap<>();
 
         // Built-in functions (my standard library hehehe)
-        functions.put("<MDA>sine", new Function("<MDA>sine",
-                List.of(new Variable("x", VariableType.DOUBLE, null)),
-                null, false, VariableType.DOUBLE));
-        functions.put("<MDA>vibe_sway", new Function("<MDA>vibe_sway",
-                List.of(new Variable("x", VariableType.DOUBLE, null)),
-                null, false, VariableType.DOUBLE));
+        functions.put("<MDA>sine",
+                new Function("<MDA>sine",
+                        List.of(new Variable("x", VariableType.DOUBLE, null)),
+                        null, false, VariableType.DOUBLE));
+        functions.put("<MDA>vibe_sway",
+                new Function("<MDA>vibe_sway",
+                        List.of(new Variable("x", VariableType.DOUBLE, null)),
+                        null, false, VariableType.DOUBLE));
 
-        functions.put("<MDA>cosine", new Function("<MDA>cosine",
-                List.of(new Variable("x", VariableType.DOUBLE, null)),
-                null, false, VariableType.DOUBLE));
-        functions.put("<MDA>side_chill", new Function("<MDA>side_chill",
-                List.of(new Variable("x", VariableType.DOUBLE, null)),
-                null, false, VariableType.DOUBLE));
+        functions.put("<MDA>cosine",
+                new Function("<MDA>cosine",
+                        List.of(new Variable("x", VariableType.DOUBLE, null)),
+                        null, false, VariableType.DOUBLE));
+        functions.put("<MDA>side_chill",
+                new Function("<MDA>side_chill",
+                        List.of(new Variable("x", VariableType.DOUBLE, null)),
+                        null, false, VariableType.DOUBLE));
 
-        functions.put("<MDA>tangent", new Function("<MDA>tangent",
-                List.of(new Variable("x", VariableType.DOUBLE, null)),
-                null, false, VariableType.DOUBLE));
-        functions.put("<MDA>angle_tea", new Function("<MDA>angle_tea",
-                List.of(new Variable("x", VariableType.DOUBLE, null)),
-                null, false,VariableType.DOUBLE));
+        functions.put("<MDA>hyperbolic_sine",
+                new Function("<MDA>hyperbolic_sine",
+                        List.of(new Variable("x", VariableType.DOUBLE, null)),
+                        null, false, VariableType.DOUBLE));
+        functions.put("<MDA>vibe_overload",
+                new Function("<MDA>vibe_overload",
+                        List.of(new Variable("x", VariableType.DOUBLE, null)),
+                        null, false, VariableType.DOUBLE));
 
-        functions.put("<MDA>cotangent", new Function("<MDA>cotangent",
-                List.of(new Variable("x", VariableType.DOUBLE, null)),
-                null, false, VariableType.DOUBLE));
-        functions.put("<MDA>cotan_drip", new Function("<MDA>cotan_drip",
-                List.of(new Variable("x", VariableType.DOUBLE, null)),
-                null, false, VariableType.DOUBLE));
+        functions.put("<MDA>hyperbolic_cosine",
+                new Function("<MDA>hyperbolic_cosine",
+                        List.of(new Variable("x", VariableType.DOUBLE, null)),
+                        null, false, VariableType.DOUBLE));
+        functions.put("<MDA>side_overload",
+                new Function("<MDA>side_overload",
+                        List.of(new Variable("x", VariableType.DOUBLE, null)),
+                        null, false, VariableType.DOUBLE));
 
-        functions.put("<MDA>arcsine", new Function("<MDA>arcsine",
-                List.of(new Variable("x", VariableType.DOUBLE, null)),
-                null, false, VariableType.DOUBLE));
-        functions.put("<MDA>vibe_rewind", new Function("<MDA>vibe_rewind",
-                List.of(new Variable("x", VariableType.DOUBLE, null)),
-                null, false, VariableType.DOUBLE));
+        functions.put("<MDA>degrees_to_radians",
+                new Function("<MDA>degrees_to_radians",
+                        List.of(new Variable("x", VariableType.DOUBLE, null)),
+                        null, false, VariableType.DOUBLE));
+        functions.put("<MDA>degz2radz",
+                new Function("<MDA>degz2radz",
+                        List.of(new Variable("x", VariableType.DOUBLE, null)),
+                        null, false, VariableType.DOUBLE));
 
-        functions.put("<MDA>arccosine", new Function("<MDA>arccosine",
-                List.of(new Variable("x", VariableType.DOUBLE, null)),
-                null, false, VariableType.DOUBLE));
-        functions.put("<MDA>side_throwback", new Function("<MDA>side_throwback",
-                List.of(new Variable("x", VariableType.DOUBLE, null)),
-                null, false, VariableType.DOUBLE));
+        functions.put("<MDA>radians_to_degrees",
+                new Function("<MDA>radians_to_degrees",
+                        List.of(new Variable("x", VariableType.DOUBLE, null)),
+                        null, false, VariableType.DOUBLE));
+        functions.put("<MDA>radz2degz",
+                new Function("<MDA>radz2degz",
+                        List.of(new Variable("x", VariableType.DOUBLE, null)),
+                        null, false, VariableType.DOUBLE));
 
-        functions.put("<MDA>arctangent", new Function("<MDA>arctangent",
-                List.of(new Variable("x", VariableType.DOUBLE, null)),
-                null, false, VariableType.DOUBLE));
-        functions.put("<MDA>angle_flash", new Function("<MDA>angle_flash",
-                List.of(new Variable("x", VariableType.DOUBLE, null)),
-                null, false, VariableType.DOUBLE));
+        functions.put("<MDA>exponential",
+                new Function("<MDA>exponential",
+                        List.of(new Variable("x", VariableType.DOUBLE, null)),
+                        null, false, VariableType.DOUBLE));
+        functions.put("<MDA>brr_brr_patapim",
+                new Function("<MDA>brr_brr_patapim",
+                        List.of(new Variable("x", VariableType.DOUBLE, null)),
+                        null, false, VariableType.DOUBLE));
 
-        functions.put("<MDA>arccotangent", new Function("<MDA>arccotangent",
-                List.of(new Variable("x", VariableType.DOUBLE, null)),
-                null, false, VariableType.DOUBLE));
-        functions.put("<MDA>cotan_flashback", new Function("<MDA>cotan_flashback",
-                List.of(new Variable("x", VariableType.DOUBLE, null)),
-                null, false, VariableType.DOUBLE));
+        functions.put("<MDA>logarithm",
+                new Function("<MDA>logarithm",
+                        List.of(new Variable("x", VariableType.DOUBLE, null),
+                                new Variable("y", VariableType.INTEGER, null)),
+                        null, false, VariableType.DOUBLE));
+        functions.put("<MDA>vibe_log",
+                new Function("<MDA>vibe_log",
+                        List.of(new Variable("x", VariableType.DOUBLE, null),
+                                new Variable("y", VariableType.INTEGER, null)),
+                        null, false, VariableType.DOUBLE));
 
-        functions.put("<MDA>array_length", new Function("<MDA>array_length",
-                List.of(new Variable("arr", VariableType.ANY, null)),
-                null, false, VariableType.INTEGER));
-        functions.put("<MDA>squad_countdown", new Function("<MDA>squad_countdown",
-                List.of(new Variable("arr", VariableType.ANY, null)),
-                null, false, VariableType.INTEGER));
+        functions.put("<MDA>array_length",
+                new Function("<MDA>array_length",
+                        List.of(new Variable("arr", VariableType.ANY, null)),
+                        null, false, VariableType.INTEGER));
+        functions.put("<MDA>squad_countdown",
+                new Function("<MDA>squad_countdown",
+                        List.of(new Variable("arr", VariableType.ANY, null)),
+                        null, false, VariableType.INTEGER));
 
-        functions.put("<MDA>array_get_at", new Function("<MDA>array_get_at",
-                List.of(new Variable("arr", VariableType.ANY, null), new Variable("index", VariableType.INTEGER, null)),
-                null, false, VariableType.ANY));
-        functions.put("<MDA>squad_peep", new Function("<MDA>squad_peep",
-                List.of(new Variable("arr", VariableType.ANY, null), new Variable("index", VariableType.INTEGER, null)),
-                null, false, VariableType.ANY));
+        functions.put("<MDA>array_get_at",
+                new Function("<MDA>array_get_at",
+                        List.of(new Variable("arr", VariableType.ANY, null),
+                                new Variable("index", VariableType.INTEGER, null)),
+                        null, false, VariableType.ANY));
+        functions.put("<MDA>squad_peep",
+                new Function("<MDA>squad_peep",
+                        List.of(new Variable("arr", VariableType.ANY, null),
+                                new Variable("index", VariableType.INTEGER, null)),
+                        null, false, VariableType.ANY));
 
-        functions.put("<MDA>array_set_at", new Function("<MDA>array_set_at",
-                List.of(new Variable("arr", VariableType.ANY, null), new Variable("index", VariableType.INTEGER, null), new Variable("value", VariableType.ANY, null)),
-                null, false, VariableType.ANY));
-        functions.put("<MDA>squad_seep", new Function("<MDA>squad_seep",
-                List.of(new Variable("arr", VariableType.ANY, null), new Variable("index", VariableType.INTEGER, null), new Variable("value", VariableType.ANY, null)),
-                null, false, VariableType.ANY));
+        functions.put("<MDA>array_set_at",
+                new Function("<MDA>array_set_at",
+                        List.of(new Variable("arr", VariableType.ANY, null),
+                                new Variable("index", VariableType.INTEGER, null),
+                                new Variable("value", VariableType.ANY, null)),
+                        null, false, VariableType.ANY));
+        functions.put("<MDA>squad_seep",
+                new Function("<MDA>squad_seep",
+                        List.of(new Variable("arr", VariableType.ANY, null),
+                                new Variable("index", VariableType.INTEGER, null),
+                                new Variable("value", VariableType.ANY, null)),
+                        null, false, VariableType.ANY));
 
-        functions.put("<MDA>array_copy", new Function("<MDA>array_copy",
-                List.of(new Variable("arr", VariableType.ANY, null)),
-                null, false, VariableType.ANY));
-        functions.put("<MDA>squad_join", new Function("<MDA>squad_join",
-                List.of(new Variable("arr", VariableType.ANY, null)),
-                null, false, VariableType.ANY));
+        functions.put("<MDA>array_copy",
+                new Function("<MDA>array_copy",
+                        List.of(new Variable("arr", VariableType.ANY, null)),
+                        null, false, VariableType.ANY));
+        functions.put("<MDA>squad_join",
+                new Function("<MDA>squad_join",
+                        List.of(new Variable("arr", VariableType.ANY, null)),
+                        null, false, VariableType.ANY));
 
-        functions.put("<MDA>array_contains", new Function("<MDA>array_contains",
-                List.of(new Variable("arr", VariableType.ANY, null), new Variable("value", VariableType.ANY, null)),
-                null, false, VariableType.BOOLEAN));
-        functions.put("<MDA>squad_vibeswith", new Function("<MDA>squad_vibeswith",
-                List.of(new Variable("arr", VariableType.ANY, null), new Variable("value", VariableType.ANY, null)),
-                null, false, VariableType.BOOLEAN));
+        functions.put("<MDA>array_contains",
+                new Function("<MDA>array_contains",
+                        List.of(new Variable("arr", VariableType.ANY, null),
+                                new Variable("value", VariableType.ANY, null)),
+                        null, false, VariableType.BOOLEAN));
+        functions.put("<MDA>squad_vibeswith",
+                new Function("<MDA>squad_vibeswith",
+                        List.of(new Variable("arr", VariableType.ANY, null),
+                                new Variable("value", VariableType.ANY, null)),
+                        null, false, VariableType.BOOLEAN));
 
-        functions.put("<MDA>array_index_of", new Function("<MDA>array_index_of",
-                List.of(new Variable("arr", VariableType.ANY, null), new Variable("value", VariableType.ANY, null)),
-                null, false, VariableType.INTEGER));
-        functions.put("<MDA>squad_whereat", new Function("<MDA>squad_whereat",
-                List.of(new Variable("arr", VariableType.ANY, null), new Variable("value", VariableType.ANY, null)),
-                null, false, VariableType.INTEGER));
+        functions.put("<MDA>array_index_of",
+                new Function("<MDA>array_index_of",
+                        List.of(new Variable("arr", VariableType.ANY, null),
+                                new Variable("value", VariableType.ANY, null)),
+                        null, false, VariableType.INTEGER));
+        functions.put("<MDA>squad_whereat",
+                new Function("<MDA>squad_whereat",
+                        List.of(new Variable("arr", VariableType.ANY, null),
+                                new Variable("value", VariableType.ANY, null)),
+                        null, false, VariableType.INTEGER));
 
-        functions.put("<MDA>array_count", new Function("<MDA>array_count",
-                List.of(new Variable("arr", VariableType.ANY, null), new Variable("value", VariableType.ANY, null)),
-                null, false, VariableType.INTEGER));
-        functions.put("<MDA>squad_howmany", new Function("<MDA>squad_howmany",
-                List.of(new Variable("arr", VariableType.ANY, null), new Variable("value", VariableType.ANY, null)),
-                null, false, VariableType.INTEGER));
+        functions.put("<MDA>array_count",
+                new Function("<MDA>array_count",
+                        List.of(new Variable("arr", VariableType.ANY, null),
+                                new Variable("value", VariableType.ANY, null)),
+                        null, false, VariableType.INTEGER));
+        functions.put("<MDA>squad_howmany",
+                new Function("<MDA>squad_howmany",
+                        List.of(new Variable("arr", VariableType.ANY, null),
+                                new Variable("value", VariableType.ANY, null)),
+                        null, false, VariableType.INTEGER));
 
-        functions.put("<MDA>array_insert_first", new Function("<MDA>array_insert_first",
-                List.of(new Variable("arr", VariableType.ANY, null), new Variable("value", VariableType.ANY, null)),
-                null, false, VariableType.ANY));
-        functions.put("<MDA>squad_pushup", new Function("<MDA>squad_pushup",
-                List.of(new Variable("arr", VariableType.ANY, null), new Variable("value", VariableType.ANY, null)),
-                null, false, VariableType.ANY));
+        functions.put("<MDA>array_insert_first",
+                new Function("<MDA>array_insert_first",
+                        List.of(new Variable("arr", VariableType.ANY, null),
+                                new Variable("value", VariableType.ANY, null)),
+                        null, false, VariableType.ANY));
+        functions.put("<MDA>squad_pushup",
+                new Function("<MDA>squad_pushup",
+                        List.of(new Variable("arr", VariableType.ANY, null),
+                                new Variable("value", VariableType.ANY, null)),
+                        null, false, VariableType.ANY));
 
-        functions.put("<MDA>array_insert_at", new Function("<MDA>array_insert_at",
-                List.of(new Variable("arr", VariableType.ANY, null), new Variable("index", VariableType.INTEGER, null), new Variable("value", VariableType.ANY, null)),
-                null, false, VariableType.ANY));
-        functions.put("<MDA>squad_dropin", new Function("<MDA>squad_dropin",
-                List.of(new Variable("arr", VariableType.ANY, null), new Variable("index", VariableType.INTEGER, null), new Variable("value", VariableType.ANY, null)),
-                null, false, VariableType.ANY));
+        functions.put("<MDA>array_insert_at",
+                new Function("<MDA>array_insert_at",
+                        List.of(new Variable("arr", VariableType.ANY, null),
+                                new Variable("index", VariableType.INTEGER, null),
+                                new Variable("value", VariableType.ANY, null)),
+                        null, false, VariableType.ANY));
+        functions.put("<MDA>squad_dropin",
+                new Function("<MDA>squad_dropin",
+                        List.of(new Variable("arr", VariableType.ANY, null),
+                                new Variable("index", VariableType.INTEGER, null),
+                                new Variable("value", VariableType.ANY, null)),
+                        null, false, VariableType.ANY));
 
-        functions.put("<MDA>array_insert_last", new Function("<MDA>array_insert_last",
-                List.of(new Variable("arr", VariableType.ANY, null), new Variable("value", VariableType.ANY, null)),
-                null, false, VariableType.ANY));
-        functions.put("<MDA>squad_slidein", new Function("<MDA>squad_slidein",
-                List.of(new Variable("arr", VariableType.ANY, null), new Variable("value", VariableType.ANY, null)),
-                null, false, VariableType.ANY));
+        functions.put("<MDA>array_insert_last",
+                new Function("<MDA>array_insert_last",
+                        List.of(new Variable("arr", VariableType.ANY, null),
+                                new Variable("value", VariableType.ANY, null)),
+                        null, false, VariableType.ANY));
+        functions.put("<MDA>squad_slidein",
+                new Function("<MDA>squad_slidein",
+                        List.of(new Variable("arr", VariableType.ANY, null),
+                                new Variable("value", VariableType.ANY, null)),
+                        null, false, VariableType.ANY));
 
-        functions.put("<MDA>array_delete_first", new Function("<MDA>array_delete_first",
-                List.of(new Variable("arr", VariableType.ANY, null)),
-                null, false, VariableType.ANY));
-        functions.put("<MDA>squad_chopfirst", new Function("<MDA>squad_chopfirst",
-                List.of(new Variable("arr", VariableType.ANY, null)),
-                null, false, VariableType.ANY));
+        functions.put("<MDA>array_delete_first",
+                new Function("<MDA>array_delete_first",
+                        List.of(new Variable("arr", VariableType.ANY, null)),
+                        null, false, VariableType.ANY));
+        functions.put("<MDA>squad_chopfirst",
+                new Function("<MDA>squad_chopfirst",
+                        List.of(new Variable("arr", VariableType.ANY, null)),
+                        null, false, VariableType.ANY));
 
-        functions.put("<MDA>array_delete_at", new Function("<MDA>array_delete_at",
-                List.of(new Variable("arr", VariableType.ANY, null), new Variable("index", VariableType.INTEGER, null)),
-                null, false, VariableType.ANY));
-        functions.put("<MDA>squad_chopspot", new Function("<MDA>squad_chopspot",
-                List.of(new Variable("arr", VariableType.ANY, null), new Variable("index", VariableType.INTEGER, null)),
-                null, false, VariableType.ANY));
+        functions.put("<MDA>array_delete_at",
+                new Function("<MDA>array_delete_at",
+                        List.of(new Variable("arr", VariableType.ANY, null),
+                                new Variable("index", VariableType.INTEGER, null)),
+                        null, false, VariableType.ANY));
+        functions.put("<MDA>squad_chopspot",
+                new Function("<MDA>squad_chopspot",
+                        List.of(new Variable("arr", VariableType.ANY, null),
+                                new Variable("index", VariableType.INTEGER, null)),
+                        null, false, VariableType.ANY));
 
-        functions.put("<MDA>array_delete_last", new Function("<MDA>array_delete_last",
-                List.of(new Variable("arr", VariableType.ANY, null)),
-                null, false, VariableType.ANY));
-        functions.put("<MDA>squad_choplast", new Function("<MDA>squad_choplast",
-                List.of(new Variable("arr", VariableType.ANY, null)),
-                null, false, VariableType.ANY));
+        functions.put("<MDA>array_delete_last",
+                new Function("<MDA>array_delete_last",
+                        List.of(new Variable("arr", VariableType.ANY, null)),
+                        null, false, VariableType.ANY));
+        functions.put("<MDA>squad_choplast",
+                new Function("<MDA>squad_choplast",
+                        List.of(new Variable("arr", VariableType.ANY, null)),
+                        null, false, VariableType.ANY));
+
+        functions.put("<MDA>string_slice",
+                new Function("<MDA>string_slice",
+                        List.of(new Variable("string", VariableType.STRING, null),
+                                new Variable("start", VariableType.INTEGER, null),
+                                new Variable("end", VariableType.INTEGER, null)),
+                        null, false, VariableType.STRING));
+        functions.put("<MDA>squad_cut",
+                new Function("<MDA>squad_cut",
+                        List.of(new Variable("string", VariableType.STRING, null),
+                                new Variable("start", VariableType.INTEGER, null),
+                                new Variable("end", VariableType.INTEGER, null)),
+                        null, false, VariableType.STRING));
+
+        functions.put("<MDA>string_split",
+                new Function("<MDA>string_split",
+                        List.of(new Variable("string", VariableType.STRING, null),
+                                new Variable("character", VariableType.CHARACTER, null)),
+                        null, false, VariableType.STRING_ARRAY));
+        functions.put("<MDA>squad_slay",
+                new Function("<MDA>squad_slay",
+                        List.of(new Variable("string", VariableType.STRING, null),
+                                new Variable("character", VariableType.CHARACTER, null)),
+                        null, false, VariableType.STRING_ARRAY));
+
+        functions.put("<MDA>string_substring",
+                new Function("<MDA>string_substring",
+                        List.of(new Variable("string", VariableType.STRING, null),
+                                new Variable("substring", VariableType.STRING, null)),
+                        null, false, VariableType.BOOLEAN));
+        functions.put("<MDA>squad_subquad",
+                new Function("<MDA>squad_subquad",
+                        List.of(new Variable("string", VariableType.STRING, null),
+                                new Variable("substring", VariableType.STRING, null)),
+                        null, false, VariableType.BOOLEAN));
+
+        functions.put("<MDA>int_to_double",
+                new Function("<MDA>int_to_double",
+                        List.of(new Variable("value", VariableType.INTEGER, null)),
+                        null, false, VariableType.DOUBLE));
+        functions.put("<MDA>rizz2g",
+                new Function("<MDA>rizz2g",
+                        List.of(new Variable("value", VariableType.INTEGER, null)),
+                        null, false, VariableType.DOUBLE));
+
+        functions.put("<MDA>double_to_int",
+                new Function("<MDA>double_to_int",
+                        List.of(new Variable("value", VariableType.DOUBLE, null)),
+                        null, false, VariableType.INTEGER));
+        functions.put("<MDA>g2rizz",
+                new Function("<MDA>g2rizz",
+                        List.of(new Variable("value", VariableType.DOUBLE, null)),
+                        null, false, VariableType.INTEGER));
+
+        functions.put("<MDA>boolean_to_int",
+                new Function("<MDA>boolean_to_int",
+                        List.of(new Variable("value", VariableType.BOOLEAN, null)),
+                        null, false, VariableType.INTEGER));
+        functions.put("<MDA>cappin2rizz",
+                new Function("<MDA>cappin2rizz",
+                        List.of(new Variable("value", VariableType.BOOLEAN, null)),
+                        null, false, VariableType.INTEGER));
+
+        functions.put("<MDA>string_to_int",
+                new Function("<MDA>string_to_int",
+                        List.of(new Variable("value", VariableType.STRING, null)),
+                        null, false, VariableType.INTEGER));
+        functions.put("<MDA>squad2rizz",
+                new Function("<MDA>squad2rizz",
+                        List.of(new Variable("value", VariableType.STRING, null)),
+                        null, false, VariableType.INTEGER));
+
+        functions.put("<MDA>string_to_double",
+                new Function("<MDA>string_to_double",
+                        List.of(new Variable("value", VariableType.STRING, null)),
+                        null, false, VariableType.DOUBLE));
+        functions.put("<MDA>squad2g",
+                new Function("<MDA>squad2g",
+                        List.of(new Variable("value", VariableType.STRING, null)),
+                        null, false, VariableType.DOUBLE));
+
+        functions.put("<MDA>int_to_string",
+                new Function("<MDA>int_to_string",
+                        List.of(new Variable("value", VariableType.INTEGER, null)),
+                        null, false, VariableType.STRING));
+        functions.put("<MDA>rizz2squad",
+                new Function("<MDA>rizz2squad",
+                        List.of(new Variable("value", VariableType.INTEGER, null)),
+                        null, false, VariableType.STRING));
+
+        functions.put("<MDA>double_to_string",
+                new Function("<MDA>double_to_string",
+                        List.of(new Variable("value", VariableType.DOUBLE, null)),
+                        null, false, VariableType.STRING));
+        functions.put("<MDA>g2squad",
+                new Function("<MDA>g2squad",
+                        List.of(new Variable("value", VariableType.DOUBLE, null)),
+                        null, false, VariableType.STRING));
     }
 
     private Object parseMacroValue(String value) {
@@ -288,9 +453,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         if (existing == null) {
             Function prototype = new Function(functionName, parameters, null, true, returnType);
             functions.put(functionName, prototype);
-        }
-
-        else if (existing.getIsDeclaredOnly()) {
+        } else if (existing.getIsDeclaredOnly()) {
             if (!existing.getReturnType().equals(returnType)) {
                 throw new RuntimeException("Return type mismatch in function declaration of: " + functionName);
             }
@@ -299,9 +462,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 throw new RuntimeException("Parameter mismatch in function declaration of: " + functionName);
             }
 
-        }
-
-        else {
+        } else {
             throw new RuntimeException("Function " + functionName + " is already defined.");
         }
 
@@ -327,9 +488,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         if (existing == null) {
             Function function = new Function(functionName, parameters, ctx.function_block(), false, returnType);
             functions.put(functionName, function);
-        }
-
-        else if (existing.getIsDeclaredOnly()) {
+        } else if (existing.getIsDeclaredOnly()) {
             if (!existing.getReturnType().equals(returnType)) {
                 throw new RuntimeException("Return type mismatch in function definition of: " + functionName);
             }
@@ -340,9 +499,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
             existing.setBody(ctx.function_block());
             existing.setIsDeclaredOnly(false);
-        }
-
-        else {
+        } else {
             throw new RuntimeException("Function " + functionName + " is already defined.");
         }
 
@@ -407,13 +564,9 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             case INTEGER: {
                 if (value instanceof Integer) {
                     variables.put(varName, new Variable(varName, var.getType(), value));
-                }
-
-                else if (value instanceof Variable v && v.getType() == VariableType.INTEGER) {
+                } else if (value instanceof Variable v && v.getType() == VariableType.INTEGER) {
                     variables.put(varName, new Variable(varName, var.getType(), v.getValue()));
-                }
-
-                else {
+                } else {
                     VariableType valueType = (value instanceof Variable v) ? v.getType() : TypeChecker.inferTypeFromValue(value);
                     throw new RuntimeException("Type mismatch for variable " + varName + ": expected " + VariableType.INTEGER + " but got " + valueType);
                 }
@@ -424,13 +577,9 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             case DOUBLE: {
                 if (value instanceof Double) {
                     variables.put(varName, new Variable(varName, var.getType(), value));
-                }
-
-                else if (value instanceof Variable v && v.getType() == VariableType.DOUBLE) {
+                } else if (value instanceof Variable v && v.getType() == VariableType.DOUBLE) {
                     variables.put(varName, new Variable(varName, var.getType(), v.getValue()));
-                }
-
-                else {
+                } else {
                     VariableType valueType = (value instanceof Variable v) ? v.getType() : TypeChecker.inferTypeFromValue(value);
                     throw new RuntimeException("Type mismatch for variable " + varName + ": expected " + VariableType.DOUBLE + " but got " + valueType);
                 }
@@ -441,13 +590,9 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             case CHARACTER: {
                 if (value instanceof Character) {
                     variables.put(varName, new Variable(varName, var.getType(), value));
-                }
-
-                else if (value instanceof Variable v && v.getType() == VariableType.CHARACTER) {
+                } else if (value instanceof Variable v && v.getType() == VariableType.CHARACTER) {
                     variables.put(varName, new Variable(varName, var.getType(), v.getValue()));
-                }
-
-                else {
+                } else {
                     VariableType valueType = (value instanceof Variable v) ? v.getType() : TypeChecker.inferTypeFromValue(value);
                     throw new RuntimeException("Type mismatch for variable " + varName + ": expected " + VariableType.CHARACTER + " but got " + valueType);
                 }
@@ -458,13 +603,9 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             case STRING: {
                 if (value instanceof String) {
                     variables.put(varName, new Variable(varName, var.getType(), value));
-                }
-
-                else if (value instanceof Variable v && v.getType() == VariableType.STRING) {
+                } else if (value instanceof Variable v && v.getType() == VariableType.STRING) {
                     variables.put(varName, new Variable(varName, var.getType(), v.getValue()));
-                }
-
-                else {
+                } else {
                     VariableType valueType = (value instanceof Variable v) ? v.getType() : TypeChecker.inferTypeFromValue(value);
                     throw new RuntimeException("Type mismatch for variable " + varName + ": expected " + VariableType.STRING + " but got " + valueType);
                 }
@@ -475,13 +616,9 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             case BOOLEAN: {
                 if (value instanceof Boolean) {
                     variables.put(varName, new Variable(varName, var.getType(), value));
-                }
-
-                else if (value instanceof Variable v && v.getType() == VariableType.BOOLEAN) {
+                } else if (value instanceof Variable v && v.getType() == VariableType.BOOLEAN) {
                     variables.put(varName, new Variable(varName, var.getType(), v.getValue()));
-                }
-
-                else {
+                } else {
                     VariableType valueType = (value instanceof Variable v) ? v.getType() : TypeChecker.inferTypeFromValue(value);
                     throw new RuntimeException("Type mismatch for variable " + varName + ": expected " + VariableType.BOOLEAN + " but got " + valueType);
                 }
@@ -515,15 +652,11 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                         }
 
                         variables.put(varName, new Variable(varName, var.getType(), extracted));
-                    }
-
-                    else {
+                    } else {
                         VariableType valueType = (value instanceof Variable v) ? v.getType() : TypeChecker.inferTypeFromValue(value);
                         throw new RuntimeException("Type mismatch for variable " + varName + ": expected " + VariableType.INTEGER_ARRAY + " but got " + valueType);
                     }
-                }
-
-                else {
+                } else {
                     throw new RuntimeException("Invalid value: expected a list for array " + varName);
                 }
 
@@ -556,9 +689,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                         }
 
                         variables.put(varName, new Variable(varName, var.getType(), extracted));
-                    }
-
-                    else {
+                    } else {
                         VariableType valueType = (value instanceof Variable v) ? v.getType() : TypeChecker.inferTypeFromValue(value);
                         throw new RuntimeException("Type mismatch for variable " + varName + ": expected " + VariableType.DOUBLE_ARRAY + " but got " + valueType);
                     }
@@ -595,9 +726,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                         }
 
                         variables.put(varName, new Variable(varName, var.getType(), extracted));
-                    }
-
-                    else {
+                    } else {
                         VariableType valueType = (value instanceof Variable v) ? v.getType() : TypeChecker.inferTypeFromValue(value);
                         throw new RuntimeException("Type mismatch for variable " + varName + ": expected " + VariableType.STRING_ARRAY + " but got " + valueType);
                     }
@@ -634,9 +763,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                         }
 
                         variables.put(varName, new Variable(varName, var.getType(), extracted));
-                    }
-
-                    else {
+                    } else {
                         VariableType valueType = (value instanceof Variable v) ? v.getType() : TypeChecker.inferTypeFromValue(value);
                         throw new RuntimeException("Type mismatch for variable " + varName + ": expected " + VariableType.BOOLEAN_ARRAY + " but got " + valueType);
                     }
@@ -656,7 +783,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
     @Override
     public Object visitPrint_statement(CZParser.Print_statementContext ctx) {
-        StringBuilder output = new StringBuilder("\uD83D\uDCE2 ");
+        StringBuilder output = new StringBuilder();
 
         if (ctx.arguments() != null) {
             for (CZParser.ExpressionContext exprCtx : ctx.arguments().expression()) {
@@ -672,9 +799,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                     for (int i = 0; i < arrayValue.size(); i++) {
                         if (arrayValue.get(i) instanceof Variable variable) {
                             output.append(variable.getValue());
-                        }
-
-                        else {
+                        } else {
                             output.append(arrayValue.get(i));
                         }
 
@@ -686,13 +811,20 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                     output.append("]");
                 }
 
+                else if (value instanceof String strVal) {
+                    output.append(strVal.replace("\\n", "\n")
+                            .replace("\\t", "\t")
+                            .replace("\\\"", "\"")
+                            .replace("\\\\", "\\"));
+                }
+
                 else {
                     output.append(value);
                 }
             }
         }
 
-        System.out.println(output);
+        System.out.print(output.toString());
         return null;
     }
 
@@ -854,9 +986,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         while (current != null) {
             if (current instanceof CZParser.Function_declarationContext funcCtx) {
                 return funcCtx.IDENTIFIER().getText();
-            }
-
-            else if (current instanceof CZParser.FunctionContext funcCtx) {
+            } else if (current instanceof CZParser.FunctionContext funcCtx) {
                 return funcCtx.IDENTIFIER().getText();
             }
 
@@ -929,9 +1059,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             double r = (right instanceof Integer) ? ((Integer) right).doubleValue() : (Double) right;
 
             return Math.pow(l, r);
-        }
-
-        else if (left instanceof Integer && right instanceof Integer) {
+        } else if (left instanceof Integer && right instanceof Integer) {
             int l = (Integer) left;
             int r = (Integer) right;
 
@@ -964,9 +1092,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 case CZParser.MODULUS -> l % r;
                 default -> throw new RuntimeException("Invalid operator for doubles");
             };
-        }
-
-        else if (left instanceof Integer && right instanceof Integer) {
+        } else if (left instanceof Integer && right instanceof Integer) {
             int l = (Integer) left;
             int r = (Integer) right;
 
@@ -997,27 +1123,19 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         if (ctx.op.getType() == CZParser.ADDITION) {
             if (left instanceof String || right instanceof String || left instanceof Character || right instanceof Character) {
                 return String.valueOf(left) + right;
-            }
-
-            else if (left instanceof Double || right instanceof Double) {
+            } else if (left instanceof Double || right instanceof Double) {
                 double l = (left instanceof Integer) ? ((Integer) left).doubleValue() : (Double) left;
                 double r = (right instanceof Integer) ? ((Integer) right).doubleValue() : (Double) right;
                 return l + r;
-            }
-
-            else {
+            } else {
                 return (Integer) left + (Integer) right;
             }
-        }
-
-        else {
+        } else {
             if (left instanceof Double || right instanceof Double) {
                 double l = (left instanceof Integer) ? ((Integer) left).doubleValue() : (Double) left;
                 double r = (right instanceof Integer) ? ((Integer) right).doubleValue() : (Double) right;
                 return l - r;
-            }
-
-            else {
+            } else {
                 return (Integer) left - (Integer) right;
             }
         }
@@ -1074,9 +1192,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 case CZParser.GREATER_THAN_OR_EQUAL -> l >= r;
                 default -> false;
             };
-        }
-
-        else if (left instanceof Integer && right instanceof Integer) {
+        } else if (left instanceof Integer && right instanceof Integer) {
             int l = (Integer) left;
             int r = (Integer) right;
 
@@ -1087,9 +1203,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 case CZParser.GREATER_THAN_OR_EQUAL -> l >= r;
                 default -> false;
             };
-        }
-
-        else if (left instanceof Character && right instanceof Character) {
+        } else if (left instanceof Character && right instanceof Character) {
             char l = (Character) left;
             char r = (Character) right;
 
@@ -1100,9 +1214,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 case CZParser.GREATER_THAN_OR_EQUAL -> l >= r;
                 default -> false;
             };
-        }
-
-        else if (left instanceof String && right instanceof String) {
+        } else if (left instanceof String && right instanceof String) {
             int cmp = ((String) left).compareTo((String) right);
 
             return switch (ctx.op.getType()) {
@@ -1206,12 +1318,6 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         }
     }
 
-    private double toDouble(Object value) {
-        if (value instanceof Integer) return ((Integer) value).doubleValue();
-        if (value instanceof Double) return (Double) value;
-        throw new RuntimeException("Expected numeric value but got: " + value);
-    }
-
     @Override
     public Object visitFunctionCallExpression(CZParser.FunctionCallExpressionContext ctx) {
         String functionName = ctx.function_call().IDENTIFIER() != null ? ctx.function_call().IDENTIFIER().getText() : ctx.function_call().standard_function().getText();
@@ -1232,10 +1338,8 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 Object value = visit(ctx.function_call().arguments().expression(0));
 
                 if (value instanceof Variable v && v.getType().equals(VariableType.DOUBLE)) {
-                    return Math.sin((Double)v.getValue());
-                }
-
-                else if (value instanceof Double v) {
+                    return Math.sin((Double) v.getValue());
+                } else if (value instanceof Double v) {
                     return Math.sin(v);
                 }
 
@@ -1248,10 +1352,8 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 Object value = visit(ctx.function_call().arguments().expression(0));
 
                 if (value instanceof Variable v && v.getType().equals(VariableType.DOUBLE)) {
-                    return Math.cos((Double)v.getValue());
-                }
-
-                else if (value instanceof Double v) {
+                    return Math.cos((Double) v.getValue());
+                } else if (value instanceof Double v) {
                     return Math.cos(v);
                 }
 
@@ -1259,105 +1361,103 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                         + "' in function " + functionName + ": expected " + f.getParameters().getFirst().getType() + " but got " + TypeChecker.inferTypeFromValue(value));
             }
 
-            case "<MDA>tangent":
-            case "<MDA>angle_tea": {
+            case "<MDA>hyperbolic_sine":
+            case "<MDA>vibe_overload": {
                 Object value = visit(ctx.function_call().arguments().expression(0));
 
                 if (value instanceof Variable v && v.getType().equals(VariableType.DOUBLE)) {
-                    return Math.tan((Double)v.getValue());
-                }
-
-                else if (value instanceof Double v) {
-                    return Math.tan(v);
-                }
-
-                throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().getFirst().getName()
-                        + "' in function " + functionName + ": expected " + f.getParameters().getFirst().getType() + " but got " + TypeChecker.inferTypeFromValue(value));
-
-            }
-
-            case "<MDA>cotangent":
-            case "<MDA>cotan_drip": {
-                Object value = visit(ctx.function_call().arguments().expression(0));
-
-                if (value instanceof Variable v && v.getType().equals(VariableType.DOUBLE)) {
-                    if ((Double) v.getValue() == 0) {
-                        throw new RuntimeException("Undefined: cotangent undefined at zero");
-                    }
-
-                    return 1.0 / Math.tan((Double)v.getValue());
-                }
-
-                else if (value instanceof Double v) {
-                    return 1.0 / Math.tan(v);
+                    return Math.sinh((Double) v.getValue());
+                } else if (value instanceof Double v) {
+                    return Math.sinh(v);
                 }
 
                 throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().getFirst().getName()
                         + "' in function " + functionName + ": expected " + f.getParameters().getFirst().getType() + " but got " + TypeChecker.inferTypeFromValue(value));
             }
 
-            case "<MDA>arcsine":
-            case "<MDA>vibe_rewind": {
+            case "<MDA>hyperbolic_cosine":
+            case "<MDA>side_overload": {
                 Object value = visit(ctx.function_call().arguments().expression(0));
 
                 if (value instanceof Variable v && v.getType().equals(VariableType.DOUBLE)) {
-                    return Math.asin((Double)v.getValue());
-                }
-
-                else if (value instanceof Double v) {
-                    return Math.asin(v);
-                }
-
-                throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().getFirst().getName()
-                        + "' in function " + functionName + ": expected " + f.getParameters().getFirst().getType() + " but got " + TypeChecker.inferTypeFromValue(value));
-
-            }
-            case "<MDA>arccosine":
-            case "<MDA>side_throwback": {
-                Object value = visit(ctx.function_call().arguments().expression(0));
-
-                if (value instanceof Variable v && v.getType().equals(VariableType.DOUBLE)) {
-                    return Math.acos((Double)v.getValue());
-                }
-
-                else if (value instanceof Double v) {
-                    return Math.acos(v);
+                    return Math.cosh((Double) v.getValue());
+                } else if (value instanceof Double v) {
+                    return Math.cosh(v);
                 }
 
                 throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().getFirst().getName()
                         + "' in function " + functionName + ": expected " + f.getParameters().getFirst().getType() + " but got " + TypeChecker.inferTypeFromValue(value));
             }
 
-            case "<MDA>arctangent":
-            case "<MDA>angle_flash": {
+            case "<MDA>degrees_to_radians":
+            case "<MDA>degz2radz": {
                 Object value = visit(ctx.function_call().arguments().expression(0));
 
                 if (value instanceof Variable v && v.getType().equals(VariableType.DOUBLE)) {
-                    return Math.atan((Double)v.getValue());
-                }
-
-                else if (value instanceof Double v) {
-                    return Math.atan(v);
+                    return Math.toRadians((Double) v.getValue());
+                } else if (value instanceof Double v) {
+                    return Math.toRadians(v);
                 }
 
                 throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().getFirst().getName()
                         + "' in function " + functionName + ": expected " + f.getParameters().getFirst().getType() + " but got " + TypeChecker.inferTypeFromValue(value));
             }
 
-            case "<MDA>arccotangent":
-            case "<MDA>cotan_flashback": {
+            case "<MDA>radians_to_degrees":
+            case "<MDA>radz2degz": {
                 Object value = visit(ctx.function_call().arguments().expression(0));
 
                 if (value instanceof Variable v && v.getType().equals(VariableType.DOUBLE)) {
-                    return Math.atan(toDouble(1.0 / (Double)v.getValue()));
-                }
-
-                else if (value instanceof Double v) {
-                    return Math.atan(toDouble(1.0 / v));
+                    return Math.toDegrees((Double) v.getValue());
+                } else if (value instanceof Double v) {
+                    return Math.toDegrees(v);
                 }
 
                 throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().getFirst().getName()
                         + "' in function " + functionName + ": expected " + f.getParameters().getFirst().getType() + " but got " + TypeChecker.inferTypeFromValue(value));
+            }
+
+            case "<MDA>exponential":
+            case "<MDA>brr_brr_patapim": {
+                Object value = visit(ctx.function_call().arguments().expression(0));
+
+                if (value instanceof Variable v && v.getType().equals(VariableType.DOUBLE)) {
+                    return Math.exp((Double) v.getValue());
+                } else if (value instanceof Double v) {
+                    return Math.exp(v);
+                }
+
+                throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().getFirst().getName()
+                        + "' in function " + functionName + ": expected " + f.getParameters().getFirst().getType() + " but got " + TypeChecker.inferTypeFromValue(value));
+            }
+
+            case "<MDA>logarithm":
+            case "<MDA>vibe_log": {
+                Object value = visit(ctx.function_call().arguments().expression(0));
+                Object base = visit(ctx.function_call().arguments().expression(1));
+
+                Double val;
+                Integer b;
+
+                if (value instanceof Variable v && v.getType().equals(VariableType.DOUBLE)) {
+                    val = (Double) v.getValue();
+                } else if (value instanceof Double v) {
+                    val = v;
+                } else {
+                    throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().getFirst().getName()
+                            + "' in function " + functionName + ": expected " + f.getParameters().getFirst().getType() + " but got " + TypeChecker.inferTypeFromValue(value));
+                }
+
+                if (base instanceof Variable var && var.getType().equals(VariableType.INTEGER)) {
+                    b = (Integer) var.getValue();
+                } else if (base instanceof Integer i) {
+                    b = i;
+                } else {
+                    throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().get(1).getName()
+                            + "' in function " + functionName + ": expected " + f.getParameters().get(1).getType() + " but got " + TypeChecker.inferTypeFromValue(value));
+                }
+
+                return Math.log(val) / Math.log(b);
             }
 
             case "<MDA>array_length":
@@ -1366,9 +1466,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
                 if (array instanceof Variable var && var.getValue() instanceof List<?>) {
                     return ((List<?>) var.getValue()).size();
-                }
-
-                else {
+                } else {
                     throw new RuntimeException("The standard 'array_length' function requires an array argument");
                 }
             }
@@ -1386,13 +1484,9 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
                 if (index instanceof Integer) {
                     idx = (Integer) index;
-                }
-
-                else if (index instanceof Variable var2 && var2.getType() == VariableType.INTEGER && var2.getValue() instanceof Integer i) {
+                } else if (index instanceof Variable var2 && var2.getType() == VariableType.INTEGER && var2.getValue() instanceof Integer i) {
                     idx = i;
-                }
-
-                else {
+                } else {
                     VariableType gotType = (index instanceof Variable v) ? v.getType() : TypeChecker.inferTypeFromValue(index);
                     throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().get(1).getName()
                             + "' in function " + functionName + ": expected " + VariableType.INTEGER + " but got " + gotType);
@@ -1455,9 +1549,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
                 if (array instanceof Variable var && var.getValue() instanceof List<?> list) {
                     return new ArrayList<>(list);
-                }
-
-                else {
+                } else {
                     throw new RuntimeException("The 'array_copy' function requires an array variable");
                 }
             }
@@ -1745,6 +1837,204 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 return typedList;
             }
 
+            case "<MDA>string_slice":
+            case "<MDA>squad_cut": {
+                Object strVal = visit(ctx.function_call().arguments().expression(0));
+                Object startVal = visit(ctx.function_call().arguments().expression(1));
+                Object endVal = visit(ctx.function_call().arguments().expression(2));
+
+                String str;
+                if (strVal instanceof Variable v && v.getType() == VariableType.STRING) {
+                    str = (String) v.getValue();
+                } else if (strVal instanceof String s) {
+                    str = s;
+                } else {
+                    throw new RuntimeException("Type mismatch for first parameter of 'string_slice'");
+                }
+
+                int start;
+                if (startVal instanceof Variable v && v.getType() == VariableType.INTEGER) {
+                    start = (Integer) v.getValue();
+                } else if (startVal instanceof Integer) {
+                    start = (Integer) startVal;
+                } else {
+                    throw new RuntimeException("Type mismatch for second parameter of 'string_slice'");
+                }
+
+                int end;
+                if (endVal instanceof Variable v && v.getType() == VariableType.INTEGER) {
+                    end = (Integer) v.getValue();
+                } else if (endVal instanceof Integer) {
+                    end = (Integer) endVal;
+                } else {
+                    throw new RuntimeException("Type mismatch for third parameter of 'string_slice'");
+                }
+
+                if (start < 0 || end > str.length() || start > end) {
+                    throw new RuntimeException("Invalid string slice range in 'string_slice': " + start + " to " + end);
+                }
+
+                return str.substring(start, end);
+            }
+
+            case "<MDA>string_split":
+            case "<MDA>squad_slay": {
+                Object strVal = visit(ctx.function_call().arguments().expression(0));
+                Object charVal = visit(ctx.function_call().arguments().expression(1));
+
+                String str;
+                if (strVal instanceof Variable v && v.getType() == VariableType.STRING) {
+                    str = (String) v.getValue();
+                } else if (strVal instanceof String s) {
+                    str = s;
+                } else {
+                    throw new RuntimeException("Type mismatch for first parameter of 'string_split'");
+                }
+
+                char delimiter;
+                if (charVal instanceof Variable v && v.getType() == VariableType.CHARACTER) {
+                    delimiter = (Character) v.getValue();
+                } else if (charVal instanceof Character c) {
+                    delimiter = c;
+                } else {
+                    throw new RuntimeException("Type mismatch for second parameter of 'string_split'");
+                }
+
+                String[] parts = str.split(Pattern.quote(String.valueOf(delimiter)));
+                return Arrays.asList(parts);
+            }
+
+            case "<MDA>string_substring":
+            case "<MDA>squad_subquad": {
+                Object strVal = visit(ctx.function_call().arguments().expression(0));
+                Object substrVal = visit(ctx.function_call().arguments().expression(1));
+
+                String str;
+                if (strVal instanceof Variable v && v.getType() == VariableType.STRING) {
+                    str = (String) v.getValue();
+                } else if (strVal instanceof String s) {
+                    str = s;
+                } else {
+                    throw new RuntimeException("Type mismatch for first parameter of 'string_substring'");
+                }
+
+                String substr;
+                if (substrVal instanceof Variable v && v.getType() == VariableType.STRING) {
+                    substr = (String) v.getValue();
+                } else if (substrVal instanceof String s) {
+                    substr = s;
+                } else {
+                    throw new RuntimeException("Type mismatch for second parameter of 'string_substring'");
+                }
+
+                return str.contains(substr);
+            }
+
+            case "<MDA>int_to_double":
+            case "<MDA>rizz2g": {
+                Object value = visit(ctx.function_call().arguments().expression(0));
+
+                if (value instanceof Variable v && v.getType() == VariableType.INTEGER) {
+                    return ((Integer) v.getValue()).doubleValue();
+                } else if (value instanceof Integer i) {
+                    return i.doubleValue();
+                }
+
+                throw new RuntimeException("Type mismatch: expected INTEGER for 'int_to_double'");
+            }
+
+            case "<MDA>double_to_int":
+            case "<MDA>g2rizz": {
+                Object value = visit(ctx.function_call().arguments().expression(0));
+
+                if (value instanceof Variable v && v.getType() == VariableType.DOUBLE) {
+                    return ((Double) v.getValue()).intValue();
+                } else if (value instanceof Double d) {
+                    return d.intValue();
+                }
+
+                throw new RuntimeException("Type mismatch: expected DOUBLE for 'double_to_int'");
+            }
+
+            case "<MDA>boolean_to_int":
+            case "<MDA>cappin2rizz": {
+                Object value = visit(ctx.function_call().arguments().expression(0));
+
+                if (value instanceof Variable v && v.getType() == VariableType.BOOLEAN) {
+                    return ((Boolean) v.getValue()) ? 1 : 0;
+                } else if (value instanceof Boolean b) {
+                    return b ? 1 : 0;
+                }
+
+                throw new RuntimeException("Type mismatch: expected BOOLEAN for 'boolean_to_int'");
+            }
+
+            case "<MDA>string_to_int":
+            case "<MDA>squad2rizz": {
+                Object value = visit(ctx.function_call().arguments().expression(0));
+
+                String str;
+                if (value instanceof Variable v && v.getType() == VariableType.STRING) {
+                    str = (String) v.getValue();
+                } else if (value instanceof String s) {
+                    str = s;
+                } else {
+                    throw new RuntimeException("Type mismatch: expected STRING for 'string_to_int'");
+                }
+
+                try {
+                    return Integer.parseInt(str);
+                } catch (NumberFormatException e) {
+                    throw new RuntimeException("Failed to convert STRING to INTEGER in 'string_to_int': " + str);
+                }
+            }
+
+            case "<MDA>string_to_double":
+            case "<MDA>squad2g": {
+                Object value = visit(ctx.function_call().arguments().expression(0));
+
+                String str;
+                if (value instanceof Variable v && v.getType() == VariableType.STRING) {
+                    str = (String) v.getValue();
+                } else if (value instanceof String s) {
+                    str = s;
+                } else {
+                    throw new RuntimeException("Type mismatch: expected STRING for 'string_to_double'");
+                }
+
+                try {
+                    return Double.parseDouble(str);
+                } catch (NumberFormatException e) {
+                    throw new RuntimeException("Failed to convert STRING to DOUBLE in 'string_to_double': " + str);
+                }
+            }
+
+            case "<MDA>int_to_string":
+            case "<MDA>rizz2squad": {
+                Object value = visit(ctx.function_call().arguments().expression(0));
+
+                if (value instanceof Variable v && v.getType() == VariableType.INTEGER) {
+                    return String.valueOf(v.getValue());
+                } else if (value instanceof Integer i) {
+                    return String.valueOf(i);
+                }
+
+                throw new RuntimeException("Type mismatch: expected INTEGER for 'int_to_string'");
+            }
+
+            case "<MDA>double_to_string":
+            case "<MDA>g2squad": {
+                Object value = visit(ctx.function_call().arguments().expression(0));
+
+                if (value instanceof Variable v && v.getType() == VariableType.DOUBLE) {
+                    return String.valueOf(v.getValue());
+                } else if (value instanceof Double d) {
+                    return String.valueOf(d);
+                }
+
+                throw new RuntimeException("Type mismatch: expected DOUBLE for 'double_to_string'");
+            }
+
             default: {
                 String functionNameLower = functionName.toLowerCase();
                 Function function = functions.get(functionNameLower);
@@ -1782,9 +2072,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                         }
 
                         functionVariables.put(param.getName(), new Variable(param.getName(), param.getType(), variableArg.getValue()));
-                    }
-
-                    else {
+                    } else {
                         VariableType argType = TypeChecker.inferTypeFromValue(argValue);
 
                         if (!param.getType().equals(argType)) {
@@ -1827,9 +2115,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
         if (var != null) {
             return var;
-        }
-
-        else {
+        } else {
             throw new RuntimeException("Variable " + varName + " not defined");
         }
     }

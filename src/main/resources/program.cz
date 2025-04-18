@@ -1,30 +1,60 @@
-array<int> sort(array<int> arr);
+#define PI 3.14159
 
 int main() {
-    int elem = 5;
-    array<int> arr = [elem, -2, 4, 9, 0];
-    array<int> sorted_arr = sort(<MDA>array_copy(arr));
+    // ─── Math Functions ───────────────────────────────────────────────────────
+    double degs = <MDA>radians_to_degrees(PI);
+    double rads = <MDA>degrees_to_radians(180.0);
 
-    print("Initial array: ", arr);
-    print("Sorted array: ", sorted_arr);
+    print("[1]. SINE\n");
+    print(<MDA>sine(180.0), "\n");
+    print(<MDA>sine(degs), "\n");
+
+    print("\n");
+
+    print("[2]. COSINE\n");
+    print(<MDA>cosine(180.0), "\n");
+    print(<MDA>cosine(degs), "\n");
+
+    print("\n");
+
+    print("[3]. HYPERBOLIC SINE\n");
+    print(<MDA>hyperbolic_sine(180.0), "\n");
+    print(<MDA>hyperbolic_sine(degs), "\n");
+
+    print("\n");
+
+    print("[4]. HYPERBOLIC COSINE\n");
+    print(<MDA>hyperbolic_cosine(180.0), "\n");
+    print(<MDA>hyperbolic_cosine(degs), "\n");
+
+    print("\n");
+
+    print("[5]. DEGREES <-> RADIANS\n");
+    print(<MDA>degrees_to_radians(180.0), "\n");
+    print(<MDA>radians_to_degrees(PI), "\n");
+
+    print("\n");
+
+    print("[6]. EXPONENTIAL + LOGARITHM\n");
+    print(<MDA>exponential(2.0), "\n");
+    print(<MDA>logarithm(8.0, 2), "\n"); // log base 2 of 8 = 3
+
+    // ─── Type Conversions ────────────────────────────────────────────────────
+    print("\n[7]. TYPE CONVERSIONS\n");
+    print(<MDA>int_to_double(42), "\n");
+    print(<MDA>double_to_int(3.99), "\n");
+    print(<MDA>boolean_to_int(true), "\n");
+    print(<MDA>boolean_to_int(false), "\n");
+    print(<MDA>string_to_int("123"), "\n");
+    print(<MDA>string_to_double("3.1415"), "\n");
+    print(<MDA>int_to_string(42), "\n");
+    print(<MDA>double_to_string(3.1415), "\n");
+
+    // ─── String Functions ─────────────────────────────────────────────────────
+    print("\n[8]. STRING FUNCTIONS\n");
+    print(<MDA>string_slice("hello world", 0, 5), "\n");          // "hello"
+    print(<MDA>string_split("a,b,c", ','), "\n");                // ["a", "b", "c"]
+    print(<MDA>string_substring("gen z coding", "coding"), "\n"); // true
 
     return 0;
 }
-
-array<int> sort(array<int> arr) {
-    int array_length = <MDA>array_length(arr);
-    int temp;
-
-    for (int i = 0; i < array_length; i = i + 1) {
-        for (int k = i + 1; k < array_length; k = k + 1) {
-            if (<MDA>array_get_at(arr, i) > <MDA>array_get_at(arr, k)) {
-                temp = <MDA>array_get_at(arr, i);
-                <MDA>array_set_at(arr, i, <MDA>array_get_at(arr, k));
-                <MDA>array_set_at(arr, k, temp);
-            }
-        }
-    }
-
-    return arr;
-}
-
