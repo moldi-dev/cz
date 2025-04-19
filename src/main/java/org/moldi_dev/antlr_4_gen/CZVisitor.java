@@ -164,6 +164,12 @@ public interface CZVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitWhile_statement(CZParser.While_statementContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link CZParser#do_while_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDo_while_statement(CZParser.Do_while_statementContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link CZParser#for_statement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

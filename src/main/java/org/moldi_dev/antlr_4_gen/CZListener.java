@@ -261,6 +261,16 @@ public interface CZListener extends ParseTreeListener {
 	 */
 	void exitWhile_statement(CZParser.While_statementContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link CZParser#do_while_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterDo_while_statement(CZParser.Do_while_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CZParser#do_while_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitDo_while_statement(CZParser.Do_while_statementContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link CZParser#for_statement}.
 	 * @param ctx the parse tree
 	 */

@@ -196,6 +196,13 @@ public class CZBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements CZV
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitDo_while_statement(CZParser.Do_while_statementContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitFor_statement(CZParser.For_statementContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}

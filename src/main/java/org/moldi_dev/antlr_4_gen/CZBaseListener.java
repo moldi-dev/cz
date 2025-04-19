@@ -320,6 +320,18 @@ public class CZBaseListener implements CZListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterDo_while_statement(CZParser.Do_while_statementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitDo_while_statement(CZParser.Do_while_statementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterFor_statement(CZParser.For_statementContext ctx) { }
 	/**
 	 * {@inheritDoc}

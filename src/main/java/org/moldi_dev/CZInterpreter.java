@@ -922,6 +922,34 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
     }
 
     @Override
+    public Object visitDo_while_statement(CZParser.Do_while_statementContext ctx) {
+        do {
+            shouldBreak = false;
+            shouldContinue = false;
+
+            for (CZParser.StatementContext stmt : ctx.block().statement()) {
+                Object result = visit(stmt);
+
+                if (shouldBreak) {
+                    shouldBreak = false;
+                    return null;
+                }
+
+                if (shouldContinue) {
+                    shouldContinue = false;
+                    break;
+                }
+
+                if (result != null) {
+                    return result;
+                }
+            }
+        } while ((boolean) visit(ctx.expression()));
+
+        return null;
+    }
+
+    @Override
     public Object visitFor_statement(CZParser.For_statementContext ctx) {
         boolean outerBreak = shouldBreak;
         boolean outerContinue = shouldContinue;
@@ -1897,7 +1925,15 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 }
 
                 String[] parts = str.split(Pattern.quote(String.valueOf(delimiter)));
-                return Arrays.asList(parts);
+                List<String> nonEmptyParts = new ArrayList<>();
+
+                for (String part : parts) {
+                    if (!part.isEmpty()) {
+                        nonEmptyParts.add(part);
+                    }
+                }
+
+                return nonEmptyParts;
             }
 
             case "<MDA>string_substring":

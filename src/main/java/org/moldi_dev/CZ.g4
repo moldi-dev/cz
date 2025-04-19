@@ -48,6 +48,7 @@ statement
     | read_statement SEMICOLON
     | if_statement
     | while_statement
+    | do_while_statement
     | for_statement
     | block
     | break_statement
@@ -149,6 +150,10 @@ while_statement
     : WHILE LEFT_PARENTHESIS expression RIGHT_PARENTHESIS block
     ;
 
+do_while_statement
+    : DO block WHILE LEFT_PARENTHESIS expression RIGHT_PARENTHESIS SEMICOLON
+    ;
+
 for_statement
     : FOR LEFT_PARENTHESIS for_init? SEMICOLON expression? SEMICOLON assignment? RIGHT_PARENTHESIS block
     ;
@@ -226,6 +231,9 @@ READ: 'read' | 'spill_tea';
 IF: 'if' | 'fr';
 ELSE: 'else' | 'nahfr';
 WHILE: 'while' | 'ong';
+UNLESS: 'unless' | 'vbb';
+GUARD: 'guard' | 'xxx';
+DO: 'do' | 'cook';
 FOR: 'for' | 'vibing';
 BREAK: 'break' | 'stahp';
 CONTINUE: 'continue' | 'f_around';
