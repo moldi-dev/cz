@@ -21,6 +21,16 @@ public interface CZListener extends ParseTreeListener {
 	 */
 	void exitProgram(CZParser.ProgramContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link CZParser#headers}.
+	 * @param ctx the parse tree
+	 */
+	void enterHeaders(CZParser.HeadersContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CZParser#headers}.
+	 * @param ctx the parse tree
+	 */
+	void exitHeaders(CZParser.HeadersContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link CZParser#define_directive}.
 	 * @param ctx the parse tree
 	 */

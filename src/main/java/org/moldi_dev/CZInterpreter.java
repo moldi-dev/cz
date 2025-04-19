@@ -633,7 +633,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
                 if (value instanceof List<?> rawList) {
                     if (rawList.isEmpty()) {
-                        throw new RuntimeException("Empty list: expected an array of elements for array " + varName);
+                        variables.put(varName, new Variable(varName, var.getType(), new ArrayList<>()));
                     }
 
                     if (rawList.stream().allMatch(item ->
@@ -670,7 +670,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
                 if (value instanceof List<?> rawList) {
                     if (rawList.isEmpty()) {
-                        throw new RuntimeException("Empty list: expected an array of elements for array " + varName);
+                        variables.put(varName, new Variable(varName, var.getType(), new ArrayList<>()));
                     }
 
                     if (rawList.stream().allMatch(item ->
@@ -707,7 +707,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
                 if (value instanceof List<?> rawList) {
                     if (rawList.isEmpty()) {
-                        throw new RuntimeException("Empty list: expected an array of elements for array " + varName);
+                        variables.put(varName, new Variable(varName, var.getType(), new ArrayList<>()));
                     }
 
                     if (rawList.stream().allMatch(item ->
@@ -744,7 +744,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
                 if (value instanceof List<?> rawList) {
                     if (rawList.isEmpty()) {
-                        throw new RuntimeException("Empty list: expected an array of elements for array " + varName);
+                        variables.put(varName, new Variable(varName, var.getType(), new ArrayList<>()));
                     }
 
                     if (rawList.stream().allMatch(item ->
@@ -809,22 +809,18 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                     }
 
                     output.append("]");
-                }
-
-                else if (value instanceof String strVal) {
+                } else if (value instanceof String strVal) {
                     output.append(strVal.replace("\\n", "\n")
                             .replace("\\t", "\t")
                             .replace("\\\"", "\"")
                             .replace("\\\\", "\\"));
-                }
-
-                else {
+                } else {
                     output.append(value);
                 }
             }
         }
 
-        System.out.print(output.toString());
+        System.out.print(output);
         return null;
     }
 
@@ -2036,8 +2032,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             }
 
             default: {
-                String functionNameLower = functionName.toLowerCase();
-                Function function = functions.get(functionNameLower);
+                Function function = functions.get(functionName);
 
                 if (function == null || function.getIsDeclaredOnly()) {
                     throw new RuntimeException("Function " + functionName + " not defined or missing implementation.");

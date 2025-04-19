@@ -1,0 +1,206 @@
+#include <MDA>
+
+array<int> bubble_sort(array<int> arr);
+array<int> selection_sort(array<int> arr);
+array<int> insertion_sort(array<int> arr);
+array<int> quick_sort(array<int> arr);
+
+array<int> merge(array<int> left, array<int> right);
+array<int> merge_sort(array<int> arr);
+
+int main() {
+    array<int> a = [5, -2, 4, 9, 0];
+
+    array<int> sorted_arr_bubble_sort = bubble_sort(<MDA>array_copy(a));
+    array<int> sorted_arr_selection_sort = selection_sort(<MDA>array_copy(a));
+    array<int> sorted_arr_insertion_sort = insertion_sort(<MDA>array_copy(a));
+    array<int> sorted_arr_quick_sort = quick_sort(<MDA>array_copy(a));
+    array<int> sorted_arr_merge_sort = merge_sort(<MDA>array_copy(a));
+
+    print("Initial array: ", a, "\n");
+    print("Sorted array with bubble sort: ", sorted_arr_bubble_sort, "\n");
+    print("Sorted array with selection sort: ", sorted_arr_selection_sort, "\n");
+    print("Sorted array with insertion sort: ", sorted_arr_insertion_sort, "\n");
+    print("Sorted array with quick sort: ", sorted_arr_quick_sort, "\n");
+    print("Sorted array with merge sort: ", sorted_arr_merge_sort, "\n");
+
+    return 0;
+}
+
+array<int> bubble_sort(array<int> arr) {
+    int array_length = <MDA>array_length(arr);
+    int temp;
+
+    for (int i = 0; i < array_length; i = i + 1) {
+        for (int k = i + 1; k < array_length; k = k + 1) {
+            if (<MDA>array_get_at(arr, i) > <MDA>array_get_at(arr, k)) {
+                temp = <MDA>array_get_at(arr, i);
+                <MDA>array_set_at(arr, i, <MDA>array_get_at(arr, k));
+                <MDA>array_set_at(arr, k, temp);
+            }
+        }
+    }
+
+    return arr;
+}
+
+array<int> selection_sort(array<int> arr) {
+    int array_length = <MDA>array_length(arr);
+    int min_idx;
+    int temp;
+
+    for (int i = 0; i < array_length - 1; i = i + 1) {
+        min_idx = i;
+
+        for (int j = i + 1; j < array_length; j = j + 1) {
+            if (<MDA>array_get_at(arr, j) < <MDA>array_get_at(arr, min_idx)) {
+                min_idx = j;
+            }
+        }
+
+        temp = <MDA>array_get_at(arr, min_idx);
+        <MDA>array_set_at(arr, min_idx, <MDA>array_get_at(arr, i));
+        <MDA>array_set_at(arr, i, temp);
+    }
+
+    return arr;
+}
+
+array<int> insertion_sort(array<int> arr) {
+    int array_length = <MDA>array_length(arr);
+    int temp;
+    int j;
+
+    for (int i = 1; i < array_length; i = i + 1) {
+        temp = <MDA>array_get_at(arr, i);
+        j = i - 1;
+
+        while (j >= 0) {
+            if (<MDA>array_get_at(arr, j) < temp) {
+                break;
+            }
+
+            <MDA>array_set_at(arr, j + 1, <MDA>array_get_at(arr, j));
+            j = j - 1;
+        }
+
+        <MDA>array_set_at(arr, j + 1, temp);
+    }
+
+    return arr;
+}
+
+array<int> quick_sort(array<int> arr) {
+    int length = <MDA>array_length(arr);
+
+    if (length <= 1) {
+        return arr;
+    }
+
+    int pivot = <MDA>array_get_at(arr, 0);
+    array<int> less = [];
+    array<int> equal = [];
+    array<int> greater = [];
+
+    for (int i = 0; i < length; i = i + 1) {
+        int val = <MDA>array_get_at(arr, i);
+
+        if (val < pivot) {
+            <MDA>array_insert_last(less, val);
+        }
+
+        else if (val > pivot) {
+            <MDA>array_insert_last(greater, val);
+        }
+
+        else {
+            <MDA>array_insert_last(equal, val);
+        }
+    }
+
+    less = quick_sort(less);
+    greater = quick_sort(greater);
+
+    array<int> result = [];
+
+    int less_len = <MDA>array_length(less);
+
+    for (int i = 0; i < less_len; i = i + 1) {
+        <MDA>array_insert_last(result, <MDA>array_get_at(less, i));
+    }
+
+    int equal_len = <MDA>array_length(equal);
+
+    for (int i = 0; i < equal_len; i = i + 1) {
+        <MDA>array_insert_last(result, <MDA>array_get_at(equal, i));
+    }
+
+    int greater_len = <MDA>array_length(greater);
+
+    for (int i = 0; i < greater_len; i = i + 1) {
+        <MDA>array_insert_last(result, <MDA>array_get_at(greater, i));
+    }
+
+    return result;
+}
+
+array<int> merge(array<int> left, array<int> right) {
+    array<int> result = [];
+    int i = 0;
+    int j = 0;
+    int left_len = <MDA>array_length(left);
+    int right_len = <MDA>array_length(right);
+
+    while (i < left_len && j < right_len) {
+        int l_val = <MDA>array_get_at(left, i);
+        int r_val = <MDA>array_get_at(right, j);
+
+        if (l_val <= r_val) {
+            <MDA>array_insert_last(result, l_val);
+            i = i + 1;
+        }
+
+        else {
+            <MDA>array_insert_last(result, r_val);
+            j = j + 1;
+        }
+    }
+
+    while (i < left_len) {
+        <MDA>array_insert_last(result, <MDA>array_get_at(left, i));
+        i = i + 1;
+    }
+
+    while (j < right_len) {
+        <MDA>array_insert_last(result, <MDA>array_get_at(right, j));
+        j = j + 1;
+    }
+
+    return result;
+}
+
+array<int> merge_sort(array<int> arr) {
+    int length = <MDA>array_length(arr);
+
+    if (length <= 1) {
+        return arr;
+    }
+
+    int middle = length / 2;
+
+    array<int> left = [];
+    array<int> right = [];
+
+    for (int i = 0; i < middle; i = i + 1) {
+        <MDA>array_insert_last(left, <MDA>array_get_at(arr, i));
+    }
+
+    for (int i = middle; i < length; i = i + 1) {
+        <MDA>array_insert_last(right, <MDA>array_get_at(arr, i));
+    }
+
+    left = merge_sort(left);
+    right = merge_sort(right);
+
+    return merge(left, right);
+}

@@ -1,3 +1,17 @@
+#include <MDA>
+
+int fibonacci_sum_recursively(int n);
+int fibonacci_sum_iteratively(int n);
+
+int main() {
+    int n = 10;
+
+    print("Fibonacci sum iteratively up to ", n, ": ", fibonacci_sum_iteratively(n), "\n");
+    print("Fibonacci sum recursively up to ", n, ": ", fibonacci_sum_recursively(n), "\n");
+
+    return 0;
+}
+
 int fibonacci_sum_recursively(int n) {
     if (n == 0) {
         return 0;
@@ -22,13 +36,4 @@ int fibonacci_sum_iteratively(int n) {
     }
 
     return sum;
-}
-
-int main() {
-    int n = 10;
-
-    print(fibonacci_sum_iteratively(n));
-    print(fibonacci_sum_recursively(n));
-
-    return 0;
 }

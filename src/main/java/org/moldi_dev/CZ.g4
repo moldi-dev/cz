@@ -1,16 +1,16 @@
 grammar CZ;
 
-options {
-    caseInsensitive = true;
-}
-
 @header {
     import java.util.*;
 }
 
 // Parser rules
 program
-    : define_directive* function_declaration* function* main_function function* EOF
+    : headers define_directive* function_declaration* function* main_function function* EOF
+    ;
+
+headers
+    : STANDARD_INCLUDE_DIRECTIVE
     ;
 
 define_directive
@@ -190,7 +190,7 @@ literal
     ;
 
 array_literal
-    : LEFT_BRACKET expression (COMMA expression)* RIGHT_BRACKET
+    : LEFT_BRACKET (expression (COMMA expression)*)* RIGHT_BRACKET
     ;
 
 boolean_literal
@@ -237,6 +237,7 @@ SWITCH: 'switch' | 'switchy';
 CASE: 'case' | 'vibe';
 DEFAULT: 'default' | 'deffie';
 DEFINE: '#define' | '#vibe_define';
+STANDARD_INCLUDE_DIRECTIVE: '#include <MDA>' | '#vibe_include <MDA>';
 
 // Operators
 QUESTION: '?' | 'fr?';
@@ -283,7 +284,7 @@ EXPONENTIAL: '<MDA>exponential' | '<MDA>brr_brr_patapim'; // <MDA>exponential ::
 LOGARITHM: '<MDA>logarithm' | '<MDA>vibe_log'; // <MDA>logarithm :: DOUBLE, INTEGER => DOUBLE
 
 ARRAY_LENGTH: '<MDA>array_length' | '<MDA>squad_countdown'; // <MDA>array_length :: array<T> => INTEGER
-ARRAY_GET_AT: '<MDA>array_get_at' | '<MDA>squad_peep'; // <MDA>array_get_at :: array<T>, INTEGER => INTEGER
+ARRAY_GET_AT: '<MDA>array_get_at' | '<MDA>squad_peep'; // <MDA>array_get_at :: array<T>, INTEGER => T
 ARRAY_SET_AT: '<MDA>array_set_at' | '<MDA>squad_seep'; // <MDA>array_set_at :: array<T>, INTEGER, T => array<T>
 ARRAY_COPY: '<MDA>array_copy' | '<MDA>squad_join'; // <MDA>array_copy :: array<T> => array<T>
 ARRAY_CONTAINS: '<MDA>array_contains' | '<MDA>squad_vibeswith'; // <MDA>array_set_at :: array<T>, T => BOOLEAN
