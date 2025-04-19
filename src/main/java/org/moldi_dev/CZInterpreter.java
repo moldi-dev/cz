@@ -19,6 +19,10 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         functions = new HashMap<>();
         macros = new HashMap<>();
 
+        // Built-in macros (can be overriden through macros if needed)
+        macros.put("E", String.valueOf(Math.E));
+        macros.put("PI", String.valueOf(Math.PI));
+
         // Built-in functions (my standard library hehehe)
         functions.put("<MDA>sine",
                 new Function("<MDA>sine",
@@ -86,12 +90,12 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         functions.put("<MDA>logarithm",
                 new Function("<MDA>logarithm",
                         List.of(new Variable("x", VariableType.DOUBLE, null),
-                                new Variable("y", VariableType.INTEGER, null)),
+                                new Variable("y", VariableType.DOUBLE, null)),
                         null, false, VariableType.DOUBLE));
         functions.put("<MDA>vibe_log",
                 new Function("<MDA>vibe_log",
                         List.of(new Variable("x", VariableType.DOUBLE, null),
-                                new Variable("y", VariableType.INTEGER, null)),
+                                new Variable("y", VariableType.DOUBLE, null)),
                         null, false, VariableType.DOUBLE));
 
         functions.put("<MDA>array_length",
@@ -1348,12 +1352,22 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
         Function f = functions.get(functionName);
 
-        if (f == null) {
-            throw new RuntimeException("Function '" + functionName + "' is not declared.");
+        if (f == null || f.getIsDeclaredOnly()) {
+            throw new RuntimeException("Function " + functionName + " not defined or missing implementation.");
         }
 
-        if (f.getIsDeclaredOnly()) {
-            throw new RuntimeException("Function '" + functionName + "' is declared but not defined.");
+        List<Object> argumentValues = new ArrayList<>();
+
+        if (ctx.function_call().arguments() != null) {
+            for (CZParser.ExpressionContext exprCtx : ctx.function_call().arguments().expression()) {
+                argumentValues.add(visit(exprCtx));
+            }
+        }
+
+        List<Variable> parameters = f.getParameters();
+
+        if (argumentValues.size() != parameters.size()) {
+            throw new RuntimeException("Argument count mismatch for function " + functionName);
         }
 
         switch (functionName) {
@@ -1461,7 +1475,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 Object base = visit(ctx.function_call().arguments().expression(1));
 
                 Double val;
-                Integer b;
+                Double b;
 
                 if (value instanceof Variable v && v.getType().equals(VariableType.DOUBLE)) {
                     val = (Double) v.getValue();
@@ -1472,9 +1486,9 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                             + "' in function " + functionName + ": expected " + f.getParameters().getFirst().getType() + " but got " + TypeChecker.inferTypeFromValue(value));
                 }
 
-                if (base instanceof Variable var && var.getType().equals(VariableType.INTEGER)) {
-                    b = (Integer) var.getValue();
-                } else if (base instanceof Integer i) {
+                if (base instanceof Variable var && var.getType().equals(VariableType.DOUBLE)) {
+                    b = (Double) var.getValue();
+                } else if (base instanceof Double i) {
                     b = i;
                 } else {
                     throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().get(1).getName()
@@ -2068,26 +2082,6 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             }
 
             default: {
-                Function function = functions.get(functionName);
-
-                if (function == null || function.getIsDeclaredOnly()) {
-                    throw new RuntimeException("Function " + functionName + " not defined or missing implementation.");
-                }
-
-                List<Object> argumentValues = new ArrayList<>();
-
-                if (ctx.function_call().arguments() != null) {
-                    for (CZParser.ExpressionContext exprCtx : ctx.function_call().arguments().expression()) {
-                        argumentValues.add(visit(exprCtx));
-                    }
-                }
-
-                List<Variable> parameters = function.getParameters();
-
-                if (argumentValues.size() != parameters.size()) {
-                    throw new RuntimeException("Argument count mismatch for function " + functionName);
-                }
-
                 Map<String, Variable> functionVariables = new HashMap<>();
 
                 for (int i = 0; i < parameters.size(); i++) {
@@ -2119,10 +2113,10 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 variables.clear();
                 variables.putAll(functionVariables);
 
-                Object result = null;
+                Object result;
 
                 try {
-                    result = visit(function.getBody());
+                    result = visit(f.getBody());
                 } catch (ReturnValue rv) {
                     result = rv.getValue();
                 }

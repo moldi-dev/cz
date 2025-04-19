@@ -20,12 +20,6 @@ public interface CZVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitProgram(CZParser.ProgramContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link CZParser#headers}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitHeaders(CZParser.HeadersContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link CZParser#define_directive}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

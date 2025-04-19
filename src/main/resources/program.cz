@@ -1,7 +1,17 @@
 #include <MDA>
 
+int func();
+
+int func() {
+    return 1;
+}
+
 int main() {
-    print("Hello World!");
+    array<int> a = [1, 2, 3];
+    int b;
+
+    print(<MDA>array_length(a), "\n");
+    print(func(), "\n");
 
     return 0;
 }

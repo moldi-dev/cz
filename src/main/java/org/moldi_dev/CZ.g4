@@ -6,11 +6,7 @@ grammar CZ;
 
 // Parser rules
 program
-    : headers define_directive* function_declaration* function* main_function function* EOF
-    ;
-
-headers
-    : STANDARD_INCLUDE_DIRECTIVE
+    : STANDARD_INCLUDE_DIRECTIVE define_directive* function_declaration* function* main_function function* EOF
     ;
 
 define_directive
@@ -231,8 +227,6 @@ READ: 'read' | 'spill_tea';
 IF: 'if' | 'fr';
 ELSE: 'else' | 'nahfr';
 WHILE: 'while' | 'ong';
-UNLESS: 'unless' | 'vbb';
-GUARD: 'guard' | 'xxx';
 DO: 'do' | 'cook';
 FOR: 'for' | 'vibing';
 BREAK: 'break' | 'stahp';
@@ -289,7 +283,7 @@ HYPERBOLIC_COSINE: '<MDA>hyperbolic_cosine' | '<MDA>side_overload'; // <MDA>hype
 DEGREES_TO_RADIANS: '<MDA>degrees_to_radians' | '<MDA>degz2radz'; // <MDA>degrees_to_radians :: DOUBLE => DOUBLE
 RADIANS_TO_DEGREES: '<MDA>radians_to_degrees' | '<MDA>radz2degz'; // <MDA>radians_to_degrees :: DOUBLE => DOUBLE
 EXPONENTIAL: '<MDA>exponential' | '<MDA>brr_brr_patapim'; // <MDA>exponential :: DOUBLE => DOUBLE
-LOGARITHM: '<MDA>logarithm' | '<MDA>vibe_log'; // <MDA>logarithm :: DOUBLE, INTEGER => DOUBLE
+LOGARITHM: '<MDA>logarithm' | '<MDA>vibe_log'; // <MDA>logarithm :: DOUBLE, DOUBLE => DOUBLE
 
 ARRAY_LENGTH: '<MDA>array_length' | '<MDA>squad_countdown'; // <MDA>array_length :: array<T> => INTEGER
 ARRAY_GET_AT: '<MDA>array_get_at' | '<MDA>squad_peep'; // <MDA>array_get_at :: array<T>, INTEGER => T
