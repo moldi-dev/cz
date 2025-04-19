@@ -1,0 +1,201 @@
+#vibe_include <MDA>
+
+squad<rizz> bubble_sort opentalk squad<rizz> arr closetalk pointz
+squad<rizz> selection_sort opentalk squad<rizz> arr closetalk pointz
+squad<rizz> insertion_sort opentalk squad<rizz> arr closetalk pointz
+squad<rizz> quick_sort opentalk squad<rizz> arr closetalk pointz
+
+squad<rizz> merge opentalk squad<rizz> left splitz squad<rizz> right closetalk pointz
+squad<rizz> merge_sort opentalk squad<rizz> arr closetalk pointz
+
+rizz boss opentalk closetalk openjam
+    squad<rizz> a vibecheck openvibe 5 splitz -2 splitz 4 splitz 9 splitz 0 splitz 11 splitz -3 splitz 100 splitz -100 closevibe pointz
+
+    squad<rizz> sorted_arr_bubble_sort vibecheck bubble_sort opentalk <MDA>squad_join opentalk a closetalk closetalk pointz
+    squad<rizz> sorted_arr_selection_sort vibecheck selection_sort opentalk <MDA>squad_join opentalk a closetalk closetalk pointz
+    squad<rizz> sorted_arr_insertion_sort vibecheck insertion_sort opentalk <MDA>squad_join opentalk a closetalk closetalk pointz
+    squad<rizz> sorted_arr_quick_sort vibecheck quick_sort opentalk <MDA>squad_join opentalk a closetalk closetalk pointz
+    squad<rizz> sorted_arr_merge_sort vibecheck merge_sort opentalk <MDA>squad_join opentalk a closetalk closetalk pointz
+
+    yeet opentalk "Original array: " splitz a splitz "\n" closetalk pointz
+    yeet opentalk "Sorted array -> bubble sort: " splitz sorted_arr_bubble_sort splitz "\n" closetalk pointz
+    yeet opentalk "Sorted array -> selection sort: " splitz sorted_arr_selection_sort splitz "\n" closetalk pointz
+    yeet opentalk "Sorted array -> insertion sort: " splitz sorted_arr_insertion_sort splitz "\n" closetalk pointz
+    yeet opentalk "Sorted array -> quick sort: " splitz sorted_arr_quick_sort splitz "\n" closetalk pointz
+    yeet opentalk "Sorted array -> merge sort: " splitz sorted_arr_merge_sort splitz "\n" closetalk pointz
+
+    bounce 0 pointz
+closejam
+
+squad<rizz> bubble_sort opentalk squad<rizz> arr closetalk openjam
+    rizz array_length vibecheck <MDA>squad_countdown opentalk arr closetalk pointz
+    rizz temp pointz
+
+    vibing opentalk rizz i vibecheck 0 pointz i smol array_length mid 1 pointz i vibecheck i extra 1 closetalk openjam
+        vibing opentalk rizz k vibecheck i extra 1 pointz k smol array_length pointz k vibecheck k extra 1 closetalk openjam
+            fr opentalk <MDA>squad_peep opentalk arr splitz i closetalk big <MDA>squad_peep opentalk arr splitz k closetalk closetalk openjam
+                temp vibecheck <MDA>squad_peep opentalk arr splitz i closetalk pointz
+                <MDA>squad_seep opentalk arr splitz i splitz <MDA>squad_peep opentalk arr splitz k closetalk closetalk pointz
+                <MDA>squad_seep opentalk arr splitz k splitz temp closetalk pointz
+            closejam
+        closejam
+    closejam
+
+    bounce arr pointz
+closejam
+
+squad<rizz> selection_sort opentalk squad<rizz> arr closetalk openjam
+    rizz array_length vibecheck <MDA>squad_countdown opentalk arr closetalk pointz
+    rizz min_idx pointz
+    rizz temp pointz
+
+    vibing opentalk rizz i vibecheck 0 pointz i smol array_length mid 1 pointz i vibecheck i extra 1 closetalk openjam
+        min_idx vibecheck i pointz
+
+        vibing opentalk rizz j vibecheck i extra 1 pointz j smol array_length pointz j vibecheck j extra 1 closetalk openjam
+            fr opentalk <MDA>squad_peep opentalk arr splitz j closetalk smol <MDA>squad_peep opentalk arr splitz min_idx closetalk closetalk openjam
+                min_idx vibecheck j pointz
+            closejam
+        closejam
+
+        temp vibecheck <MDA>squad_peep opentalk arr splitz min_idx closetalk pointz
+        <MDA>squad_seep opentalk arr splitz min_idx splitz <MDA>squad_peep opentalk arr splitz i closetalk closetalk pointz
+        <MDA>squad_seep opentalk arr splitz i splitz temp closetalk pointz
+    closejam
+
+    bounce arr pointz
+closejam
+
+squad<rizz> insertion_sort opentalk squad<rizz> arr closetalk openjam
+    rizz array_length vibecheck <MDA>squad_countdown opentalk arr closetalk pointz
+    rizz temp pointz
+    rizz j pointz
+
+    vibing opentalk rizz i vibecheck 1 pointz i smol array_length pointz i vibecheck i extra 1 closetalk openjam
+        temp vibecheck <MDA>squad_peep opentalk arr splitz i closetalk pointz
+        j vibecheck i mid 1 pointz
+
+        ong opentalk j biggish 0 closetalk openjam
+            fr opentalk <MDA>squad_peep opentalk arr splitz j closetalk big temp closetalk openjam
+                <MDA>squad_seep opentalk arr splitz j extra 1 splitz <MDA>squad_peep opentalk arr splitz j closetalk closetalk pointz
+                j vibecheck j mid 1 pointz
+            closejam
+
+            nahfr openjam
+                stahp pointz
+            closejam
+        closejam
+
+        <MDA>squad_seep opentalk arr splitz j extra 1 splitz temp closetalk pointz
+    closejam
+
+    bounce arr pointz
+closejam
+
+squad<rizz> quick_sort opentalk squad<rizz> arr closetalk openjam
+    rizz length vibecheck <MDA>squad_countdown opentalk arr closetalk pointz
+
+    fr opentalk length smallish 1 closetalk openjam
+        bounce arr pointz
+    closejam
+
+    rizz pivot vibecheck <MDA>squad_peep opentalk arr splitz 0 closetalk pointz
+    squad<rizz> less vibecheck openvibe closevibe pointz
+    squad<rizz> equal vibecheck openvibe closevibe pointz
+    squad<rizz> greater vibecheck openvibe closevibe pointz
+
+    vibing opentalk rizz i vibecheck 0 pointz i smol length pointz i vibecheck i extra 1 closetalk openjam
+        rizz val vibecheck <MDA>squad_peep opentalk arr splitz i closetalk pointz
+
+        fr opentalk val smol pivot closetalk openjam
+            <MDA>squad_slidein opentalk less splitz val closetalk pointz
+        closejam
+
+        nahfr fr opentalk val big pivot closetalk openjam
+            <MDA>squad_slidein opentalk greater splitz val closetalk pointz
+        closejam
+
+        nahfr openjam
+            <MDA>squad_slidein opentalk equal splitz val closetalk pointz
+        closejam
+    closejam
+
+    less vibecheck quick_sort opentalk less closetalk pointz
+    greater vibecheck quick_sort opentalk greater closetalk pointz
+
+    squad<rizz> result vibecheck openvibe closevibe pointz
+
+    vibing opentalk rizz i vibecheck 0 pointz i smol <MDA>squad_countdown opentalk less closetalk pointz i vibecheck i extra 1 closetalk openjam
+        <MDA>squad_slidein opentalk result splitz <MDA>squad_peep opentalk less splitz i closetalk closetalk pointz
+    closejam
+
+    vibing opentalk rizz i vibecheck 0 pointz i smol <MDA>squad_countdown opentalk equal closetalk pointz i vibecheck i extra 1 closetalk openjam
+        <MDA>squad_slidein opentalk result splitz <MDA>squad_peep opentalk equal splitz i closetalk closetalk pointz
+    closejam
+
+    vibing opentalk rizz i vibecheck 0 pointz i smol <MDA>squad_countdown opentalk greater closetalk pointz i vibecheck i extra 1 closetalk openjam
+        <MDA>squad_slidein opentalk result splitz <MDA>squad_peep opentalk greater splitz i closetalk closetalk pointz
+    closejam
+
+    bounce result pointz
+closejam
+
+squad<rizz> merge opentalk squad<rizz> left splitz squad<rizz> right closetalk openjam
+    squad<rizz> result vibecheck openvibe closevibe pointz
+    rizz i vibecheck 0 pointz
+    rizz j vibecheck 0 pointz
+    rizz left_len vibecheck <MDA>squad_countdown opentalk left closetalk pointz
+    rizz right_len vibecheck <MDA>squad_countdown opentalk right closetalk pointz
+
+    ong opentalk i smol left_len facts j smol right_len closetalk openjam
+        rizz l_val vibecheck <MDA>squad_peep opentalk left splitz i closetalk pointz
+        rizz r_val vibecheck <MDA>squad_peep opentalk right splitz j closetalk pointz
+
+        fr opentalk l_val smallish r_val closetalk openjam
+            <MDA>squad_slidein opentalk result splitz l_val closetalk pointz
+            i vibecheck i extra 1 pointz
+        closejam
+
+        nahfr openjam
+            <MDA>squad_slidein opentalk result splitz r_val closetalk pointz
+            j vibecheck j extra 1 pointz
+        closejam
+    closejam
+
+    ong opentalk i smol left_len closetalk openjam
+        <MDA>squad_slidein opentalk result splitz <MDA>squad_peep opentalk left splitz i closetalk closetalk pointz
+        i vibecheck i extra 1 pointz
+    closejam
+
+    ong opentalk j smol right_len closetalk openjam
+        <MDA>squad_slidein opentalk result splitz <MDA>squad_peep opentalk right splitz j closetalk closetalk pointz
+        j vibecheck j extra 1 pointz
+    closejam
+
+    bounce result pointz
+closejam
+
+squad<rizz> merge_sort opentalk squad<rizz> arr closetalk openjam
+    rizz length vibecheck <MDA>squad_countdown opentalk arr closetalk pointz
+
+    fr opentalk length smallish 1 closetalk openjam
+        bounce arr pointz
+    closejam
+
+    rizz middle vibecheck length ratioed 2 pointz
+    squad<rizz> left vibecheck openvibe closevibe pointz
+    squad<rizz> right vibecheck openvibe closevibe pointz
+
+    vibing opentalk rizz i vibecheck 0 pointz i smol middle pointz i vibecheck i extra 1 closetalk openjam
+        <MDA>squad_slidein opentalk left splitz <MDA>squad_peep opentalk arr splitz i closetalk closetalk pointz
+    closejam
+
+    vibing opentalk rizz i vibecheck middle pointz i smol length pointz i vibecheck i extra 1 closetalk openjam
+        <MDA>squad_slidein opentalk right splitz <MDA>squad_peep opentalk arr splitz i closetalk closetalk pointz
+    closejam
+
+    left vibecheck merge_sort opentalk left closetalk pointz
+    right vibecheck merge_sort opentalk right closetalk pointz
+
+    bounce merge opentalk left splitz right closetalk pointz
+closejam

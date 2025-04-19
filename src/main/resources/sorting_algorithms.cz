@@ -9,7 +9,7 @@ array<int> merge(array<int> left, array<int> right);
 array<int> merge_sort(array<int> arr);
 
 int main() {
-    array<int> a = [5, -2, 4, 9, 0];
+    array<int> a = [5, -2, 4, 9, 0, 11, -3, 100, -100];
 
     array<int> sorted_arr_bubble_sort = bubble_sort(<MDA>array_copy(a));
     array<int> sorted_arr_selection_sort = selection_sort(<MDA>array_copy(a));
@@ -17,12 +17,12 @@ int main() {
     array<int> sorted_arr_quick_sort = quick_sort(<MDA>array_copy(a));
     array<int> sorted_arr_merge_sort = merge_sort(<MDA>array_copy(a));
 
-    print("Initial array: ", a, "\n");
-    print("Sorted array with bubble sort: ", sorted_arr_bubble_sort, "\n");
-    print("Sorted array with selection sort: ", sorted_arr_selection_sort, "\n");
-    print("Sorted array with insertion sort: ", sorted_arr_insertion_sort, "\n");
-    print("Sorted array with quick sort: ", sorted_arr_quick_sort, "\n");
-    print("Sorted array with merge sort: ", sorted_arr_merge_sort, "\n");
+    print("Original array: ", a, "\n");
+    print("Sorted array -> bubble sort: ", sorted_arr_bubble_sort, "\n");
+    print("Sorted array -> selection sort: ", sorted_arr_selection_sort, "\n");
+    print("Sorted array -> insertion sort: ", sorted_arr_insertion_sort, "\n");
+    print("Sorted array -> quick sort: ", sorted_arr_quick_sort, "\n");
+    print("Sorted array -> merge sort: ", sorted_arr_merge_sort, "\n");
 
     return 0;
 }
@@ -31,7 +31,7 @@ array<int> bubble_sort(array<int> arr) {
     int array_length = <MDA>array_length(arr);
     int temp;
 
-    for (int i = 0; i < array_length; i = i + 1) {
+    for (int i = 0; i < array_length - 1; i = i + 1) {
         for (int k = i + 1; k < array_length; k = k + 1) {
             if (<MDA>array_get_at(arr, i) > <MDA>array_get_at(arr, k)) {
                 temp = <MDA>array_get_at(arr, i);
