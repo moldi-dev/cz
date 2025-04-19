@@ -75,15 +75,9 @@ squad<rizz> insertion_sort opentalk squad<rizz> arr closetalk openjam
         temp vibecheck <MDA>squad_peep opentalk arr splitz i closetalk pointz
         j vibecheck i mid 1 pointz
 
-        ong opentalk j biggish 0 closetalk openjam
-            fr opentalk <MDA>squad_peep opentalk arr splitz j closetalk big temp closetalk openjam
-                <MDA>squad_seep opentalk arr splitz j extra 1 splitz <MDA>squad_peep opentalk arr splitz j closetalk closetalk pointz
-                j vibecheck j mid 1 pointz
-            closejam
-
-            nahfr openjam
-                stahp pointz
-            closejam
+        ong opentalk j biggish 0 facts <MDA>squad_peep opentalk arr splitz j closetalk big temp closetalk openjam
+            <MDA>squad_seep opentalk arr splitz j extra 1 splitz <MDA>squad_peep opentalk arr splitz j closetalk closetalk pointz
+            j vibecheck j mid 1 pointz
         closejam
 
         <MDA>squad_seep opentalk arr splitz j extra 1 splitz temp closetalk pointz

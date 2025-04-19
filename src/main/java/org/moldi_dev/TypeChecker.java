@@ -3,7 +3,9 @@ package org.moldi_dev;
 import java.util.List;
 
 public class TypeChecker {
-    public static VariableType inferTypeFromValue(Object value) {
+    public TypeChecker() {}
+
+    public VariableType inferTypeFromValue(Object value) {
         if (value instanceof Variable) {
             return ((Variable) value).getType();
         }
@@ -31,7 +33,7 @@ public class TypeChecker {
         return VariableType.ANY;
     }
 
-    public static VariableType inferTypeFromArrayType(VariableType arrayType) {
+    public VariableType inferTypeFromArrayType(VariableType arrayType) {
         return switch (arrayType) {
             case INTEGER_ARRAY -> VariableType.INTEGER;
             case DOUBLE_ARRAY -> VariableType.DOUBLE;

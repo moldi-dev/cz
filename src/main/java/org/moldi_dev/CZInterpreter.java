@@ -5,7 +5,6 @@ import org.moldi_dev.antlr_4_gen.CZBaseVisitor;
 import org.moldi_dev.antlr_4_gen.CZParser;
 
 import java.util.*;
-import java.util.regex.Pattern;
 
 public class CZInterpreter extends CZBaseVisitor<Object> {
     private final Map<String, Function> functions;
@@ -13,13 +12,24 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
     private Map<String, Variable> variables;
     private boolean shouldBreak = false;
     private boolean shouldContinue = false;
+    private final ExpressionEvaluator expressionEvaluator;
+    private final TypeChecker typeChecker;
+    private final TypeMapper typeMapper;
+    private final Utility utility;
+    private final StandardFunctionHandler standardFunctionHandler;
 
     public CZInterpreter() {
+        standardFunctionHandler = new StandardFunctionHandler();
+        utility = new Utility();
+        typeChecker = new TypeChecker();
+        typeMapper = new TypeMapper();
+        expressionEvaluator = new ExpressionEvaluator();
+        
         variables = new HashMap<>();
         functions = new HashMap<>();
         macros = new HashMap<>();
 
-        // Built-in macros (can be overriden through macros if needed)
+        // Built-in macros (can be overriden if needed)
         macros.put("E", String.valueOf(Math.E));
         macros.put("PI", String.valueOf(Math.PI));
 
@@ -336,31 +346,6 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                         null, false, VariableType.STRING));
     }
 
-    private Object parseMacroValue(String value) {
-        value = value.trim();
-
-        if (value.equals("true") || value.equals("false")) {
-            return Boolean.parseBoolean(value);
-        }
-
-        try {
-            return Integer.parseInt(value);
-        } catch (NumberFormatException ignored) {
-        }
-
-        try {
-            return Double.parseDouble(value);
-        } catch (NumberFormatException ignored) {
-        }
-
-        if ((value.startsWith("\"") && value.endsWith("\"")) ||
-                (value.startsWith("'") && value.endsWith("'"))) {
-            return value.substring(1, value.length() - 1);
-        }
-
-        return value;
-    }
-
     @Override
     public Object visitProgram(CZParser.ProgramContext ctx) {
         for (CZParser.Define_directiveContext defineCtx : ctx.define_directive()) {
@@ -370,16 +355,24 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             if (defineCtx.INTEGER_NUMBER() != null) {
                 macroValue = defineCtx.INTEGER_NUMBER().getText();
                 macros.put(macroName, macroValue);
-            } else if (defineCtx.DOUBLE_NUMBER() != null) {
+            }
+
+            else if (defineCtx.DOUBLE_NUMBER() != null) {
                 macroValue = defineCtx.DOUBLE_NUMBER().getText();
                 macros.put(macroName, macroValue);
-            } else if (defineCtx.STRING_LITERAL() != null) {
+            }
+
+            else if (defineCtx.STRING_LITERAL() != null) {
                 macroValue = defineCtx.STRING_LITERAL().getText();
                 macros.put(macroName, macroValue);
-            } else if (defineCtx.CHARACTER() != null) {
+            }
+
+            else if (defineCtx.CHARACTER() != null) {
                 macroValue = defineCtx.CHARACTER().getText();
                 macros.put(macroName, macroValue);
-            } else if (defineCtx.boolean_literal() != null) {
+            }
+
+            else if (defineCtx.boolean_literal() != null) {
                 macroValue = defineCtx.boolean_literal().getText();
                 macros.put(macroName, macroValue);
             }
@@ -397,7 +390,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
         for (Function function : functions.values()) {
             if (function.getIsDeclaredOnly()) {
-                throw new RuntimeException("Function '" + function.getFunctionName() + "' declared but not defined.");
+                throw new RuntimeException("Function \"" + function.getFunctionName() + "\" declared but not defined.");
             }
         }
 
@@ -416,25 +409,11 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
     public Object visitMain_function(CZParser.Main_functionContext ctx) {
         try {
             return visit(ctx.function_block());
-        } catch (ReturnValue rv) {
+        }
+
+        catch (ReturnValue rv) {
             return rv.getValue();
         }
-    }
-
-    private boolean parametersMatch(List<Variable> a, List<Variable> b) {
-        if (a.size() != b.size()) return false;
-
-        for (int i = 0; i < a.size(); i++) {
-            if (!a.get(i).getType().equals(b.get(i).getType())) {
-                return false;
-            }
-
-            if (!a.get(i).getName().equals(b.get(i).getName())) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     @Override
@@ -444,30 +423,33 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
         if (ctx.parameters() != null) {
             for (CZParser.ParameterContext paramCtx : ctx.parameters().parameter()) {
-                VariableType type = TypeMapper.toVariableType(paramCtx.type_().getText());
+                VariableType type = typeMapper.toVariableType(paramCtx.type_().getText());
                 String name = paramCtx.IDENTIFIER().getText();
                 parameters.add(new Variable(name, type, null));
             }
         }
 
-        VariableType returnType = TypeMapper.toVariableType(ctx.type_().getText());
+        VariableType returnType = typeMapper.toVariableType(ctx.type_().getText());
 
         Function existing = functions.get(functionName);
 
         if (existing == null) {
             Function prototype = new Function(functionName, parameters, null, true, returnType);
             functions.put(functionName, prototype);
-        } else if (existing.getIsDeclaredOnly()) {
+        }
+
+        else if (existing.getIsDeclaredOnly()) {
             if (!existing.getReturnType().equals(returnType)) {
-                throw new RuntimeException("Return type mismatch in function declaration of: " + functionName);
+                throw new RuntimeException("Return type mismatch in function declaration of \"" + functionName + "\".");
             }
 
-            if (!parametersMatch(existing.getParameters(), parameters)) {
-                throw new RuntimeException("Parameter mismatch in function declaration of: " + functionName);
+            if (utility.parametersMatch(existing.getParameters(), parameters)) {
+                throw new RuntimeException("Parameter mismatch in function declaration of \"" + functionName + "\".");
             }
+        }
 
-        } else {
-            throw new RuntimeException("Function " + functionName + " is already defined.");
+        else {
+            throw new RuntimeException("Function \"" + functionName + "\" is already defined.");
         }
 
         return null;
@@ -480,31 +462,35 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
         if (ctx.parameters() != null) {
             for (CZParser.ParameterContext paramCtx : ctx.parameters().parameter()) {
-                VariableType type = TypeMapper.toVariableType(paramCtx.type_().getText());
+                VariableType type = typeMapper.toVariableType(paramCtx.type_().getText());
                 String name = paramCtx.IDENTIFIER().getText();
                 parameters.add(new Variable(name, type, null));
             }
         }
 
-        VariableType returnType = TypeMapper.toVariableType(ctx.type_().getText());
+        VariableType returnType = typeMapper.toVariableType(ctx.type_().getText());
         Function existing = functions.get(functionName);
 
         if (existing == null) {
             Function function = new Function(functionName, parameters, ctx.function_block(), false, returnType);
             functions.put(functionName, function);
-        } else if (existing.getIsDeclaredOnly()) {
+        }
+
+        else if (existing.getIsDeclaredOnly()) {
             if (!existing.getReturnType().equals(returnType)) {
-                throw new RuntimeException("Return type mismatch in function definition of: " + functionName);
+                throw new RuntimeException("Return type mismatch in function definition of \"" + functionName + "\".");
             }
 
-            if (!parametersMatch(existing.getParameters(), parameters)) {
-                throw new RuntimeException("Parameter mismatch in function definition of: " + functionName);
+            if (utility.parametersMatch(existing.getParameters(), parameters)) {
+                throw new RuntimeException("Parameter mismatch in function definition of \"" + functionName + "\".");
             }
 
             existing.setBody(ctx.function_block());
             existing.setIsDeclaredOnly(false);
-        } else {
-            throw new RuntimeException("Function " + functionName + " is already defined.");
+        }
+
+        else {
+            throw new RuntimeException("Function \"" + functionName + "\" is already defined.");
         }
 
         return null;
@@ -531,7 +517,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
     public Object visitDeclaration(CZParser.DeclarationContext ctx) {
         String varName = ctx.IDENTIFIER().getText();
         String typeToken = ctx.type_().getText();
-        VariableType type = TypeMapper.toVariableType(typeToken);
+        VariableType type = typeMapper.toVariableType(typeToken);
 
         switch (type) {
             case INTEGER_ARRAY -> variables.put(varName, new Variable(varName, type, new ArrayList<Integer>()));
@@ -543,7 +529,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             case BOOLEAN -> variables.put(varName, new Variable(varName, type, false));
             case CHARACTER -> variables.put(varName, new Variable(varName, type, '\0'));
             case STRING -> variables.put(varName, new Variable(varName, type, "\0"));
-            default -> throw new RuntimeException("Unknown variable type given inside a declaration");
+            default -> throw new RuntimeException("Unknown variable type given inside a declaration.");
         }
 
         if (ctx.expression() != null) {
@@ -568,11 +554,15 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             case INTEGER: {
                 if (value instanceof Integer) {
                     variables.put(varName, new Variable(varName, var.getType(), value));
-                } else if (value instanceof Variable v && v.getType() == VariableType.INTEGER) {
+                }
+
+                else if (value instanceof Variable v && v.getType() == VariableType.INTEGER) {
                     variables.put(varName, new Variable(varName, var.getType(), v.getValue()));
-                } else {
-                    VariableType valueType = (value instanceof Variable v) ? v.getType() : TypeChecker.inferTypeFromValue(value);
-                    throw new RuntimeException("Type mismatch for variable " + varName + ": expected " + VariableType.INTEGER + " but got " + valueType);
+                }
+
+                else {
+                    VariableType valueType = (value instanceof Variable v) ? v.getType() : typeChecker.inferTypeFromValue(value);
+                    throw new RuntimeException("Type mismatch for variable \"" + varName + "\": expected " + VariableType.INTEGER + " but got " + valueType + ".");
                 }
 
                 break;
@@ -581,11 +571,15 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             case DOUBLE: {
                 if (value instanceof Double) {
                     variables.put(varName, new Variable(varName, var.getType(), value));
-                } else if (value instanceof Variable v && v.getType() == VariableType.DOUBLE) {
+                }
+
+                else if (value instanceof Variable v && v.getType() == VariableType.DOUBLE) {
                     variables.put(varName, new Variable(varName, var.getType(), v.getValue()));
-                } else {
-                    VariableType valueType = (value instanceof Variable v) ? v.getType() : TypeChecker.inferTypeFromValue(value);
-                    throw new RuntimeException("Type mismatch for variable " + varName + ": expected " + VariableType.DOUBLE + " but got " + valueType);
+                }
+
+                else {
+                    VariableType valueType = (value instanceof Variable v) ? v.getType() : typeChecker.inferTypeFromValue(value);
+                    throw new RuntimeException("Type mismatch for variable \"" + varName + "\": expected " + VariableType.DOUBLE + " but got " + valueType + ".");
                 }
 
                 break;
@@ -594,11 +588,15 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             case CHARACTER: {
                 if (value instanceof Character) {
                     variables.put(varName, new Variable(varName, var.getType(), value));
-                } else if (value instanceof Variable v && v.getType() == VariableType.CHARACTER) {
+                }
+
+                else if (value instanceof Variable v && v.getType() == VariableType.CHARACTER) {
                     variables.put(varName, new Variable(varName, var.getType(), v.getValue()));
-                } else {
-                    VariableType valueType = (value instanceof Variable v) ? v.getType() : TypeChecker.inferTypeFromValue(value);
-                    throw new RuntimeException("Type mismatch for variable " + varName + ": expected " + VariableType.CHARACTER + " but got " + valueType);
+                }
+
+                else {
+                    VariableType valueType = (value instanceof Variable v) ? v.getType() : typeChecker.inferTypeFromValue(value);
+                    throw new RuntimeException("Type mismatch for variable \"" + varName + "\": expected " + VariableType.CHARACTER + " but got " + valueType + ".");
                 }
 
                 break;
@@ -607,11 +605,15 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             case STRING: {
                 if (value instanceof String) {
                     variables.put(varName, new Variable(varName, var.getType(), value));
-                } else if (value instanceof Variable v && v.getType() == VariableType.STRING) {
+                }
+
+                else if (value instanceof Variable v && v.getType() == VariableType.STRING) {
                     variables.put(varName, new Variable(varName, var.getType(), v.getValue()));
-                } else {
-                    VariableType valueType = (value instanceof Variable v) ? v.getType() : TypeChecker.inferTypeFromValue(value);
-                    throw new RuntimeException("Type mismatch for variable " + varName + ": expected " + VariableType.STRING + " but got " + valueType);
+                }
+
+                else {
+                    VariableType valueType = (value instanceof Variable v) ? v.getType() : typeChecker.inferTypeFromValue(value);
+                    throw new RuntimeException("Type mismatch for variable \"" + varName + "\": expected " + VariableType.STRING + " but got " + valueType + ".");
                 }
 
                 break;
@@ -620,11 +622,15 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             case BOOLEAN: {
                 if (value instanceof Boolean) {
                     variables.put(varName, new Variable(varName, var.getType(), value));
-                } else if (value instanceof Variable v && v.getType() == VariableType.BOOLEAN) {
+                }
+
+                else if (value instanceof Variable v && v.getType() == VariableType.BOOLEAN) {
                     variables.put(varName, new Variable(varName, var.getType(), v.getValue()));
-                } else {
-                    VariableType valueType = (value instanceof Variable v) ? v.getType() : TypeChecker.inferTypeFromValue(value);
-                    throw new RuntimeException("Type mismatch for variable " + varName + ": expected " + VariableType.BOOLEAN + " but got " + valueType);
+                }
+
+                else {
+                    VariableType valueType = (value instanceof Variable v) ? v.getType() : typeChecker.inferTypeFromValue(value);
+                    throw new RuntimeException("Type mismatch for variable \"" + varName + "\": expected " + VariableType.BOOLEAN + " but got " + valueType + ".");
                 }
 
                 break;
@@ -649,19 +655,25 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                         for (Object item : rawList) {
                             if (item instanceof Integer i) {
                                 extracted.add(i);
-                            } else {
+                            }
+
+                            else {
                                 Variable v = (Variable) item;
                                 extracted.add((Integer) v.getValue());
                             }
                         }
 
                         variables.put(varName, new Variable(varName, var.getType(), extracted));
-                    } else {
-                        VariableType valueType = (value instanceof Variable v) ? v.getType() : TypeChecker.inferTypeFromValue(value);
-                        throw new RuntimeException("Type mismatch for variable " + varName + ": expected " + VariableType.INTEGER_ARRAY + " but got " + valueType);
                     }
-                } else {
-                    throw new RuntimeException("Invalid value: expected a list for array " + varName);
+
+                    else {
+                        VariableType valueType = (value instanceof Variable v) ? v.getType() : typeChecker.inferTypeFromValue(value);
+                        throw new RuntimeException("Type mismatch for array \"" + varName + "\": expected " + VariableType.INTEGER_ARRAY + " but got " + valueType + ".");
+                    }
+                }
+
+                else {
+                    throw new RuntimeException("Invalid value: expected a list of elements for array \"" + varName + "\".");
                 }
 
                 break;
@@ -686,19 +698,25 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                         for (Object item : rawList) {
                             if (item instanceof Double d) {
                                 extracted.add(d);
-                            } else {
+                            }
+
+                            else {
                                 Variable v = (Variable) item;
                                 extracted.add((Double) v.getValue());
                             }
                         }
 
                         variables.put(varName, new Variable(varName, var.getType(), extracted));
-                    } else {
-                        VariableType valueType = (value instanceof Variable v) ? v.getType() : TypeChecker.inferTypeFromValue(value);
-                        throw new RuntimeException("Type mismatch for variable " + varName + ": expected " + VariableType.DOUBLE_ARRAY + " but got " + valueType);
                     }
-                } else {
-                    throw new RuntimeException("Invalid value: expected a list for array " + varName);
+
+                    else {
+                        VariableType valueType = (value instanceof Variable v) ? v.getType() : typeChecker.inferTypeFromValue(value);
+                        throw new RuntimeException("Type mismatch for variable \"" + varName + "\": expected " + VariableType.DOUBLE_ARRAY + " but got " + valueType + ".");
+                    }
+                }
+
+                else {
+                    throw new RuntimeException("Invalid value: expected a list of elements for array \"" + varName + "\".");
                 }
 
                 break;
@@ -723,19 +741,25 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                         for (Object item : rawList) {
                             if (item instanceof String s) {
                                 extracted.add(s);
-                            } else {
+                            }
+
+                            else {
                                 Variable v = (Variable) item;
                                 extracted.add((String) v.getValue());
                             }
                         }
 
                         variables.put(varName, new Variable(varName, var.getType(), extracted));
-                    } else {
-                        VariableType valueType = (value instanceof Variable v) ? v.getType() : TypeChecker.inferTypeFromValue(value);
-                        throw new RuntimeException("Type mismatch for variable " + varName + ": expected " + VariableType.STRING_ARRAY + " but got " + valueType);
                     }
-                } else {
-                    throw new RuntimeException("Invalid value: expected a list for array " + varName);
+
+                    else {
+                        VariableType valueType = (value instanceof Variable v) ? v.getType() : typeChecker.inferTypeFromValue(value);
+                        throw new RuntimeException("Type mismatch for array \"" + varName + "\": expected " + VariableType.STRING_ARRAY + " but got " + valueType + ".");
+                    }
+                }
+
+                else {
+                    throw new RuntimeException("Invalid value: expected a list for array \"" + varName + "\".");
                 }
 
                 break;
@@ -760,26 +784,32 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                         for (Object item : rawList) {
                             if (item instanceof Boolean b) {
                                 extracted.add(b);
-                            } else {
+                            }
+
+                            else {
                                 Variable v = (Variable) item;
                                 extracted.add((Boolean) v.getValue());
                             }
                         }
 
                         variables.put(varName, new Variable(varName, var.getType(), extracted));
-                    } else {
-                        VariableType valueType = (value instanceof Variable v) ? v.getType() : TypeChecker.inferTypeFromValue(value);
-                        throw new RuntimeException("Type mismatch for variable " + varName + ": expected " + VariableType.BOOLEAN_ARRAY + " but got " + valueType);
                     }
-                } else {
-                    throw new RuntimeException("Invalid value: expected a list for array " + varName);
+
+                    else {
+                        VariableType valueType = (value instanceof Variable v) ? v.getType() : typeChecker.inferTypeFromValue(value);
+                        throw new RuntimeException("Type mismatch for variable \"" + varName + "\": expected " + VariableType.BOOLEAN_ARRAY + " but got " + valueType + ".");
+                    }
+                }
+
+                else {
+                    throw new RuntimeException("Invalid value: expected a list for array \"" + varName + "\".");
                 }
 
                 break;
             }
 
             default:
-                throw new RuntimeException("Unsupported variable type: " + var.getType());
+                throw new RuntimeException("Unsupported variable type: \"" + var.getType() + "\".");
         }
 
         return null;
@@ -813,12 +843,16 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                     }
 
                     output.append("]");
-                } else if (value instanceof String strVal) {
+                }
+
+                else if (value instanceof String strVal) {
                     output.append(strVal.replace("\\n", "\n")
                             .replace("\\t", "\t")
                             .replace("\\\"", "\"")
                             .replace("\\\\", "\\"));
-                } else {
+                }
+
+                else {
                     output.append(value);
                 }
             }
@@ -834,7 +868,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         Scanner scanner = new Scanner(System.in);
         Variable var = variables.get(varName);
 
-        System.out.print("\uD83D\uDCBB Enter a(n) " + TypeMapper.toString(var.getType()) + " value for variable " + varName + ": ");
+        System.out.print("\uD83D\uDCBB Enter a(n) " + typeMapper.toString(var.getType()) + " value for variable " + varName + ": ");
 
         switch (var.getType()) {
             case INTEGER: {
@@ -869,7 +903,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             }
 
             default: {
-                throw new RuntimeException("Unsupported variable type: " + var.getType());
+                throw new RuntimeException("Unsupported variable type: \"" + var.getType() + "\".");
             }
         }
 
@@ -1008,35 +1042,19 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         return null;
     }
 
-    private String findEnclosingFunctionName(ParserRuleContext ctx) {
-        ParserRuleContext current = ctx;
-
-        while (current != null) {
-            if (current instanceof CZParser.Function_declarationContext funcCtx) {
-                return funcCtx.IDENTIFIER().getText();
-            } else if (current instanceof CZParser.FunctionContext funcCtx) {
-                return funcCtx.IDENTIFIER().getText();
-            }
-
-            current = current.getParent();
-        }
-
-        return "_NOT_FOUND";
-    }
-
     @Override
     public Object visitReturn_statement(CZParser.Return_statementContext ctx) {
         Object value = visit(ctx.expression());
 
-        String functionName = findEnclosingFunctionName(ctx);
+        String functionName = utility.findEnclosingFunctionName(ctx);
         Function function = functions.get(functionName);
 
         if (function != null) {
             VariableType declaredReturnType = function.getReturnType();
-            VariableType valueType = TypeChecker.inferTypeFromValue(value);
+            VariableType valueType = typeChecker.inferTypeFromValue(value);
 
             if (!declaredReturnType.equals(valueType)) {
-                throw new RuntimeException("Type mismatch: expected return type " + declaredReturnType + " but got " + valueType);
+                throw new RuntimeException("Return type mismatch for function \"" + functionName + "\": expected return type " + declaredReturnType + " but got " + valueType + ".");
             }
         }
 
@@ -1051,288 +1069,62 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
     @Override
     public Object visitUnaryExpression(CZParser.UnaryExpressionContext ctx) {
         Object value = visit(ctx.expression());
-
-        if (value instanceof Variable) {
-            value = ((Variable) value).getValue();
-        }
-
-        switch (ctx.op.getType()) {
-            case CZParser.NOT:
-                if (value instanceof Boolean) return !(Boolean) value;
-                throw new RuntimeException("Logical NOT (!) requires a boolean operand");
-
-            case CZParser.BITWISE_NOT:
-                if (value instanceof Integer) return ~(Integer) value;
-                throw new RuntimeException("Bitwise NOT (~) requires an integer operand");
-        }
-
-        return value;
+        return expressionEvaluator.evaluateUnaryExpression(value, ctx.op.getType());
     }
 
     @Override
     public Object visitPowerExpression(CZParser.PowerExpressionContext ctx) {
         Object left = visit(ctx.left);
         Object right = visit(ctx.right);
-
-        if (left instanceof Variable) {
-            left = ((Variable) left).getValue();
-        }
-
-        if (right instanceof Variable) {
-            right = ((Variable) right).getValue();
-        }
-
-        if (left instanceof Double || right instanceof Double) {
-            double l = (left instanceof Integer) ? ((Integer) left).doubleValue() : (Double) left;
-            double r = (right instanceof Integer) ? ((Integer) right).doubleValue() : (Double) right;
-
-            return Math.pow(l, r);
-        } else if (left instanceof Integer && right instanceof Integer) {
-            int l = (Integer) left;
-            int r = (Integer) right;
-
-            return (int) Math.pow(l, r);
-        }
-
-        throw new RuntimeException("Invalid operand types for power expression");
+        return expressionEvaluator.evaluatePowerExpression(left, right);
     }
 
     @Override
     public Object visitMultiplicativeExpression(CZParser.MultiplicativeExpressionContext ctx) {
         Object left = visit(ctx.left);
         Object right = visit(ctx.right);
-
-        if (left instanceof Variable) {
-            left = ((Variable) left).getValue();
-        }
-
-        if (right instanceof Variable) {
-            right = ((Variable) right).getValue();
-        }
-
-        if (left instanceof Double || right instanceof Double) {
-            double l = (left instanceof Integer) ? ((Integer) left).doubleValue() : (Double) left;
-            double r = (right instanceof Integer) ? ((Integer) right).doubleValue() : (Double) right;
-
-            return switch (ctx.op.getType()) {
-                case CZParser.MULTIPLICATION -> l * r;
-                case CZParser.DIVISION -> l / r;
-                case CZParser.MODULUS -> l % r;
-                default -> throw new RuntimeException("Invalid operator for doubles");
-            };
-        } else if (left instanceof Integer && right instanceof Integer) {
-            int l = (Integer) left;
-            int r = (Integer) right;
-
-            return switch (ctx.op.getType()) {
-                case CZParser.MULTIPLICATION -> l * r;
-                case CZParser.DIVISION -> l / r;
-                case CZParser.MODULUS -> l % r;
-                default -> 0;
-            };
-        }
-
-        throw new RuntimeException("Invalid operand types for multiplicative expression");
+        return expressionEvaluator.evaluateMultiplicativeExpression(left, right, ctx.op.getType());
     }
 
     @Override
     public Object visitAdditiveExpression(CZParser.AdditiveExpressionContext ctx) {
         Object left = visit(ctx.left);
         Object right = visit(ctx.right);
-
-        if (left instanceof Variable) {
-            left = ((Variable) left).getValue();
-        }
-
-        if (right instanceof Variable) {
-            right = ((Variable) right).getValue();
-        }
-
-        if (ctx.op.getType() == CZParser.ADDITION) {
-            if (left instanceof String || right instanceof String || left instanceof Character || right instanceof Character) {
-                return String.valueOf(left) + right;
-            } else if (left instanceof Double || right instanceof Double) {
-                double l = (left instanceof Integer) ? ((Integer) left).doubleValue() : (Double) left;
-                double r = (right instanceof Integer) ? ((Integer) right).doubleValue() : (Double) right;
-                return l + r;
-            } else {
-                return (Integer) left + (Integer) right;
-            }
-        } else {
-            if (left instanceof Double || right instanceof Double) {
-                double l = (left instanceof Integer) ? ((Integer) left).doubleValue() : (Double) left;
-                double r = (right instanceof Integer) ? ((Integer) right).doubleValue() : (Double) right;
-                return l - r;
-            } else {
-                return (Integer) left - (Integer) right;
-            }
-        }
+        return expressionEvaluator.evaluateAdditiveExpression(left, right, ctx.op.getType());
     }
 
     @Override
     public Object visitShiftExpression(CZParser.ShiftExpressionContext ctx) {
         Object left = visit(ctx.left);
         Object right = visit(ctx.right);
-
-        if (left instanceof Variable) {
-            left = ((Variable) left).getValue();
-        }
-
-        if (right instanceof Variable) {
-            right = ((Variable) right).getValue();
-        }
-
-        if (left instanceof Integer && right instanceof Integer) {
-            int l = (Integer) left;
-            int r = (Integer) right;
-
-            return switch (ctx.op.getType()) {
-                case CZParser.SHIFT_LEFT -> l << r;
-                case CZParser.SHIFT_RIGHT -> l >> r;
-                default -> 0;
-            };
-        }
-
-        throw new RuntimeException("Shift operations require integer operands");
+        return expressionEvaluator.evaluateShiftExpression(left, right, ctx.op.getType());
     }
 
     @Override
     public Object visitRelationalExpression(CZParser.RelationalExpressionContext ctx) {
         Object left = visit(ctx.left);
         Object right = visit(ctx.right);
-
-        if (left instanceof Variable) {
-            left = ((Variable) left).getValue();
-        }
-
-        if (right instanceof Variable) {
-            right = ((Variable) right).getValue();
-        }
-
-        if (left instanceof Double || right instanceof Double) {
-            double l = (left instanceof Integer) ? ((Integer) left).doubleValue() : (Double) left;
-            double r = (right instanceof Integer) ? ((Integer) right).doubleValue() : (Double) right;
-
-            return switch (ctx.op.getType()) {
-                case CZParser.LESS_THAN -> l < r;
-                case CZParser.GREATER_THAN -> l > r;
-                case CZParser.LESS_THAN_OR_EQUAL -> l <= r;
-                case CZParser.GREATER_THAN_OR_EQUAL -> l >= r;
-                default -> false;
-            };
-        } else if (left instanceof Integer && right instanceof Integer) {
-            int l = (Integer) left;
-            int r = (Integer) right;
-
-            return switch (ctx.op.getType()) {
-                case CZParser.LESS_THAN -> l < r;
-                case CZParser.GREATER_THAN -> l > r;
-                case CZParser.LESS_THAN_OR_EQUAL -> l <= r;
-                case CZParser.GREATER_THAN_OR_EQUAL -> l >= r;
-                default -> false;
-            };
-        } else if (left instanceof Character && right instanceof Character) {
-            char l = (Character) left;
-            char r = (Character) right;
-
-            return switch (ctx.op.getType()) {
-                case CZParser.LESS_THAN -> l < r;
-                case CZParser.GREATER_THAN -> l > r;
-                case CZParser.LESS_THAN_OR_EQUAL -> l <= r;
-                case CZParser.GREATER_THAN_OR_EQUAL -> l >= r;
-                default -> false;
-            };
-        } else if (left instanceof String && right instanceof String) {
-            int cmp = ((String) left).compareTo((String) right);
-
-            return switch (ctx.op.getType()) {
-                case CZParser.LESS_THAN -> cmp < 0;
-                case CZParser.GREATER_THAN -> cmp > 0;
-                case CZParser.LESS_THAN_OR_EQUAL -> cmp <= 0;
-                case CZParser.GREATER_THAN_OR_EQUAL -> cmp >= 0;
-                default -> false;
-            };
-        }
-
-        throw new RuntimeException("Invalid operands for relational comparison");
+        return expressionEvaluator.evaluateRelationalExpression(left, right, ctx.op.getType());
     }
 
     @Override
     public Object visitEqualityExpression(CZParser.EqualityExpressionContext ctx) {
         Object left = visit(ctx.left);
         Object right = visit(ctx.right);
-
-        if (left instanceof Variable) {
-            left = ((Variable) left).getValue();
-        }
-
-        if (right instanceof Variable) {
-            right = ((Variable) right).getValue();
-        }
-
-        return switch (ctx.op.getType()) {
-            case CZParser.EQUALS -> Objects.equals(left, right);
-            case CZParser.NOT_EQUALS -> !Objects.equals(left, right);
-            default -> false;
-        };
+        return expressionEvaluator.evaluateEqualityExpression(left, right, ctx.op.getType());
     }
 
     @Override
     public Object visitBitwiseExpression(CZParser.BitwiseExpressionContext ctx) {
         Object left = visit(ctx.left);
         Object right = visit(ctx.right);
-
-        if (left instanceof Variable) {
-            left = ((Variable) left).getValue();
-        }
-
-        if (right instanceof Variable) {
-            right = ((Variable) right).getValue();
-        }
-
-        if (left instanceof Character) left = (int) (Character) left;
-        if (right instanceof Character) right = (int) (Character) right;
-
-        if (!(left instanceof Integer) || !(right instanceof Integer)) {
-            throw new RuntimeException("Bitwise operations require integer operands");
-        }
-
-        int l = (Integer) left;
-        int r = (Integer) right;
-
-        return switch (ctx.op.getType()) {
-            case CZParser.BITWISE_AND -> l & r;
-            case CZParser.BITWISE_OR -> l | r;
-            case CZParser.BITWISE_XOR -> l ^ r;
-            default -> 0;
-        };
+        return expressionEvaluator.evaluateBitwiseExpression(left, right, ctx.op.getType());
     }
 
     @Override
     public Object visitLogicalExpression(CZParser.LogicalExpressionContext ctx) {
         Object left = visit(ctx.left);
-        Object right = visit(ctx.right);
-
-        if (left instanceof Variable) {
-            left = ((Variable) left).getValue();
-        }
-
-        if (right instanceof Variable) {
-            right = ((Variable) right).getValue();
-        }
-
-        if (!(left instanceof Boolean) || !(right instanceof Boolean)) {
-            throw new RuntimeException("Logical operations require boolean operands");
-        }
-
-        boolean l = (Boolean) left;
-        boolean r = (Boolean) right;
-
-        return switch (ctx.op.getType()) {
-            case CZParser.LOGICAL_AND -> l && r;
-            case CZParser.LOGICAL_OR -> l || r;
-            default -> false;
-        };
+        return expressionEvaluator.evaluateLogicalExpression(left, () -> visit(ctx.right), ctx.op.getType());
     }
 
     @Override
@@ -1341,7 +1133,9 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
         if (condition) {
             return visit(ctx.trueExpr);
-        } else {
+        }
+
+        else {
             return visit(ctx.falseExpr);
         }
     }
@@ -1353,7 +1147,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         Function f = functions.get(functionName);
 
         if (f == null || f.getIsDeclaredOnly()) {
-            throw new RuntimeException("Function " + functionName + " not defined or missing implementation.");
+            throw new RuntimeException("Function \"" + functionName + "\" not defined or missing implementation.");
         }
 
         List<Object> argumentValues = new ArrayList<>();
@@ -1367,174 +1161,70 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         List<Variable> parameters = f.getParameters();
 
         if (argumentValues.size() != parameters.size()) {
-            throw new RuntimeException("Argument count mismatch for function " + functionName);
+            throw new RuntimeException("Argument count mismatch for function \"" + functionName + "\".");
         }
 
         switch (functionName) {
             case "<MDA>sine":
             case "<MDA>vibe_sway": {
                 Object value = visit(ctx.function_call().arguments().expression(0));
-
-                if (value instanceof Variable v && v.getType().equals(VariableType.DOUBLE)) {
-                    return Math.sin((Double) v.getValue());
-                } else if (value instanceof Double v) {
-                    return Math.sin(v);
-                }
-
-                throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().getFirst().getName()
-                        + "' in function " + functionName + ": expected " + f.getParameters().getFirst().getType() + " but got " + TypeChecker.inferTypeFromValue(value));
+                return standardFunctionHandler.handleSineFunction(value);
             }
 
             case "<MDA>cosine":
             case "<MDA>side_chill": {
                 Object value = visit(ctx.function_call().arguments().expression(0));
-
-                if (value instanceof Variable v && v.getType().equals(VariableType.DOUBLE)) {
-                    return Math.cos((Double) v.getValue());
-                } else if (value instanceof Double v) {
-                    return Math.cos(v);
-                }
-
-                throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().getFirst().getName()
-                        + "' in function " + functionName + ": expected " + f.getParameters().getFirst().getType() + " but got " + TypeChecker.inferTypeFromValue(value));
+                return standardFunctionHandler.handleCosineFunction(value);
             }
 
             case "<MDA>hyperbolic_sine":
             case "<MDA>vibe_overload": {
                 Object value = visit(ctx.function_call().arguments().expression(0));
-
-                if (value instanceof Variable v && v.getType().equals(VariableType.DOUBLE)) {
-                    return Math.sinh((Double) v.getValue());
-                } else if (value instanceof Double v) {
-                    return Math.sinh(v);
-                }
-
-                throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().getFirst().getName()
-                        + "' in function " + functionName + ": expected " + f.getParameters().getFirst().getType() + " but got " + TypeChecker.inferTypeFromValue(value));
+                return standardFunctionHandler.handleHyperbolicSineFunction(value);
             }
 
             case "<MDA>hyperbolic_cosine":
             case "<MDA>side_overload": {
                 Object value = visit(ctx.function_call().arguments().expression(0));
-
-                if (value instanceof Variable v && v.getType().equals(VariableType.DOUBLE)) {
-                    return Math.cosh((Double) v.getValue());
-                } else if (value instanceof Double v) {
-                    return Math.cosh(v);
-                }
-
-                throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().getFirst().getName()
-                        + "' in function " + functionName + ": expected " + f.getParameters().getFirst().getType() + " but got " + TypeChecker.inferTypeFromValue(value));
+                return standardFunctionHandler.handleHyperbolicCosineFunction(value);
             }
 
             case "<MDA>degrees_to_radians":
             case "<MDA>degz2radz": {
                 Object value = visit(ctx.function_call().arguments().expression(0));
-
-                if (value instanceof Variable v && v.getType().equals(VariableType.DOUBLE)) {
-                    return Math.toRadians((Double) v.getValue());
-                } else if (value instanceof Double v) {
-                    return Math.toRadians(v);
-                }
-
-                throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().getFirst().getName()
-                        + "' in function " + functionName + ": expected " + f.getParameters().getFirst().getType() + " but got " + TypeChecker.inferTypeFromValue(value));
+                return standardFunctionHandler.handleDegreesToRadiansFunction(value);
             }
 
             case "<MDA>radians_to_degrees":
             case "<MDA>radz2degz": {
                 Object value = visit(ctx.function_call().arguments().expression(0));
-
-                if (value instanceof Variable v && v.getType().equals(VariableType.DOUBLE)) {
-                    return Math.toDegrees((Double) v.getValue());
-                } else if (value instanceof Double v) {
-                    return Math.toDegrees(v);
-                }
-
-                throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().getFirst().getName()
-                        + "' in function " + functionName + ": expected " + f.getParameters().getFirst().getType() + " but got " + TypeChecker.inferTypeFromValue(value));
+                return standardFunctionHandler.handleRadiansToDegreesFunction(value);
             }
 
             case "<MDA>exponential":
             case "<MDA>brr_brr_patapim": {
                 Object value = visit(ctx.function_call().arguments().expression(0));
-
-                if (value instanceof Variable v && v.getType().equals(VariableType.DOUBLE)) {
-                    return Math.exp((Double) v.getValue());
-                } else if (value instanceof Double v) {
-                    return Math.exp(v);
-                }
-
-                throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().getFirst().getName()
-                        + "' in function " + functionName + ": expected " + f.getParameters().getFirst().getType() + " but got " + TypeChecker.inferTypeFromValue(value));
+                return standardFunctionHandler.handleExponentialFunction(value);
             }
 
             case "<MDA>logarithm":
             case "<MDA>vibe_log": {
                 Object value = visit(ctx.function_call().arguments().expression(0));
                 Object base = visit(ctx.function_call().arguments().expression(1));
-
-                Double val;
-                Double b;
-
-                if (value instanceof Variable v && v.getType().equals(VariableType.DOUBLE)) {
-                    val = (Double) v.getValue();
-                } else if (value instanceof Double v) {
-                    val = v;
-                } else {
-                    throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().getFirst().getName()
-                            + "' in function " + functionName + ": expected " + f.getParameters().getFirst().getType() + " but got " + TypeChecker.inferTypeFromValue(value));
-                }
-
-                if (base instanceof Variable var && var.getType().equals(VariableType.DOUBLE)) {
-                    b = (Double) var.getValue();
-                } else if (base instanceof Double i) {
-                    b = i;
-                } else {
-                    throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().get(1).getName()
-                            + "' in function " + functionName + ": expected " + f.getParameters().get(1).getType() + " but got " + TypeChecker.inferTypeFromValue(value));
-                }
-
-                return Math.log(val) / Math.log(b);
+                return standardFunctionHandler.handleLogarithmFunction(base, value);
             }
 
             case "<MDA>array_length":
             case "<MDA>squad_countdown": {
                 Object array = visit(ctx.function_call().arguments().expression(0));
-
-                if (array instanceof Variable var && var.getValue() instanceof List<?>) {
-                    return ((List<?>) var.getValue()).size();
-                } else {
-                    throw new RuntimeException("The standard 'array_length' function requires an array argument");
-                }
+                return standardFunctionHandler.handleArrayLengthFunction(array);
             }
 
             case "<MDA>array_get_at":
             case "<MDA>squad_peep": {
                 Object array = visit(ctx.function_call().arguments().expression(0));
                 Object index = visit(ctx.function_call().arguments().expression(1));
-
-                if (!(array instanceof Variable var) || !(var.getValue() instanceof List<?> list)) {
-                    throw new RuntimeException("The standard 'array_at' function requires the first argument to be an array variable");
-                }
-
-                int idx;
-
-                if (index instanceof Integer) {
-                    idx = (Integer) index;
-                } else if (index instanceof Variable var2 && var2.getType() == VariableType.INTEGER && var2.getValue() instanceof Integer i) {
-                    idx = i;
-                } else {
-                    VariableType gotType = (index instanceof Variable v) ? v.getType() : TypeChecker.inferTypeFromValue(index);
-                    throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().get(1).getName()
-                            + "' in function " + functionName + ": expected " + VariableType.INTEGER + " but got " + gotType);
-                }
-
-                if (idx < 0 || idx >= list.size()) {
-                    throw new RuntimeException("Index out of bounds in function " + functionName + ": tried to access index " + idx + " of array with size " + list.size());
-                }
-
-                return list.get(idx);
+                return standardFunctionHandler.handleArrayGetAtFunction(array, index);
             }
 
             case "<MDA>array_set_at":
@@ -1542,188 +1232,41 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 Object array = visit(ctx.function_call().arguments().expression(0));
                 Object index = visit(ctx.function_call().arguments().expression(1));
                 Object value = visit(ctx.function_call().arguments().expression(2));
-
-                Variable variable;
-
-                if (!(array instanceof Variable var) || !(var.getValue() instanceof List<?> list)) {
-                    throw new RuntimeException("The standard 'array_set_at' function requires the first argument to be an array variable");
-                } else {
-                    variable = var;
-                }
-
-                int idx;
-                if (index instanceof Integer) {
-                    idx = (Integer) index;
-                } else if (index instanceof Variable var2 && var2.getType() == VariableType.INTEGER && var2.getValue() instanceof Integer i) {
-                    idx = i;
-                } else {
-                    VariableType gotType = (index instanceof Variable v) ? v.getType() : TypeChecker.inferTypeFromValue(index);
-                    throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().get(2).getName()
-                            + "' in function " + functionName + ": expected " + VariableType.INTEGER + " but got " + gotType);
-                }
-
-                if (idx < 0 || idx >= list.size()) {
-                    throw new RuntimeException("Index out of bounds in function " + functionName + ": tried to access index " + idx + " of array with size " + list.size());
-                }
-
-                VariableType expectedType = TypeChecker.inferTypeFromArrayType(variable.getType());
-
-                VariableType valueType = value instanceof Variable vValue ? vValue.getType() : TypeChecker.inferTypeFromValue(value);
-
-                if (!valueType.equals(expectedType)) {
-                    throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().get(2).getName()
-                            + "' in function " + functionName + ": expected " + expectedType + " but got " + valueType);
-                }
-
-                List<Object> typedList = (List<Object>) list;
-                typedList.set(idx, value);
-
-                return typedList;
+                return standardFunctionHandler.handleArraySetAtFunction(array, index, value);
             }
 
             case "<MDA>array_copy":
             case "<MDA>squad_join": {
                 Object array = visit(ctx.function_call().arguments().expression(0));
-
-                if (array instanceof Variable var && var.getValue() instanceof List<?> list) {
-                    return new ArrayList<>(list);
-                } else {
-                    throw new RuntimeException("The 'array_copy' function requires an array variable");
-                }
+                return standardFunctionHandler.handleArrayCopyFunction(array);
             }
 
             case "<MDA>array_contains":
             case "<MDA>squad_vibeswith": {
                 Object array = visit(ctx.function_call().arguments().expression(0));
                 Object value = visit(ctx.function_call().arguments().expression(1));
-
-                Variable variable;
-
-                if (!(array instanceof Variable var) || !(var.getValue() instanceof List<?> list)) {
-                    throw new RuntimeException("The standard 'array_contains' function requires the first argument to be an array variable");
-                } else {
-                    variable = var;
-                }
-
-                VariableType expectedType = TypeChecker.inferTypeFromArrayType(variable.getType());
-
-                VariableType valueType = value instanceof Variable vValue ? vValue.getType() : TypeChecker.inferTypeFromValue(value);
-
-                if (!valueType.equals(expectedType)) {
-                    throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().get(1).getName()
-                            + "' in function " + functionName + ": expected " + expectedType + " but got " + valueType);
-                }
-
-                List<Object> typedList = (List<Object>) list;
-
-                if (value instanceof Variable vValue) {
-                    value = vValue.getValue();
-                }
-
-                return typedList.contains(value);
+                return standardFunctionHandler.handleArrayContainsFunction(array, value);
             }
 
             case "<MDA>array_index_of":
             case "<MDA>squad_whereat": {
                 Object array = visit(ctx.function_call().arguments().expression(0));
                 Object value = visit(ctx.function_call().arguments().expression(1));
-
-                Variable variable;
-
-                if (!(array instanceof Variable var) || !(var.getValue() instanceof List<?> list)) {
-                    throw new RuntimeException("The standard 'array_index_of' function requires the first argument to be an array variable");
-                } else {
-                    variable = var;
-                }
-
-                VariableType expectedType = TypeChecker.inferTypeFromArrayType(variable.getType());
-
-                VariableType valueType = value instanceof Variable vValue ? vValue.getType() : TypeChecker.inferTypeFromValue(value);
-
-                if (!valueType.equals(expectedType)) {
-                    throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().get(1).getName()
-                            + "' in function " + functionName + ": expected " + expectedType + " but got " + valueType);
-                }
-
-                List<Object> typedList = (List<Object>) list;
-
-                if (value instanceof Variable vValue) {
-                    value = vValue.getValue();
-                }
-
-                return typedList.indexOf(value);
+                return standardFunctionHandler.handleArrayIndexOfFunction(array, value);
             }
 
             case "<MDA>array_count":
             case "<MDA>squad_howmany": {
                 Object array = visit(ctx.function_call().arguments().expression(0));
                 Object value = visit(ctx.function_call().arguments().expression(1));
-
-                Variable variable;
-
-                if (!(array instanceof Variable var) || !(var.getValue() instanceof List<?> list)) {
-                    throw new RuntimeException("The standard 'array_count' function requires the first argument to be an array variable");
-                } else {
-                    variable = var;
-                }
-
-                VariableType expectedType = TypeChecker.inferTypeFromArrayType(variable.getType());
-
-                VariableType valueType = value instanceof Variable vValue ? vValue.getType() : TypeChecker.inferTypeFromValue(value);
-
-                if (!valueType.equals(expectedType)) {
-                    throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().get(1).getName()
-                            + "' in function " + functionName + ": expected " + expectedType + " but got " + valueType);
-                }
-
-                List<Object> typedList = (List<Object>) list;
-
-                int count = 0;
-
-                if (value instanceof Variable vValue) {
-                    value = vValue.getValue();
-                }
-
-                for (Object item : typedList) {
-                    if (item.equals(value)) {
-                        count++;
-                    }
-                }
-
-                return count;
+                return standardFunctionHandler.handleArrayCountFunction(array, value);
             }
 
             case "<MDA>array_insert_first":
             case "<MDA>squad_pushup": {
                 Object array = visit(ctx.function_call().arguments().expression(0));
                 Object value = visit(ctx.function_call().arguments().expression(1));
-
-                Variable variable;
-
-                if (!(array instanceof Variable var) || !(var.getValue() instanceof List<?> list)) {
-                    throw new RuntimeException("The standard 'array_insert_first' function requires the first argument to be an array variable");
-                } else {
-                    variable = var;
-                }
-
-                VariableType expectedType = TypeChecker.inferTypeFromArrayType(variable.getType());
-
-                VariableType valueType = value instanceof Variable vValue ? vValue.getType() : TypeChecker.inferTypeFromValue(value);
-
-                if (!valueType.equals(expectedType)) {
-                    throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().get(1).getName()
-                            + "' in function " + functionName + ": expected " + expectedType + " but got " + valueType);
-                }
-
-                List<Object> typedList = (List<Object>) list;
-
-                if (value instanceof Variable vValue) {
-                    value = vValue.getValue();
-                }
-
-                typedList.addFirst(value);
-
-                return typedList;
+                return standardFunctionHandler.handleArrayInsertFirstFunction(array, value);
             }
 
             case "<MDA>array_insert_at":
@@ -1731,354 +1274,97 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 Object array = visit(ctx.function_call().arguments().expression(0));
                 Object index = visit(ctx.function_call().arguments().expression(1));
                 Object value = visit(ctx.function_call().arguments().expression(2));
-
-                Variable variable;
-
-                if (!(array instanceof Variable var) || !(var.getValue() instanceof List<?> list)) {
-                    throw new RuntimeException("The standard 'array_insert_at' function requires the first argument to be an array variable");
-                } else {
-                    variable = var;
-                }
-
-                int idx;
-                if (index instanceof Integer) {
-                    idx = (Integer) index;
-                } else if (index instanceof Variable var2 && var2.getType() == VariableType.INTEGER && var2.getValue() instanceof Integer i) {
-                    idx = i;
-                } else {
-                    VariableType gotType = (index instanceof Variable v) ? v.getType() : TypeChecker.inferTypeFromValue(index);
-                    throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().get(1).getName()
-                            + "' in function " + functionName + ": expected " + VariableType.INTEGER + " but got " + gotType);
-                }
-
-                if (idx < 0 || idx > list.size()) {
-                    throw new RuntimeException("Index out of bounds in function " + functionName + ": tried to insert at index " + idx + " in array of size " + list.size());
-                }
-
-                VariableType expectedType = TypeChecker.inferTypeFromArrayType(variable.getType());
-                VariableType actualType = (value instanceof Variable vValue) ? vValue.getType() : TypeChecker.inferTypeFromValue(value);
-
-                if (!actualType.equals(expectedType)) {
-                    throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().get(2).getName()
-                            + "' in function " + functionName + ": expected " + expectedType + " but got " + actualType);
-                }
-
-                List<Object> typedList = (List<Object>) list;
-
-                if (value instanceof Variable vValue) {
-                    value = vValue.getValue();
-                }
-
-                typedList.add(idx, value);
-
-                return typedList;
+                return standardFunctionHandler.handleArrayInsertAtFunction(array, index, value);
             }
 
             case "<MDA>array_insert_last":
             case "<MDA>squad_slidein": {
                 Object array = visit(ctx.function_call().arguments().expression(0));
                 Object value = visit(ctx.function_call().arguments().expression(1));
-
-                Variable variable;
-
-                if (!(array instanceof Variable var) || !(var.getValue() instanceof List<?> list)) {
-                    throw new RuntimeException("The standard 'array_insert_last' function requires the first argument to be an array variable");
-                } else {
-                    variable = var;
-                }
-
-                VariableType expectedType = TypeChecker.inferTypeFromArrayType(variable.getType());
-                VariableType valueType = (value instanceof Variable v) ? v.getType() : TypeChecker.inferTypeFromValue(value);
-
-                if (!valueType.equals(expectedType)) {
-                    throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().get(1).getName()
-                            + "' in function " + functionName + ": expected " + expectedType + " but got " + valueType);
-                }
-
-                List<Object> typedList = (List<Object>) list;
-
-                if (value instanceof Variable vValue) {
-                    value = vValue.getValue();
-                }
-
-                typedList.add(value);
-
-                return typedList;
+                return standardFunctionHandler.handleArrayInsertLastFunction(array, value);
             }
 
             case "<MDA>array_delete_first":
             case "<MDA>squad_chopfirst": {
                 Object array = visit(ctx.function_call().arguments().expression(0));
-
-                if (!(array instanceof Variable var) || !(var.getValue() instanceof List<?> list)) {
-                    throw new RuntimeException("The standard 'array_delete_first' function requires the first argument to be an array variable");
-                }
-
-                List<Object> typedList = (List<Object>) list;
-
-                if (typedList.isEmpty()) {
-                    throw new RuntimeException("Cannot delete first element of an empty array in function " + functionName);
-                }
-
-                typedList.removeFirst();
-
-                return typedList;
+                return standardFunctionHandler.handleArrayDeleteFirstFunction(array);
             }
 
             case "<MDA>array_delete_at":
             case "<MDA>squad_chopspot": {
                 Object array = visit(ctx.function_call().arguments().expression(0));
                 Object index = visit(ctx.function_call().arguments().expression(1));
-
-                if (!(array instanceof Variable var) || !(var.getValue() instanceof List<?> list)) {
-                    throw new RuntimeException("The standard 'array_delete_at' function requires the first argument to be an array variable");
-                }
-
-                int idx;
-                if (index instanceof Integer) {
-                    idx = (Integer) index;
-                } else if (index instanceof Variable var2 && var2.getType() == VariableType.INTEGER && var2.getValue() instanceof Integer i) {
-                    idx = i;
-                } else {
-                    VariableType gotType = (index instanceof Variable v) ? v.getType() : TypeChecker.inferTypeFromValue(index);
-                    throw new RuntimeException("Type mismatch for parameter '" + f.getParameters().get(1).getName()
-                            + "' in function " + functionName + ": expected " + VariableType.INTEGER + " but got " + gotType);
-                }
-
-                List<Object> typedList = (List<Object>) list;
-
-                if (idx < 0 || idx >= typedList.size()) {
-                    throw new RuntimeException("Index out of bounds in function " + functionName + ": tried to delete at index " + idx + " from array of size " + typedList.size());
-                }
-
-                typedList.remove(idx);
-
-                return typedList;
+                return standardFunctionHandler.handleArrayDeleteAtFunction(array, index);
             }
 
             case "<MDA>array_delete_last":
             case "<MDA>squad_choplast": {
                 Object array = visit(ctx.function_call().arguments().expression(0));
-
-                if (!(array instanceof Variable var) || !(var.getValue() instanceof List<?> list)) {
-                    throw new RuntimeException("The standard 'array_delete_last' function requires the first argument to be an array variable");
-                }
-
-                List<Object> typedList = (List<Object>) list;
-
-                if (typedList.isEmpty()) {
-                    throw new RuntimeException("Cannot delete last element of an empty array in function " + functionName);
-                }
-
-                typedList.removeLast();
-
-                return typedList;
+                return standardFunctionHandler.handleArrayDeleteLastFunction(array);
             }
 
             case "<MDA>string_slice":
             case "<MDA>squad_cut": {
-                Object strVal = visit(ctx.function_call().arguments().expression(0));
-                Object startVal = visit(ctx.function_call().arguments().expression(1));
-                Object endVal = visit(ctx.function_call().arguments().expression(2));
-
-                String str;
-                if (strVal instanceof Variable v && v.getType() == VariableType.STRING) {
-                    str = (String) v.getValue();
-                } else if (strVal instanceof String s) {
-                    str = s;
-                } else {
-                    throw new RuntimeException("Type mismatch for first parameter of 'string_slice'");
-                }
-
-                int start;
-                if (startVal instanceof Variable v && v.getType() == VariableType.INTEGER) {
-                    start = (Integer) v.getValue();
-                } else if (startVal instanceof Integer) {
-                    start = (Integer) startVal;
-                } else {
-                    throw new RuntimeException("Type mismatch for second parameter of 'string_slice'");
-                }
-
-                int end;
-                if (endVal instanceof Variable v && v.getType() == VariableType.INTEGER) {
-                    end = (Integer) v.getValue();
-                } else if (endVal instanceof Integer) {
-                    end = (Integer) endVal;
-                } else {
-                    throw new RuntimeException("Type mismatch for third parameter of 'string_slice'");
-                }
-
-                if (start < 0 || end > str.length() || start > end) {
-                    throw new RuntimeException("Invalid string slice range in 'string_slice': " + start + " to " + end);
-                }
-
-                return str.substring(start, end);
+                Object string = visit(ctx.function_call().arguments().expression(0));
+                Object startIndex = visit(ctx.function_call().arguments().expression(1));
+                Object endIndex = visit(ctx.function_call().arguments().expression(2));
+                return standardFunctionHandler.handleStringSliceFunction(string, startIndex, endIndex);
             }
 
             case "<MDA>string_split":
             case "<MDA>squad_slay": {
-                Object strVal = visit(ctx.function_call().arguments().expression(0));
-                Object charVal = visit(ctx.function_call().arguments().expression(1));
-
-                String str;
-                if (strVal instanceof Variable v && v.getType() == VariableType.STRING) {
-                    str = (String) v.getValue();
-                } else if (strVal instanceof String s) {
-                    str = s;
-                } else {
-                    throw new RuntimeException("Type mismatch for first parameter of 'string_split'");
-                }
-
-                char delimiter;
-                if (charVal instanceof Variable v && v.getType() == VariableType.CHARACTER) {
-                    delimiter = (Character) v.getValue();
-                } else if (charVal instanceof Character c) {
-                    delimiter = c;
-                } else {
-                    throw new RuntimeException("Type mismatch for second parameter of 'string_split'");
-                }
-
-                String[] parts = str.split(Pattern.quote(String.valueOf(delimiter)));
-                List<String> nonEmptyParts = new ArrayList<>();
-
-                for (String part : parts) {
-                    if (!part.isEmpty()) {
-                        nonEmptyParts.add(part);
-                    }
-                }
-
-                return nonEmptyParts;
+                Object string = visit(ctx.function_call().arguments().expression(0));
+                Object character = visit(ctx.function_call().arguments().expression(1));
+                return standardFunctionHandler.handleStringSplitFunction(string, character);
             }
 
             case "<MDA>string_substring":
             case "<MDA>squad_subquad": {
-                Object strVal = visit(ctx.function_call().arguments().expression(0));
-                Object substrVal = visit(ctx.function_call().arguments().expression(1));
-
-                String str;
-                if (strVal instanceof Variable v && v.getType() == VariableType.STRING) {
-                    str = (String) v.getValue();
-                } else if (strVal instanceof String s) {
-                    str = s;
-                } else {
-                    throw new RuntimeException("Type mismatch for first parameter of 'string_substring'");
-                }
-
-                String substr;
-                if (substrVal instanceof Variable v && v.getType() == VariableType.STRING) {
-                    substr = (String) v.getValue();
-                } else if (substrVal instanceof String s) {
-                    substr = s;
-                } else {
-                    throw new RuntimeException("Type mismatch for second parameter of 'string_substring'");
-                }
-
-                return str.contains(substr);
+                Object string = visit(ctx.function_call().arguments().expression(0));
+                Object substring = visit(ctx.function_call().arguments().expression(1));
+                return standardFunctionHandler.handleStringSubstringFunction(string, substring);
             }
 
             case "<MDA>int_to_double":
             case "<MDA>rizz2g": {
                 Object value = visit(ctx.function_call().arguments().expression(0));
-
-                if (value instanceof Variable v && v.getType() == VariableType.INTEGER) {
-                    return ((Integer) v.getValue()).doubleValue();
-                } else if (value instanceof Integer i) {
-                    return i.doubleValue();
-                }
-
-                throw new RuntimeException("Type mismatch: expected INTEGER for 'int_to_double'");
+                return standardFunctionHandler.handleIntegerToDoubleFunction(value);
             }
 
             case "<MDA>double_to_int":
             case "<MDA>g2rizz": {
                 Object value = visit(ctx.function_call().arguments().expression(0));
-
-                if (value instanceof Variable v && v.getType() == VariableType.DOUBLE) {
-                    return ((Double) v.getValue()).intValue();
-                } else if (value instanceof Double d) {
-                    return d.intValue();
-                }
-
-                throw new RuntimeException("Type mismatch: expected DOUBLE for 'double_to_int'");
+                return standardFunctionHandler.handleDoubleToIntegerFunction(value);
             }
 
             case "<MDA>boolean_to_int":
             case "<MDA>cappin2rizz": {
                 Object value = visit(ctx.function_call().arguments().expression(0));
-
-                if (value instanceof Variable v && v.getType() == VariableType.BOOLEAN) {
-                    return ((Boolean) v.getValue()) ? 1 : 0;
-                } else if (value instanceof Boolean b) {
-                    return b ? 1 : 0;
-                }
-
-                throw new RuntimeException("Type mismatch: expected BOOLEAN for 'boolean_to_int'");
+                return standardFunctionHandler.handleBooleanToIntegerFunction(value);
             }
 
             case "<MDA>string_to_int":
             case "<MDA>squad2rizz": {
                 Object value = visit(ctx.function_call().arguments().expression(0));
-
-                String str;
-                if (value instanceof Variable v && v.getType() == VariableType.STRING) {
-                    str = (String) v.getValue();
-                } else if (value instanceof String s) {
-                    str = s;
-                } else {
-                    throw new RuntimeException("Type mismatch: expected STRING for 'string_to_int'");
-                }
-
-                try {
-                    return Integer.parseInt(str);
-                } catch (NumberFormatException e) {
-                    throw new RuntimeException("Failed to convert STRING to INTEGER in 'string_to_int': " + str);
-                }
+                return standardFunctionHandler.handleStringToIntegerFunction(value);
             }
 
             case "<MDA>string_to_double":
             case "<MDA>squad2g": {
                 Object value = visit(ctx.function_call().arguments().expression(0));
-
-                String str;
-                if (value instanceof Variable v && v.getType() == VariableType.STRING) {
-                    str = (String) v.getValue();
-                } else if (value instanceof String s) {
-                    str = s;
-                } else {
-                    throw new RuntimeException("Type mismatch: expected STRING for 'string_to_double'");
-                }
-
-                try {
-                    return Double.parseDouble(str);
-                } catch (NumberFormatException e) {
-                    throw new RuntimeException("Failed to convert STRING to DOUBLE in 'string_to_double': " + str);
-                }
+                return standardFunctionHandler.handleStringToDoubleFunction(value);
             }
 
             case "<MDA>int_to_string":
             case "<MDA>rizz2squad": {
                 Object value = visit(ctx.function_call().arguments().expression(0));
-
-                if (value instanceof Variable v && v.getType() == VariableType.INTEGER) {
-                    return String.valueOf(v.getValue());
-                } else if (value instanceof Integer i) {
-                    return String.valueOf(i);
-                }
-
-                throw new RuntimeException("Type mismatch: expected INTEGER for 'int_to_string'");
+                return standardFunctionHandler.handleIntegerToStringFunction(value);
             }
 
             case "<MDA>double_to_string":
             case "<MDA>g2squad": {
                 Object value = visit(ctx.function_call().arguments().expression(0));
-
-                if (value instanceof Variable v && v.getType() == VariableType.DOUBLE) {
-                    return String.valueOf(v.getValue());
-                } else if (value instanceof Double d) {
-                    return String.valueOf(d);
-                }
-
-                throw new RuntimeException("Type mismatch: expected DOUBLE for 'double_to_string'");
+                return standardFunctionHandler.handleDoubleToStringFunction(value);
             }
 
             default: {
@@ -2092,17 +1378,19 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                         VariableType argType = variableArg.getType();
 
                         if (!param.getType().equals(argType)) {
-                            throw new RuntimeException("Type mismatch for parameter '" + param.getName()
-                                    + "' in function " + functionName + ": expected " + param.getType() + " but got " + argType);
+                            throw new RuntimeException("Type mismatch for parameter \"" + param.getName()
+                                    + "\" in function \"" + functionName + "\": expected " + param.getType() + " but got " + argType + ".");
                         }
 
                         functionVariables.put(param.getName(), new Variable(param.getName(), param.getType(), variableArg.getValue()));
-                    } else {
-                        VariableType argType = TypeChecker.inferTypeFromValue(argValue);
+                    }
+
+                    else {
+                        VariableType argType = typeChecker.inferTypeFromValue(argValue);
 
                         if (!param.getType().equals(argType)) {
-                            throw new RuntimeException("Type mismatch for parameter '" + param.getName()
-                                    + "' in function " + functionName + ": expected " + param.getType() + " but got " + argType);
+                            throw new RuntimeException("Type mismatch for parameter \"" + param.getName()
+                                    + "\" in function \"" + functionName + "\": expected " + param.getType() + " but got " + argType + ".");
                         }
 
                         functionVariables.put(param.getName(), new Variable(param.getName(), param.getType(), argValue));
@@ -2117,7 +1405,9 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
                 try {
                     result = visit(f.getBody());
-                } catch (ReturnValue rv) {
+                }
+
+                catch (ReturnValue rv) {
                     result = rv.getValue();
                 }
 
@@ -2133,15 +1423,17 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
         if (macros.containsKey(varName)) {
             String value = macros.get(varName);
-            return parseMacroValue(value);
+            return utility.parseMacroValue(value);
         }
 
         Variable var = variables.get(varName);
 
         if (var != null) {
             return var;
-        } else {
-            throw new RuntimeException("Variable " + varName + " not defined");
+        }
+
+        else {
+            throw new RuntimeException("Variable \"" + varName + "\" not defined" + ".");
         }
     }
 
@@ -2154,15 +1446,25 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
     public Object visitLiteral(CZParser.LiteralContext ctx) {
         if (ctx.INTEGER_NUMBER() != null) {
             return Integer.parseInt(ctx.INTEGER_NUMBER().getText());
-        } else if (ctx.DOUBLE_NUMBER() != null) {
+        }
+
+        else if (ctx.DOUBLE_NUMBER() != null) {
             return Double.parseDouble(ctx.DOUBLE_NUMBER().getText());
-        } else if (ctx.CHARACTER() != null) {
+        }
+
+        else if (ctx.CHARACTER() != null) {
             return ctx.CHARACTER().getText().charAt(1);
-        } else if (ctx.STRING_LITERAL() != null) {
+        }
+
+        else if (ctx.STRING_LITERAL() != null) {
             return ctx.STRING_LITERAL().getText().substring(1, ctx.STRING_LITERAL().getText().length() - 1);
-        } else if (ctx.boolean_literal() != null) {
+        }
+
+        else if (ctx.boolean_literal() != null) {
             return ctx.boolean_literal().TRUE() != null;
-        } else if (ctx.array_literal() != null) {
+        }
+
+        else if (ctx.array_literal() != null) {
             return visit(ctx.array_literal());
         }
 

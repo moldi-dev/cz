@@ -1,7 +1,9 @@
 package org.moldi_dev;
 
 public class TypeMapper {
-    public static VariableType toVariableType(String token) {
+    public TypeMapper() {}
+
+    public VariableType toVariableType(String token) {
         return switch (token) {
             case "int", "rizz" -> VariableType.INTEGER;
             case "double", "g" -> VariableType.DOUBLE;
@@ -16,7 +18,7 @@ public class TypeMapper {
         };
     }
 
-    public static String toString(VariableType type) {
+    public String toString(VariableType type) {
         return switch (type) {
             case INTEGER -> "int";
             case DOUBLE -> "double";

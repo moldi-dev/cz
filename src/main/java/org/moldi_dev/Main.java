@@ -31,7 +31,13 @@ public class Main {
 
         ParseTree tree = parser.program();
 
-        interpreter.visit(tree);
+        try {
+            interpreter.visit(tree);
+        }
+
+        catch (Exception e) {
+            System.out.println("\u001B[31m" + e.getMessage() + "\u001B[0m");
+        }
     }
 
     private static String readResourceFile(String fileName) throws Exception {
