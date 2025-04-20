@@ -213,12 +213,24 @@ public class ExpressionEvaluator {
     }
 
     public Object evaluateEqualityExpression(Object left, Object right, int operation) {
-        if (left instanceof Variable) {
-            left = ((Variable) left).getValue();
+        if (left instanceof Variable variable) {
+            if (variable.getType() == VariableType.ENUM) {
+                left = variable.getEnumValue();
+            }
+
+            else {
+                left = variable.getValue();
+            }
         }
 
-        if (right instanceof Variable) {
-            right = ((Variable) right).getValue();
+        if (right instanceof Variable variable) {
+            if (variable.getType() == VariableType.ENUM) {
+                right = variable.getEnumValue();
+            }
+
+            else {
+                right = variable.getValue();
+            }
         }
 
         return switch (operation) {

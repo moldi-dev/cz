@@ -1,7 +1,20 @@
 #include <MDA>
 
+enum COLOR = [RED, YELLOW, GREEN, BLUE, PINK, PURPLE];
+
 int main() {
-    print("Hello World! \n");
+    enum COLOR my_color = COLOR.YELLOW;
+
+    switch (my_color) {
+        case COLOR.YELLOW:
+            print("YELLOW\n");
+            break;
+        default:
+            print("UNKNOWN\n");
+            break;
+    }
+
+    print("My color: ", my_color);
 
     return 0;
 }

@@ -6,11 +6,11 @@ grammar CZ;
 
 // Parser rules
 program
-    : STANDARD_INCLUDE_DIRECTIVE define_directive* function_declaration* function* main_function function* EOF
+    : STANDARD_INCLUDE_DIRECTIVE constant_define_directive* function_declaration* enum_declaration* function* main_function function* EOF
     ;
 
-define_directive
-    : DEFINE IDENTIFIER (INTEGER_NUMBER | DOUBLE_NUMBER | STRING_LITERAL | CHARACTER | boolean_literal)
+constant_define_directive
+    : CONSTANT_DEFINE IDENTIFIER (INTEGER_NUMBER | DOUBLE_NUMBER | STRING_LITERAL | CHARACTER | boolean_literal)
     ;
 
 main_function
@@ -19,6 +19,14 @@ main_function
 
 function
     : type_ IDENTIFIER LEFT_PARENTHESIS parameters? RIGHT_PARENTHESIS function_block
+    ;
+
+enum_declaration
+    : ENUM IDENTIFIER ASSIGNMENT LEFT_BRACKET enum_member (COMMA enum_member)* RIGHT_BRACKET SEMICOLON
+    ;
+
+enum_member
+    : IDENTIFIER
     ;
 
 function_block
@@ -59,7 +67,7 @@ switch_statement
     ;
 
 switch_block
-    : CASE literal COLON statement*
+    : CASE expression COLON statement*
     ;
 
 default_block
@@ -177,8 +185,13 @@ expression
     | condition=expression QUESTION trueExpr=expression COLON falseExpr=expression                                               # ternaryExpression
     | function_call                                                                                                              # functionCallExpression
     | IDENTIFIER                                                                                                                 # identifierExpression
+    | enum_access                                                                                                                # enumAccessExpression
     | literal                                                                                                                    # literalExpression
     | array_literal                                                                                                              # arrayLiteralExpression
+    ;
+
+enum_access
+    : IDENTIFIER DOT IDENTIFIER
     ;
 
 literal
@@ -209,9 +222,9 @@ type_
     | CHAR
     | STRING
     | ARRAY_STRING
+    | ENUM IDENTIFIER
     ;
 
-// Lexer rules
 // Keywords (both C and CZ versions)
 INT: 'int' | 'rizz';
 BOOLEAN: 'bool' | 'cappin';
@@ -238,8 +251,9 @@ MAIN: 'main' | 'boss';
 SWITCH: 'switch' | 'switchy';
 CASE: 'case' | 'vibe';
 DEFAULT: 'default' | 'deffie';
-DEFINE: '#define' | '#vibe_define';
+CONSTANT_DEFINE: '#constant_define' | '#vibe_define';
 STANDARD_INCLUDE_DIRECTIVE: '#include <MDA>' | '#vibe_include <MDA>';
+ENUM: 'enum' | 'bae';
 
 // Operators
 QUESTION: '?' | 'fr?';
@@ -274,6 +288,7 @@ BITWISE_XOR: '^' | 'xorfam';
 BITWISE_NOT: '~' | 'unbit';
 SHIFT_LEFT: '<<' | 'leftslide';
 SHIFT_RIGHT: '>>' | 'rightslide';
+DOT: '.' | 'bougie';
 
 // Built-in functions (my own standard library bestie)
 SINE: '<MDA>sine' | '<MDA>vibe_sway'; // <MDA>sine :: DOUBLE => DOUBLE
@@ -297,7 +312,7 @@ ARRAY_INSERT_AT: '<MDA>array_insert_at' | '<MDA>squad_dropin'; // <MDA>array_ins
 ARRAY_INSERT_LAST: '<MDA>array_insert_last' | '<MDA>squad_slidein'; // <MDA>array_insert_last :: array<T>, T => array<T>
 ARRAY_DELETE_FIRST: '<MDA>array_delete_first' | '<MDA>squad_chopfirst'; // <MDA>array_delete_first :: array<T> => array<T>
 ARRAY_DELETE_AT: '<MDA>array_delete_at' | '<MDA>squad_chopspot'; // <MDA>array_delete_at :: array<T>, INTEGER => array<T>
-ARRAY_DELETE_LAST: '<MDA>array_delete_last' | '<MDA>squad_choplast'; //<MDA>array_delete_last :: array<T> => array<T>
+ARRAY_DELETE_LAST: '<MDA>array_delete_last' | '<MDA>squad_choplast'; // <MDA>array_delete_last :: array<T> => array<T>
 
 STRING_SLICE: '<MDA>string_slice' | '<MDA>squad_cut'; // <MDA>string_slice :: STRING, INTEGER, INTEGER => STRING
 STRING_SPLIT: '<MDA>string_split' | '<MDA>squad_slay'; // <MDA>string_split :: STRING, CHARACTER => array<STRING>

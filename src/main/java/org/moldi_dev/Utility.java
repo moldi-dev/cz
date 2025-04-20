@@ -42,7 +42,7 @@ public class Utility {
         return "_NOT_FOUND";
     }
 
-    public Object parseMacroValue(String value) {
+    public Object parseConstantValue(String value) {
         value = value.trim();
 
         if (value.equals("true") || value.equals("false")) {
@@ -61,8 +61,7 @@ public class Utility {
 
         catch (NumberFormatException ignored) {}
 
-        if ((value.startsWith("\"") && value.endsWith("\"")) ||
-                (value.startsWith("'") && value.endsWith("'"))) {
+        if ((value.startsWith("\"") && value.endsWith("\"")) || (value.startsWith("'") && value.endsWith("'"))) {
             return value.substring(1, value.length() - 1);
         }
 

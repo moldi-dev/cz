@@ -3,7 +3,18 @@ package org.moldi_dev;
 public class Variable {
     private String name;
     private VariableType type;
+    private String enumName;
+    private Integer enumValue;
     private Object value;
+
+    public Variable() {}
+
+    public Variable(String name, String enumName, VariableType type, Integer enumValue) {
+        this.name = name;
+        this.type = type;
+        this.enumName = enumName;
+        this.enumValue = enumValue;
+    }
 
     public Variable(String name, VariableType type, Object value) {
         this.name = name;
@@ -21,6 +32,22 @@ public class Variable {
 
     public VariableType getType() {
         return type;
+    }
+
+    public void setEnumName(String enumName) {
+        this.enumName = enumName;
+    }
+
+    public String getEnumName() {
+        return enumName;
+    }
+
+    public Integer getEnumValue() {
+        return enumValue;
+    }
+
+    public void setEnumValue(Integer enumValue) {
+        this.enumValue = enumValue;
     }
 
     public void setType(VariableType type) {

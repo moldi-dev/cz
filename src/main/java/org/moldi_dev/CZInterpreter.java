@@ -8,10 +8,13 @@ import java.util.*;
 
 public class CZInterpreter extends CZBaseVisitor<Object> {
     private final Map<String, Function> functions;
-    private final Map<String, String> macros;
+    private final Map<String, String> constants;
     private Map<String, Variable> variables;
+    private final Map<String, Map<String, Integer>> enums;
+
     private boolean shouldBreak = false;
     private boolean shouldContinue = false;
+
     private final ExpressionEvaluator expressionEvaluator;
     private final TypeChecker typeChecker;
     private final TypeMapper typeMapper;
@@ -19,19 +22,20 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
     private final StandardFunctionHandler standardFunctionHandler;
 
     public CZInterpreter() {
+        variables = new HashMap<>();
+        functions = new HashMap<>();
+        constants = new HashMap<>();
+        enums = new HashMap<>();
+
         standardFunctionHandler = new StandardFunctionHandler();
         utility = new Utility();
         typeChecker = new TypeChecker();
         typeMapper = new TypeMapper();
         expressionEvaluator = new ExpressionEvaluator();
-        
-        variables = new HashMap<>();
-        functions = new HashMap<>();
-        macros = new HashMap<>();
 
-        // Built-in macros (can be overriden if needed)
-        macros.put("E", String.valueOf(Math.E));
-        macros.put("PI", String.valueOf(Math.PI));
+        // Built-in constants (can be overriden if needed)
+        constants.put("E", String.valueOf(Math.E));
+        constants.put("PI", String.valueOf(Math.PI));
 
         // Built-in functions (my standard library hehehe)
         functions.put("<MDA>sine",
@@ -348,34 +352,38 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
     @Override
     public Object visitProgram(CZParser.ProgramContext ctx) {
-        for (CZParser.Define_directiveContext defineCtx : ctx.define_directive()) {
-            String macroName = defineCtx.IDENTIFIER().getText();
-            String macroValue;
+        for (CZParser.Constant_define_directiveContext defineCtx : ctx.constant_define_directive()) {
+            String constantName = defineCtx.IDENTIFIER().getText();
+            String constantValue;
 
             if (defineCtx.INTEGER_NUMBER() != null) {
-                macroValue = defineCtx.INTEGER_NUMBER().getText();
-                macros.put(macroName, macroValue);
+                constantValue = defineCtx.INTEGER_NUMBER().getText();
+                constants.put(constantName, constantValue);
             }
 
             else if (defineCtx.DOUBLE_NUMBER() != null) {
-                macroValue = defineCtx.DOUBLE_NUMBER().getText();
-                macros.put(macroName, macroValue);
+                constantValue = defineCtx.DOUBLE_NUMBER().getText();
+                constants.put(constantName, constantValue);
             }
 
             else if (defineCtx.STRING_LITERAL() != null) {
-                macroValue = defineCtx.STRING_LITERAL().getText();
-                macros.put(macroName, macroValue);
+                constantValue = defineCtx.STRING_LITERAL().getText();
+                constants.put(constantName, constantValue);
             }
 
             else if (defineCtx.CHARACTER() != null) {
-                macroValue = defineCtx.CHARACTER().getText();
-                macros.put(macroName, macroValue);
+                constantValue = defineCtx.CHARACTER().getText();
+                constants.put(constantName, constantValue);
             }
 
             else if (defineCtx.boolean_literal() != null) {
-                macroValue = defineCtx.boolean_literal().getText();
-                macros.put(macroName, macroValue);
+                constantValue = defineCtx.boolean_literal().getText();
+                constants.put(constantName, constantValue);
             }
+        }
+
+        for (CZParser.Enum_declarationContext enumCtx : ctx.enum_declaration()) {
+            visit(enumCtx);
         }
 
         for (CZParser.Function_declarationContext declCtx : ctx.function_declaration()) {
@@ -398,10 +406,36 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
     }
 
     @Override
-    public Object visitDefine_directive(CZParser.Define_directiveContext ctx) {
+    public Object visitConstant_define_directive(CZParser.Constant_define_directiveContext ctx) {
         String name = ctx.IDENTIFIER().getText();
         String value = ctx.getChild(2).getText();
-        macros.put(name, value);
+        constants.put(name, value);
+        return null;
+    }
+
+    @Override
+    public Object visitEnum_declaration(CZParser.Enum_declarationContext ctx) {
+        String enumType = ctx.IDENTIFIER().getText();
+
+        if (enums.containsKey(enumType)) {
+            throw new RuntimeException("Enum \"" + enumType + "\" already defined.");
+        }
+
+        List<String> enumMembers = new ArrayList<>();
+
+        for (CZParser.Enum_memberContext memberCtx : ctx.enum_member()) {
+            String enumMember = memberCtx.IDENTIFIER().getText();
+            enumMembers.add(enumMember);
+        }
+
+        Map<String, Integer> enumMap = new HashMap<>();
+
+        for (int i = 0; i < enumMembers.size(); i++) {
+            enumMap.put(enumMembers.get(i), i);
+        }
+
+        enums.put(enumType, enumMap);
+
         return null;
     }
 
@@ -517,6 +551,15 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
     public Object visitDeclaration(CZParser.DeclarationContext ctx) {
         String varName = ctx.IDENTIFIER().getText();
         String typeToken = ctx.type_().getText();
+
+        if (variables.containsKey(varName)) {
+            throw new RuntimeException("Variable \"" + varName + "\" already defined.");
+        }
+
+        if (typeToken.contains("enum")) {
+            typeToken = "enum";
+        }
+
         VariableType type = typeMapper.toVariableType(typeToken);
 
         switch (type) {
@@ -529,6 +572,18 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             case BOOLEAN -> variables.put(varName, new Variable(varName, type, false));
             case CHARACTER -> variables.put(varName, new Variable(varName, type, '\0'));
             case STRING -> variables.put(varName, new Variable(varName, type, "\0"));
+            case ENUM -> {
+                String enumName = ctx.type_().IDENTIFIER().getText();
+
+                if (!enums.containsKey(enumName)) {
+                    throw new RuntimeException("Enum type \"" + enumName + "\" is not defined.");
+                }
+
+                else {
+                    Integer defaultEnumValue = 0;
+                    variables.put(varName, new Variable(varName, enumName, type, defaultEnumValue));
+                }
+            }
             default -> throw new RuntimeException("Unknown variable type given inside a declaration.");
         }
 
@@ -631,6 +686,34 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 else {
                     VariableType valueType = (value instanceof Variable v) ? v.getType() : typeChecker.inferTypeFromValue(value);
                     throw new RuntimeException("Type mismatch for variable \"" + varName + "\": expected " + VariableType.BOOLEAN + " but got " + valueType + ".");
+                }
+
+                break;
+            }
+
+            case ENUM: {
+                if (value instanceof Variable v && v.getType() == VariableType.ENUM) {
+                    variables.put(varName, new Variable(varName, v.getEnumName(), VariableType.ENUM, v.getEnumValue()));
+                }
+
+                else if (value instanceof Integer intVal) {
+                    String enumName = var.getEnumName();
+
+                    if (enumName == null) {
+                        throw new RuntimeException("Cannot assign integer to enum without knowing the enum type.");
+                    }
+
+                    Map<String, Integer> memberMap = enums.get(enumName);
+
+                    if (memberMap == null || !memberMap.containsValue(intVal)) {
+                        throw new RuntimeException("Enum value " + intVal + " not valid for enum \"" + enumName + "\".");
+                    }
+
+                    variables.put(varName, new Variable(varName, enumName, VariableType.ENUM, intVal));
+                }
+
+                else {
+                    throw new RuntimeException("Invalid enum assignment for variable \"" + varName + "\".");
                 }
 
                 break;
@@ -815,6 +898,22 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         return null;
     }
 
+    private String resolveEnumValue(String enumName, Integer enumValue) {
+        Map<String, Integer> members = enums.get(enumName);
+
+        if (members == null) {
+            throw new RuntimeException("Enum \"" + enumName + "\" not defined.");
+        }
+
+        for (Map.Entry<String, Integer> entry : members.entrySet()) {
+            if (entry.getValue().equals(enumValue)) {
+                return enumName + "." + entry.getKey();
+            }
+        }
+
+        throw new RuntimeException("Value \"" + enumValue + "\" not found in enum \"" + enumName + "\".");
+    }
+
     @Override
     public Object visitPrint_statement(CZParser.Print_statementContext ctx) {
         StringBuilder output = new StringBuilder();
@@ -823,17 +922,23 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             for (CZParser.ExpressionContext exprCtx : ctx.arguments().expression()) {
                 Object value = visit(exprCtx);
 
-                if (value instanceof Variable variable) {
+                if (value instanceof Variable variable && !variable.getType().equals(VariableType.ENUM)) {
                     value = variable.getValue();
                 }
 
-                if (value instanceof List<?> arrayValue) {
+                if (value instanceof Variable variable && variable.getType().equals(VariableType.ENUM)) {
+                    output.append(resolveEnumValue(variable.getEnumName(), variable.getEnumValue()));
+                }
+
+                else if (value instanceof List<?> arrayValue) {
                     output.append("[");
 
                     for (int i = 0; i < arrayValue.size(); i++) {
                         if (arrayValue.get(i) instanceof Variable variable) {
                             output.append(variable.getValue());
-                        } else {
+                        }
+
+                        else {
                             output.append(arrayValue.get(i));
                         }
 
@@ -1421,9 +1526,9 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
     public Object visitIdentifierExpression(CZParser.IdentifierExpressionContext ctx) {
         String varName = ctx.IDENTIFIER().getText();
 
-        if (macros.containsKey(varName)) {
-            String value = macros.get(varName);
-            return utility.parseMacroValue(value);
+        if (constants.containsKey(varName)) {
+            String value = constants.get(varName);
+            return utility.parseConstantValue(value);
         }
 
         Variable var = variables.get(varName);
@@ -1435,6 +1540,24 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         else {
             throw new RuntimeException("Variable \"" + varName + "\" not defined" + ".");
         }
+    }
+
+    @Override
+    public Object visitEnumAccessExpression(CZParser.EnumAccessExpressionContext ctx) {
+        String enumName = ctx.enum_access().IDENTIFIER(0).getText();
+        String memberName = ctx.enum_access().IDENTIFIER(1).getText();
+
+        if (!enums.containsKey(enumName)) {
+            throw new RuntimeException("Enum type \"" + enumName + "\" is not defined.");
+        }
+
+        Map<String, Integer> enumMembers = enums.get(enumName);
+
+        if (!enumMembers.containsKey(memberName)) {
+            throw new RuntimeException("Enum member \"" + memberName + "\" not found in enum \"" + enumName + "\".");
+        }
+
+        return enumMembers.get(memberName);
     }
 
     @Override
@@ -1497,10 +1620,21 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
     @Override
     public Object visitSwitch_statement(CZParser.Switch_statementContext ctx) {
         Object switchValue = visit(ctx.expression());
+
+        if (switchValue instanceof Variable variable) {
+            if (variable.getType().equals(VariableType.ENUM)) {
+                switchValue = variable.getEnumValue();
+            }
+
+            else {
+                switchValue = variable.getValue();
+            }
+        }
+
         boolean matched = false;
 
         for (CZParser.Switch_blockContext block : ctx.switch_block()) {
-            Object caseValue = visit(block.literal());
+            Object caseValue = visit(block.expression());
 
             if (!matched && Objects.equals(switchValue, caseValue)) {
                 matched = true;
