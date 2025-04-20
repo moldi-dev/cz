@@ -16,7 +16,7 @@ public class TypeChecker {
         if (value instanceof Character) return VariableType.CHARACTER;
         if (value instanceof String) return VariableType.STRING;
         if (value instanceof List<?>) {
-            if (((List<?>) value).isEmpty()) return VariableType.ANY;
+            if (((List<?>) value).isEmpty()) return VariableType.UNKNOWN;
 
             Object first = ((List<?>) value).getFirst();
             VariableType elementType = inferTypeFromValue(first);
@@ -26,11 +26,11 @@ public class TypeChecker {
                 case DOUBLE -> VariableType.DOUBLE_ARRAY;
                 case STRING -> VariableType.STRING_ARRAY;
                 case BOOLEAN -> VariableType.BOOLEAN_ARRAY;
-                default -> VariableType.ANY;
+                default -> VariableType.UNKNOWN;
             };
         }
 
-        return VariableType.ANY;
+        return VariableType.UNKNOWN;
     }
 
     public VariableType inferTypeFromArrayType(VariableType arrayType) {
@@ -39,7 +39,7 @@ public class TypeChecker {
             case DOUBLE_ARRAY -> VariableType.DOUBLE;
             case STRING_ARRAY -> VariableType.STRING_ARRAY;
             case BOOLEAN_ARRAY -> VariableType.BOOLEAN_ARRAY;
-            default -> VariableType.ANY;
+            default -> VariableType.UNKNOWN;
         };
     }
 }

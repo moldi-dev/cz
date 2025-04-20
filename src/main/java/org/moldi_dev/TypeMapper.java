@@ -14,8 +14,8 @@ public class TypeMapper {
             case "array<double>", "squad<g>" -> VariableType.DOUBLE_ARRAY;
             case "array<string>", "squad<fam>" -> VariableType.STRING_ARRAY;
             case "array<bool>", "squad<cappin>" -> VariableType.BOOLEAN_ARRAY;
-            case "enum", "bae" -> VariableType.ENUM;
-            default -> VariableType.ANY;
+            case "enum", "bae" -> VariableType.ENUMERATION;
+            default -> VariableType.UNKNOWN;
         };
     }
 
@@ -30,8 +30,8 @@ public class TypeMapper {
             case DOUBLE_ARRAY -> "array<double>";
             case STRING_ARRAY -> "array<string>";
             case BOOLEAN_ARRAY -> "array<bool>";
-            case ENUM -> "enum";
-            case ANY -> "";
+            case ENUMERATION -> "enum";
+            case UNKNOWN -> "";
         };
     }
 }

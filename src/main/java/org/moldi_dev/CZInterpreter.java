@@ -7,10 +7,10 @@ import org.moldi_dev.antlr_4_gen.CZParser;
 import java.util.*;
 
 public class CZInterpreter extends CZBaseVisitor<Object> {
-    private final Map<String, Function> functions;
-    private final Map<String, String> constants;
-    private Map<String, Variable> variables;
-    private final Map<String, Map<String, Integer>> enums;
+    public static Map<String, Function> functions;
+    public static Map<String, String> constants;
+    public static Map<String, Variable> variables;
+    public static Map<String, Map<String, Integer>> enums;
 
     private boolean shouldBreak = false;
     private boolean shouldContinue = false;
@@ -114,142 +114,142 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
         functions.put("<MDA>array_length",
                 new Function("<MDA>array_length",
-                        List.of(new Variable("arr", VariableType.ANY, null)),
+                        List.of(new Variable("arr", VariableType.UNKNOWN, null)),
                         null, false, VariableType.INTEGER));
         functions.put("<MDA>squad_countdown",
                 new Function("<MDA>squad_countdown",
-                        List.of(new Variable("arr", VariableType.ANY, null)),
+                        List.of(new Variable("arr", VariableType.UNKNOWN, null)),
                         null, false, VariableType.INTEGER));
 
         functions.put("<MDA>array_get_at",
                 new Function("<MDA>array_get_at",
-                        List.of(new Variable("arr", VariableType.ANY, null),
+                        List.of(new Variable("arr", VariableType.UNKNOWN, null),
                                 new Variable("index", VariableType.INTEGER, null)),
-                        null, false, VariableType.ANY));
+                        null, false, VariableType.UNKNOWN));
         functions.put("<MDA>squad_peep",
                 new Function("<MDA>squad_peep",
-                        List.of(new Variable("arr", VariableType.ANY, null),
+                        List.of(new Variable("arr", VariableType.UNKNOWN, null),
                                 new Variable("index", VariableType.INTEGER, null)),
-                        null, false, VariableType.ANY));
+                        null, false, VariableType.UNKNOWN));
 
         functions.put("<MDA>array_set_at",
                 new Function("<MDA>array_set_at",
-                        List.of(new Variable("arr", VariableType.ANY, null),
+                        List.of(new Variable("arr", VariableType.UNKNOWN, null),
                                 new Variable("index", VariableType.INTEGER, null),
-                                new Variable("value", VariableType.ANY, null)),
-                        null, false, VariableType.ANY));
+                                new Variable("value", VariableType.UNKNOWN, null)),
+                        null, false, VariableType.UNKNOWN));
         functions.put("<MDA>squad_seep",
                 new Function("<MDA>squad_seep",
-                        List.of(new Variable("arr", VariableType.ANY, null),
+                        List.of(new Variable("arr", VariableType.UNKNOWN, null),
                                 new Variable("index", VariableType.INTEGER, null),
-                                new Variable("value", VariableType.ANY, null)),
-                        null, false, VariableType.ANY));
+                                new Variable("value", VariableType.UNKNOWN, null)),
+                        null, false, VariableType.UNKNOWN));
 
         functions.put("<MDA>array_copy",
                 new Function("<MDA>array_copy",
-                        List.of(new Variable("arr", VariableType.ANY, null)),
-                        null, false, VariableType.ANY));
+                        List.of(new Variable("arr", VariableType.UNKNOWN, null)),
+                        null, false, VariableType.UNKNOWN));
         functions.put("<MDA>squad_join",
                 new Function("<MDA>squad_join",
-                        List.of(new Variable("arr", VariableType.ANY, null)),
-                        null, false, VariableType.ANY));
+                        List.of(new Variable("arr", VariableType.UNKNOWN, null)),
+                        null, false, VariableType.UNKNOWN));
 
         functions.put("<MDA>array_contains",
                 new Function("<MDA>array_contains",
-                        List.of(new Variable("arr", VariableType.ANY, null),
-                                new Variable("value", VariableType.ANY, null)),
+                        List.of(new Variable("arr", VariableType.UNKNOWN, null),
+                                new Variable("value", VariableType.UNKNOWN, null)),
                         null, false, VariableType.BOOLEAN));
         functions.put("<MDA>squad_vibeswith",
                 new Function("<MDA>squad_vibeswith",
-                        List.of(new Variable("arr", VariableType.ANY, null),
-                                new Variable("value", VariableType.ANY, null)),
+                        List.of(new Variable("arr", VariableType.UNKNOWN, null),
+                                new Variable("value", VariableType.UNKNOWN, null)),
                         null, false, VariableType.BOOLEAN));
 
         functions.put("<MDA>array_index_of",
                 new Function("<MDA>array_index_of",
-                        List.of(new Variable("arr", VariableType.ANY, null),
-                                new Variable("value", VariableType.ANY, null)),
+                        List.of(new Variable("arr", VariableType.UNKNOWN, null),
+                                new Variable("value", VariableType.UNKNOWN, null)),
                         null, false, VariableType.INTEGER));
         functions.put("<MDA>squad_whereat",
                 new Function("<MDA>squad_whereat",
-                        List.of(new Variable("arr", VariableType.ANY, null),
-                                new Variable("value", VariableType.ANY, null)),
+                        List.of(new Variable("arr", VariableType.UNKNOWN, null),
+                                new Variable("value", VariableType.UNKNOWN, null)),
                         null, false, VariableType.INTEGER));
 
         functions.put("<MDA>array_count",
                 new Function("<MDA>array_count",
-                        List.of(new Variable("arr", VariableType.ANY, null),
-                                new Variable("value", VariableType.ANY, null)),
+                        List.of(new Variable("arr", VariableType.UNKNOWN, null),
+                                new Variable("value", VariableType.UNKNOWN, null)),
                         null, false, VariableType.INTEGER));
         functions.put("<MDA>squad_howmany",
                 new Function("<MDA>squad_howmany",
-                        List.of(new Variable("arr", VariableType.ANY, null),
-                                new Variable("value", VariableType.ANY, null)),
+                        List.of(new Variable("arr", VariableType.UNKNOWN, null),
+                                new Variable("value", VariableType.UNKNOWN, null)),
                         null, false, VariableType.INTEGER));
 
         functions.put("<MDA>array_insert_first",
                 new Function("<MDA>array_insert_first",
-                        List.of(new Variable("arr", VariableType.ANY, null),
-                                new Variable("value", VariableType.ANY, null)),
-                        null, false, VariableType.ANY));
+                        List.of(new Variable("arr", VariableType.UNKNOWN, null),
+                                new Variable("value", VariableType.UNKNOWN, null)),
+                        null, false, VariableType.UNKNOWN));
         functions.put("<MDA>squad_pushup",
                 new Function("<MDA>squad_pushup",
-                        List.of(new Variable("arr", VariableType.ANY, null),
-                                new Variable("value", VariableType.ANY, null)),
-                        null, false, VariableType.ANY));
+                        List.of(new Variable("arr", VariableType.UNKNOWN, null),
+                                new Variable("value", VariableType.UNKNOWN, null)),
+                        null, false, VariableType.UNKNOWN));
 
         functions.put("<MDA>array_insert_at",
                 new Function("<MDA>array_insert_at",
-                        List.of(new Variable("arr", VariableType.ANY, null),
+                        List.of(new Variable("arr", VariableType.UNKNOWN, null),
                                 new Variable("index", VariableType.INTEGER, null),
-                                new Variable("value", VariableType.ANY, null)),
-                        null, false, VariableType.ANY));
+                                new Variable("value", VariableType.UNKNOWN, null)),
+                        null, false, VariableType.UNKNOWN));
         functions.put("<MDA>squad_dropin",
                 new Function("<MDA>squad_dropin",
-                        List.of(new Variable("arr", VariableType.ANY, null),
+                        List.of(new Variable("arr", VariableType.UNKNOWN, null),
                                 new Variable("index", VariableType.INTEGER, null),
-                                new Variable("value", VariableType.ANY, null)),
-                        null, false, VariableType.ANY));
+                                new Variable("value", VariableType.UNKNOWN, null)),
+                        null, false, VariableType.UNKNOWN));
 
         functions.put("<MDA>array_insert_last",
                 new Function("<MDA>array_insert_last",
-                        List.of(new Variable("arr", VariableType.ANY, null),
-                                new Variable("value", VariableType.ANY, null)),
-                        null, false, VariableType.ANY));
+                        List.of(new Variable("arr", VariableType.UNKNOWN, null),
+                                new Variable("value", VariableType.UNKNOWN, null)),
+                        null, false, VariableType.UNKNOWN));
         functions.put("<MDA>squad_slidein",
                 new Function("<MDA>squad_slidein",
-                        List.of(new Variable("arr", VariableType.ANY, null),
-                                new Variable("value", VariableType.ANY, null)),
-                        null, false, VariableType.ANY));
+                        List.of(new Variable("arr", VariableType.UNKNOWN, null),
+                                new Variable("value", VariableType.UNKNOWN, null)),
+                        null, false, VariableType.UNKNOWN));
 
         functions.put("<MDA>array_delete_first",
                 new Function("<MDA>array_delete_first",
-                        List.of(new Variable("arr", VariableType.ANY, null)),
-                        null, false, VariableType.ANY));
+                        List.of(new Variable("arr", VariableType.UNKNOWN, null)),
+                        null, false, VariableType.UNKNOWN));
         functions.put("<MDA>squad_chopfirst",
                 new Function("<MDA>squad_chopfirst",
-                        List.of(new Variable("arr", VariableType.ANY, null)),
-                        null, false, VariableType.ANY));
+                        List.of(new Variable("arr", VariableType.UNKNOWN, null)),
+                        null, false, VariableType.UNKNOWN));
 
         functions.put("<MDA>array_delete_at",
                 new Function("<MDA>array_delete_at",
-                        List.of(new Variable("arr", VariableType.ANY, null),
+                        List.of(new Variable("arr", VariableType.UNKNOWN, null),
                                 new Variable("index", VariableType.INTEGER, null)),
-                        null, false, VariableType.ANY));
+                        null, false, VariableType.UNKNOWN));
         functions.put("<MDA>squad_chopspot",
                 new Function("<MDA>squad_chopspot",
-                        List.of(new Variable("arr", VariableType.ANY, null),
+                        List.of(new Variable("arr", VariableType.UNKNOWN, null),
                                 new Variable("index", VariableType.INTEGER, null)),
-                        null, false, VariableType.ANY));
+                        null, false, VariableType.UNKNOWN));
 
         functions.put("<MDA>array_delete_last",
                 new Function("<MDA>array_delete_last",
-                        List.of(new Variable("arr", VariableType.ANY, null)),
-                        null, false, VariableType.ANY));
+                        List.of(new Variable("arr", VariableType.UNKNOWN, null)),
+                        null, false, VariableType.UNKNOWN));
         functions.put("<MDA>squad_choplast",
                 new Function("<MDA>squad_choplast",
-                        List.of(new Variable("arr", VariableType.ANY, null)),
-                        null, false, VariableType.ANY));
+                        List.of(new Variable("arr", VariableType.UNKNOWN, null)),
+                        null, false, VariableType.UNKNOWN));
 
         functions.put("<MDA>string_slice",
                 new Function("<MDA>string_slice",
@@ -421,17 +421,22 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             throw new RuntimeException("Enum \"" + enumType + "\" already defined.");
         }
 
-        List<String> enumMembers = new ArrayList<>();
+        Map<String, Integer> enumMap = new HashMap<>();
+        int nextValue = 0;
 
         for (CZParser.Enum_memberContext memberCtx : ctx.enum_member()) {
             String enumMember = memberCtx.IDENTIFIER().getText();
-            enumMembers.add(enumMember);
-        }
 
-        Map<String, Integer> enumMap = new HashMap<>();
+            if (memberCtx.enum_member_value() != null) {
+                int explicitValue = Integer.parseInt(memberCtx.enum_member_value().INTEGER_NUMBER().getText());
+                enumMap.put(enumMember, explicitValue);
+                nextValue = explicitValue + 1;
+            }
 
-        for (int i = 0; i < enumMembers.size(); i++) {
-            enumMap.put(enumMembers.get(i), i);
+            else {
+                enumMap.put(enumMember, nextValue);
+                nextValue++;
+            }
         }
 
         enums.put(enumType, enumMap);
@@ -455,15 +460,34 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         String functionName = ctx.IDENTIFIER().getText();
         List<Variable> parameters = new ArrayList<>();
 
+        String ctxType = ctx.type_().getText();
+
+        if (ctx.type_().ENUM() != null) {
+            ctxType = "enum";
+        }
+
         if (ctx.parameters() != null) {
             for (CZParser.ParameterContext paramCtx : ctx.parameters().parameter()) {
-                VariableType type = typeMapper.toVariableType(paramCtx.type_().getText());
+                String paramCtxName = paramCtx.type_().getText();
+
+                if (paramCtx.type_().ENUM() != null) {
+                    paramCtxName = "enum";
+                }
+
+                VariableType type = typeMapper.toVariableType(paramCtxName);
                 String name = paramCtx.IDENTIFIER().getText();
-                parameters.add(new Variable(name, type, null));
+
+                if (paramCtx.type_().ENUM() != null) {
+                    parameters.add(new Variable(name, paramCtx.type_().IDENTIFIER().getText(), type, null));
+                }
+
+                else {
+                    parameters.add(new Variable(name, type, null));
+                }
             }
         }
 
-        VariableType returnType = typeMapper.toVariableType(ctx.type_().getText());
+        VariableType returnType = typeMapper.toVariableType(ctxType);
 
         Function existing = functions.get(functionName);
 
@@ -494,15 +518,34 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         String functionName = ctx.IDENTIFIER().getText();
         List<Variable> parameters = new ArrayList<>();
 
+        String ctxType = ctx.type_().getText();
+
+        if (ctx.type_().ENUM() != null) {
+            ctxType = "enum";
+        }
+
         if (ctx.parameters() != null) {
             for (CZParser.ParameterContext paramCtx : ctx.parameters().parameter()) {
-                VariableType type = typeMapper.toVariableType(paramCtx.type_().getText());
+                String typeName = paramCtx.type_().getText();
+
+                if (paramCtx.type_().ENUM() != null) {
+                    typeName = "enum";
+                }
+
+                VariableType type = typeMapper.toVariableType(typeName);
                 String name = paramCtx.IDENTIFIER().getText();
-                parameters.add(new Variable(name, type, null));
+
+                if (paramCtx.type_().ENUM() != null) {
+                    parameters.add(new Variable(name, paramCtx.type_().IDENTIFIER().getText(), type, null));
+                }
+
+                else {
+                    parameters.add(new Variable(name, type, null));
+                }
             }
         }
 
-        VariableType returnType = typeMapper.toVariableType(ctx.type_().getText());
+        VariableType returnType = typeMapper.toVariableType(ctxType);
         Function existing = functions.get(functionName);
 
         if (existing == null) {
@@ -552,10 +595,6 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         String varName = ctx.IDENTIFIER().getText();
         String typeToken = ctx.type_().getText();
 
-        if (variables.containsKey(varName)) {
-            throw new RuntimeException("Variable \"" + varName + "\" already defined.");
-        }
-
         if (typeToken.contains("enum")) {
             typeToken = "enum";
         }
@@ -572,7 +611,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             case BOOLEAN -> variables.put(varName, new Variable(varName, type, false));
             case CHARACTER -> variables.put(varName, new Variable(varName, type, '\0'));
             case STRING -> variables.put(varName, new Variable(varName, type, "\0"));
-            case ENUM -> {
+            case ENUMERATION -> {
                 String enumName = ctx.type_().IDENTIFIER().getText();
 
                 if (!enums.containsKey(enumName)) {
@@ -612,6 +651,10 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 }
 
                 else if (value instanceof Variable v && v.getType() == VariableType.INTEGER) {
+                    variables.put(varName, new Variable(varName, var.getType(), v.getValue()));
+                }
+
+                else if (value instanceof Variable v && v.getType() == VariableType.ENUMERATION) {
                     variables.put(varName, new Variable(varName, var.getType(), v.getValue()));
                 }
 
@@ -691,9 +734,9 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 break;
             }
 
-            case ENUM: {
-                if (value instanceof Variable v && v.getType() == VariableType.ENUM) {
-                    variables.put(varName, new Variable(varName, v.getEnumName(), VariableType.ENUM, v.getEnumValue()));
+            case ENUMERATION: {
+                if (value instanceof Variable v && v.getType() == VariableType.ENUMERATION && v.getEnumName().equals(variables.get(varName).getEnumName())) {
+                    variables.put(varName, new Variable(varName, v.getEnumName(), VariableType.ENUMERATION, (Integer) v.getValue()));
                 }
 
                 else if (value instanceof Integer intVal) {
@@ -709,7 +752,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                         throw new RuntimeException("Enum value " + intVal + " not valid for enum \"" + enumName + "\".");
                     }
 
-                    variables.put(varName, new Variable(varName, enumName, VariableType.ENUM, intVal));
+                    variables.put(varName, new Variable(varName, enumName, VariableType.ENUMERATION, intVal));
                 }
 
                 else {
@@ -892,26 +935,10 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             }
 
             default:
-                throw new RuntimeException("Unsupported variable type: \"" + var.getType() + "\".");
+                throw new RuntimeException("Unsupported variable type: \"" + var.getType() + "\" for direct assignation.");
         }
 
         return null;
-    }
-
-    private String resolveEnumValue(String enumName, Integer enumValue) {
-        Map<String, Integer> members = enums.get(enumName);
-
-        if (members == null) {
-            throw new RuntimeException("Enum \"" + enumName + "\" not defined.");
-        }
-
-        for (Map.Entry<String, Integer> entry : members.entrySet()) {
-            if (entry.getValue().equals(enumValue)) {
-                return enumName + "." + entry.getKey();
-            }
-        }
-
-        throw new RuntimeException("Value \"" + enumValue + "\" not found in enum \"" + enumName + "\".");
     }
 
     @Override
@@ -921,45 +948,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         if (ctx.arguments() != null) {
             for (CZParser.ExpressionContext exprCtx : ctx.arguments().expression()) {
                 Object value = visit(exprCtx);
-
-                if (value instanceof Variable variable && !variable.getType().equals(VariableType.ENUM)) {
-                    value = variable.getValue();
-                }
-
-                if (value instanceof Variable variable && variable.getType().equals(VariableType.ENUM)) {
-                    output.append(resolveEnumValue(variable.getEnumName(), variable.getEnumValue()));
-                }
-
-                else if (value instanceof List<?> arrayValue) {
-                    output.append("[");
-
-                    for (int i = 0; i < arrayValue.size(); i++) {
-                        if (arrayValue.get(i) instanceof Variable variable) {
-                            output.append(variable.getValue());
-                        }
-
-                        else {
-                            output.append(arrayValue.get(i));
-                        }
-
-                        if (i < arrayValue.size() - 1) {
-                            output.append(", ");
-                        }
-                    }
-
-                    output.append("]");
-                }
-
-                else if (value instanceof String strVal) {
-                    output.append(strVal.replace("\\n", "\n")
-                            .replace("\\t", "\t")
-                            .replace("\\\"", "\"")
-                            .replace("\\\\", "\\"));
-                }
-
-                else {
-                    output.append(value);
-                }
+                output.append(utility.formatValueForPrinting(value));
             }
         }
 
@@ -1487,7 +1476,13 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                                     + "\" in function \"" + functionName + "\": expected " + param.getType() + " but got " + argType + ".");
                         }
 
-                        functionVariables.put(param.getName(), new Variable(param.getName(), param.getType(), variableArg.getValue()));
+                        if (param.getType().equals(VariableType.ENUMERATION)) {
+                            functionVariables.put(param.getName(), new Variable(param.getName(), param.getEnumName(), param.getType(), (Integer)variableArg.getValue()));
+                        }
+
+                        else {
+                            functionVariables.put(param.getName(), new Variable(param.getName(), param.getType(), variableArg.getValue()));
+                        }
                     }
 
                     else {
@@ -1498,7 +1493,13 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                                     + "\" in function \"" + functionName + "\": expected " + param.getType() + " but got " + argType + ".");
                         }
 
-                        functionVariables.put(param.getName(), new Variable(param.getName(), param.getType(), argValue));
+                        if (param.getType().equals(VariableType.ENUMERATION)) {
+                            functionVariables.put(param.getName(), new Variable(param.getName(), param.getEnumName(), argType, (Integer)argValue));
+                        }
+
+                        else {
+                            functionVariables.put(param.getName(), new Variable(param.getName(), param.getType(), argValue));
+                        }
                     }
                 }
 
@@ -1543,21 +1544,21 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
     }
 
     @Override
-    public Object visitEnumAccessExpression(CZParser.EnumAccessExpressionContext ctx) {
-        String enumName = ctx.enum_access().IDENTIFIER(0).getText();
-        String memberName = ctx.enum_access().IDENTIFIER(1).getText();
+    public Object visitMemberAccessExpression(CZParser.MemberAccessExpressionContext ctx) {
+        String containerName = ctx.member_access().IDENTIFIER(0).getText();
+        String memberName = ctx.member_access().IDENTIFIER(1).getText();
 
-        if (!enums.containsKey(enumName)) {
-            throw new RuntimeException("Enum type \"" + enumName + "\" is not defined.");
+        if (enums.containsKey(containerName)) {
+            Map<String, Integer> enumMembers = enums.get(containerName);
+
+            if (!enumMembers.containsKey(memberName)) {
+                throw new RuntimeException("Enum member \"" + memberName + "\" not found in enum \"" + containerName + "\".");
+            }
+
+            return enumMembers.get(memberName);
         }
 
-        Map<String, Integer> enumMembers = enums.get(enumName);
-
-        if (!enumMembers.containsKey(memberName)) {
-            throw new RuntimeException("Enum member \"" + memberName + "\" not found in enum \"" + enumName + "\".");
-        }
-
-        return enumMembers.get(memberName);
+        throw new RuntimeException("Member \"" + memberName + "\" not found" + ".");
     }
 
     @Override
@@ -1621,14 +1622,8 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
     public Object visitSwitch_statement(CZParser.Switch_statementContext ctx) {
         Object switchValue = visit(ctx.expression());
 
-        if (switchValue instanceof Variable variable) {
-            if (variable.getType().equals(VariableType.ENUM)) {
-                switchValue = variable.getEnumValue();
-            }
-
-            else {
-                switchValue = variable.getValue();
-            }
+        if (switchValue instanceof Variable) {
+            switchValue = ((Variable)switchValue).getValue();
         }
 
         boolean matched = false;

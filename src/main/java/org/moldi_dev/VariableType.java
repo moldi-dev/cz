@@ -10,6 +10,6 @@ public enum VariableType {
     DOUBLE_ARRAY,
     STRING_ARRAY,
     BOOLEAN_ARRAY,
-    ENUM,
-    ANY
+    ENUMERATION,
+    UNKNOWN
 }

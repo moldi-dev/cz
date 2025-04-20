@@ -6,7 +6,7 @@ grammar CZ;
 
 // Parser rules
 program
-    : STANDARD_INCLUDE_DIRECTIVE constant_define_directive* function_declaration* enum_declaration* function* main_function function* EOF
+    : STANDARD_INCLUDE_DIRECTIVE constant_define_directive* enum_declaration* function_declaration* function* main_function function* EOF
     ;
 
 constant_define_directive
@@ -26,11 +26,15 @@ enum_declaration
     ;
 
 enum_member
-    : IDENTIFIER
+    : IDENTIFIER (enum_member_value)?
+    ;
+
+enum_member_value
+    : ASSIGNMENT INTEGER_NUMBER
     ;
 
 function_block
-    : LEFT_BRACE statement* return_statement SEMICOLON RIGHT_BRACE
+    : LEFT_BRACE statement* RIGHT_BRACE
     ;
 
 function_declaration
@@ -133,7 +137,7 @@ declaration
     ;
 
 assignment
-    : IDENTIFIER ASSIGNMENT expression
+    : (IDENTIFIER) ASSIGNMENT expression
     ;
 
 print_statement
@@ -185,12 +189,12 @@ expression
     | condition=expression QUESTION trueExpr=expression COLON falseExpr=expression                                               # ternaryExpression
     | function_call                                                                                                              # functionCallExpression
     | IDENTIFIER                                                                                                                 # identifierExpression
-    | enum_access                                                                                                                # enumAccessExpression
+    | member_access                                                                                                              # memberAccessExpression
     | literal                                                                                                                    # literalExpression
     | array_literal                                                                                                              # arrayLiteralExpression
     ;
 
-enum_access
+member_access
     : IDENTIFIER DOT IDENTIFIER
     ;
 

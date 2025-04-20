@@ -9,8 +9,8 @@ public class ExpressionEvaluator {
     public ExpressionEvaluator() {}
 
     public Object evaluateUnaryExpression(Object value, int operation) {
-        if (value instanceof Variable) {
-            value = ((Variable) value).getValue();
+        if (value instanceof Variable var && !var.getType().equals(VariableType.ENUMERATION)) {
+            value = var.getValue();
         }
 
         switch (operation) {
@@ -27,12 +27,12 @@ public class ExpressionEvaluator {
     }
 
     public Object evaluatePowerExpression(Object left, Object right) {
-        if (left instanceof Variable) {
-            left = ((Variable) left).getValue();
+        if (left instanceof Variable var && !var.getType().equals(VariableType.ENUMERATION)) {
+            left = var.getValue();
         }
 
-        if (right instanceof Variable) {
-            right = ((Variable) right).getValue();
+        if (right instanceof Variable var && !var.getType().equals(VariableType.ENUMERATION)) {
+            right = var.getValue();
         }
 
         if (left instanceof Double || right instanceof Double) {
@@ -53,12 +53,12 @@ public class ExpressionEvaluator {
     }
 
     public Object evaluateMultiplicativeExpression(Object left, Object right, int operation) {
-        if (left instanceof Variable) {
-            left = ((Variable) left).getValue();
+        if (left instanceof Variable var && !var.getType().equals(VariableType.ENUMERATION)) {
+            left = var.getValue();
         }
 
-        if (right instanceof Variable) {
-            right = ((Variable) right).getValue();
+        if (right instanceof Variable var && !var.getType().equals(VariableType.ENUMERATION)) {
+            right = var.getValue();
         }
 
         if (left instanceof Double || right instanceof Double) {
@@ -89,12 +89,12 @@ public class ExpressionEvaluator {
     }
 
     public Object evaluateAdditiveExpression(Object left, Object right, int operation) {
-        if (left instanceof Variable) {
-            left = ((Variable) left).getValue();
+        if (left instanceof Variable var && !var.getType().equals(VariableType.ENUMERATION)) {
+            left = var.getValue();
         }
 
-        if (right instanceof Variable) {
-            right = ((Variable) right).getValue();
+        if (right instanceof Variable var && !var.getType().equals(VariableType.ENUMERATION)) {
+            right = var.getValue();
         }
 
         if (operation == CZParser.ADDITION) {
@@ -127,12 +127,12 @@ public class ExpressionEvaluator {
     }
 
     public Object evaluateShiftExpression(Object left, Object right, int operation) {
-        if (left instanceof Variable) {
-            left = ((Variable) left).getValue();
+        if (left instanceof Variable var && !var.getType().equals(VariableType.ENUMERATION)) {
+            left = var.getValue();
         }
 
-        if (right instanceof Variable) {
-            right = ((Variable) right).getValue();
+        if (right instanceof Variable var && !var.getType().equals(VariableType.ENUMERATION)) {
+            right = var.getValue();
         }
 
         if (left instanceof Integer && right instanceof Integer) {
@@ -150,12 +150,12 @@ public class ExpressionEvaluator {
     }
 
     public Object evaluateRelationalExpression(Object left, Object right, int operation) {
-        if (left instanceof Variable) {
-            left = ((Variable) left).getValue();
+        if (left instanceof Variable var && !var.getType().equals(VariableType.ENUMERATION)) {
+            left = var.getValue();
         }
 
-        if (right instanceof Variable) {
-            right = ((Variable) right).getValue();
+        if (right instanceof Variable var && !var.getType().equals(VariableType.ENUMERATION)) {
+            right = var.getValue();
         }
 
         if (left instanceof Double || right instanceof Double) {
@@ -214,23 +214,11 @@ public class ExpressionEvaluator {
 
     public Object evaluateEqualityExpression(Object left, Object right, int operation) {
         if (left instanceof Variable variable) {
-            if (variable.getType() == VariableType.ENUM) {
-                left = variable.getEnumValue();
-            }
-
-            else {
-                left = variable.getValue();
-            }
+            left = variable.getValue();
         }
 
         if (right instanceof Variable variable) {
-            if (variable.getType() == VariableType.ENUM) {
-                right = variable.getEnumValue();
-            }
-
-            else {
-                right = variable.getValue();
-            }
+            right = variable.getValue();
         }
 
         return switch (operation) {
@@ -241,12 +229,12 @@ public class ExpressionEvaluator {
     }
 
     public Object evaluateBitwiseExpression(Object left, Object right, int operation) {
-        if (left instanceof Variable) {
-            left = ((Variable) left).getValue();
+        if (left instanceof Variable var && !var.getType().equals(VariableType.ENUMERATION)) {
+            left = var.getValue();
         }
 
-        if (right instanceof Variable) {
-            right = ((Variable) right).getValue();
+        if (right instanceof Variable var && !var.getType().equals(VariableType.ENUMERATION)) {
+            right = var.getValue();
         }
 
         if (left instanceof Character) left = (int) (Character) left;
@@ -268,8 +256,8 @@ public class ExpressionEvaluator {
     }
 
     public Object evaluateLogicalExpression(Object left, Supplier<Object> rightSupplier, int operation) {
-        if (left instanceof Variable) {
-            left = ((Variable) left).getValue();
+        if (left instanceof Variable var && !var.getType().equals(VariableType.ENUMERATION)) {
+            left = var.getValue();
         }
 
         if (!(left instanceof Boolean)) {
@@ -295,8 +283,8 @@ public class ExpressionEvaluator {
 
         Object right = rightSupplier.get();
 
-        if (right instanceof Variable) {
-            right = ((Variable) right).getValue();
+        if (right instanceof Variable var && !var.getType().equals(VariableType.ENUMERATION)) {
+            right = var.getValue();
         }
 
         if (!(right instanceof Boolean)) {

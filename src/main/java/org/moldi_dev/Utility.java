@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.moldi_dev.antlr_4_gen.CZParser;
 
 import java.util.List;
+import java.util.Map;
 
 public class Utility {
     public Utility() {}
@@ -66,5 +67,59 @@ public class Utility {
         }
 
         return value;
+    }
+
+    public String resolveEnumValue(String enumName, Integer enumValue) {
+        Map<String, Integer> members = CZInterpreter.enums.get(enumName);
+
+        if (members == null) {
+            throw new RuntimeException("Enum \"" + enumName + "\" not defined.");
+        }
+
+        for (Map.Entry<String, Integer> entry : members.entrySet()) {
+            if (entry.getValue().equals(enumValue)) {
+                return enumName + "." + entry.getKey();
+            }
+        }
+
+        throw new RuntimeException("Value \"" + enumValue + "\" not found in enum \"" + enumName + "\".");
+    }
+
+    public String formatValueForPrinting(Object value) {
+        if (value instanceof Variable variable) {
+            if (variable.getType().equals(VariableType.ENUMERATION)) {
+                return resolveEnumValue(variable.getEnumName(), (Integer) variable.getValue());
+            }
+
+            else {
+                value = variable.getValue();
+            }
+        }
+
+        if (value instanceof List<?> arrayValue) {
+            StringBuilder sb = new StringBuilder("[");
+
+            for (int i = 0; i < arrayValue.size(); i++) {
+                Object element = arrayValue.get(i);
+
+                sb.append(formatValueForPrinting(element));
+
+                if (i < arrayValue.size() - 1) {
+                    sb.append(", ");
+                }
+            }
+
+            sb.append("]");
+            return sb.toString();
+        }
+
+        if (value instanceof String strVal) {
+            return strVal.replace("\\n", "\n")
+                    .replace("\\t", "\t")
+                    .replace("\\\"", "\"")
+                    .replace("\\\\", "\\");
+        }
+
+        return String.valueOf(value);
     }
 }
