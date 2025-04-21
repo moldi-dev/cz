@@ -6,10 +6,12 @@ public enum VariableType {
     CHARACTER,
     STRING,
     BOOLEAN,
+    VOID,
     INTEGER_ARRAY,
     DOUBLE_ARRAY,
     STRING_ARRAY,
     BOOLEAN_ARRAY,
     ENUMERATION,
+    STRUCTURE,
     UNKNOWN
 }

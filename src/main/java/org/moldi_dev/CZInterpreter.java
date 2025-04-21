@@ -1,6 +1,7 @@
 package org.moldi_dev;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.moldi_dev.antlr_4_gen.CZBaseVisitor;
 import org.moldi_dev.antlr_4_gen.CZParser;
 
@@ -11,6 +12,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
     public static Map<String, String> constants;
     public static Map<String, Variable> variables;
     public static Map<String, Map<String, Integer>> enums;
+    public static Map<String, Struct> structs;
 
     private boolean shouldBreak = false;
     private boolean shouldContinue = false;
@@ -22,10 +24,11 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
     private final StandardFunctionHandler standardFunctionHandler;
 
     public CZInterpreter() {
-        variables = new HashMap<>();
-        functions = new HashMap<>();
-        constants = new HashMap<>();
-        enums = new HashMap<>();
+        variables = new LinkedHashMap<>();
+        functions = new LinkedHashMap<>();
+        constants = new LinkedHashMap<>();
+        enums = new LinkedHashMap<>();
+        structs = new LinkedHashMap<>();
 
         standardFunctionHandler = new StandardFunctionHandler();
         utility = new Utility();
@@ -386,6 +389,10 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             visit(enumCtx);
         }
 
+        for (CZParser.Struct_declarationContext structCtx : ctx.struct_declaration()) {
+            visit(structCtx);
+        }
+
         for (CZParser.Function_declarationContext declCtx : ctx.function_declaration()) {
             visit(declCtx);
         }
@@ -421,7 +428,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             throw new RuntimeException("Enum \"" + enumType + "\" already defined.");
         }
 
-        Map<String, Integer> enumMap = new HashMap<>();
+        Map<String, Integer> enumMap = new LinkedHashMap<>();
         int nextValue = 0;
 
         for (CZParser.Enum_memberContext memberCtx : ctx.enum_member()) {
@@ -440,6 +447,71 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         }
 
         enums.put(enumType, enumMap);
+
+        return null;
+    }
+
+    @Override
+    public Object visitStruct_declaration(CZParser.Struct_declarationContext ctx) {
+        String structName = ctx.IDENTIFIER().getText();
+
+        if (structs.containsKey(structName)) {
+            throw new RuntimeException("Struct \"" + structName + "\" already defined.");
+        }
+
+        Struct placeholderStruct = new Struct(structName, new ArrayList<>());
+        structs.put(structName, placeholderStruct);
+
+        List<Variable> fields = new ArrayList<>();
+
+        for (CZParser.Struct_memberContext memberCtx : ctx.struct_member()) {
+            String fieldName = memberCtx.IDENTIFIER().getText();
+            CZParser.Type_Context typeCtx = memberCtx.type_();
+
+            VariableType varType = utility.resolveType(typeCtx);
+            String enumName = null;
+            String nestedStructName = null;
+
+            if (typeCtx.VOID() != null) {
+                throw new RuntimeException("Struct \"" + structName + "\" can't have a void field.");
+            }
+
+            if (typeCtx.ENUM() != null) {
+                enumName = typeCtx.IDENTIFIER().getText();
+            }
+
+            else if (typeCtx.STRUCT() != null) {
+                nestedStructName = typeCtx.IDENTIFIER().getText();
+            }
+
+            Variable variable;
+
+            if (varType == VariableType.ENUMERATION) {
+                Map<String, Integer> enumMap = enums.get(enumName);
+
+                if (enumMap == null) {
+                    throw new RuntimeException("Enum \"" + enumName + "\" not defined.");
+                }
+
+                variable = new Variable(fieldName, enumName, varType, enumMap.entrySet().iterator().next().getValue());
+            }
+
+            else if (varType == VariableType.STRUCTURE) {
+                if (!structs.containsKey(nestedStructName)) {
+                    throw new RuntimeException("Struct \"" + nestedStructName + "\" not defined.");
+                }
+
+                variable = new Variable(fieldName, nestedStructName, null, varType);
+            }
+
+            else {
+                variable = new Variable(fieldName, varType, utility.getDefaultValueForVariableType(varType));
+            }
+
+            fields.add(variable);
+        }
+
+        placeholderStruct.setFields(fields);
 
         return null;
     }
@@ -466,6 +538,10 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             ctxType = "enum";
         }
 
+        else if (ctx.type_().STRUCT() != null) {
+            ctxType = "struct";
+        }
+
         if (ctx.parameters() != null) {
             for (CZParser.ParameterContext paramCtx : ctx.parameters().parameter()) {
                 String paramCtxName = paramCtx.type_().getText();
@@ -474,11 +550,19 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                     paramCtxName = "enum";
                 }
 
+                else if (paramCtx.type_().STRUCT() != null) {
+                    paramCtxName = "struct";
+                }
+
                 VariableType type = typeMapper.toVariableType(paramCtxName);
                 String name = paramCtx.IDENTIFIER().getText();
 
                 if (paramCtx.type_().ENUM() != null) {
-                    parameters.add(new Variable(name, paramCtx.type_().IDENTIFIER().getText(), type, null));
+                    parameters.add(new Variable(name, paramCtx.type_().IDENTIFIER().getText(), type, 0));
+                }
+
+                else if (paramCtx.type_().STRUCT() != null) {
+                    parameters.add(new Variable(name, paramCtx.type_().IDENTIFIER().getText(), null, type));
                 }
 
                 else {
@@ -524,6 +608,10 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             ctxType = "enum";
         }
 
+        else if (ctx.type_().STRUCT() != null) {
+            ctxType = "struct";
+        }
+
         if (ctx.parameters() != null) {
             for (CZParser.ParameterContext paramCtx : ctx.parameters().parameter()) {
                 String typeName = paramCtx.type_().getText();
@@ -532,11 +620,19 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                     typeName = "enum";
                 }
 
+                else if (paramCtx.type_().STRUCT() != null) {
+                    typeName = "struct";
+                }
+
                 VariableType type = typeMapper.toVariableType(typeName);
                 String name = paramCtx.IDENTIFIER().getText();
 
                 if (paramCtx.type_().ENUM() != null) {
-                    parameters.add(new Variable(name, paramCtx.type_().IDENTIFIER().getText(), type, null));
+                    parameters.add(new Variable(name, paramCtx.type_().IDENTIFIER().getText(), type, 0));
+                }
+
+                else if (paramCtx.type_().STRUCT() != null) {
+                    parameters.add(new Variable(name, paramCtx.type_().IDENTIFIER().getText(), null, type));
                 }
 
                 else {
@@ -599,6 +695,10 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             typeToken = "enum";
         }
 
+        else if (typeToken.contains("struct")) {
+            typeToken = "struct";
+        }
+
         VariableType type = typeMapper.toVariableType(typeToken);
 
         switch (type) {
@@ -619,8 +719,20 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 }
 
                 else {
-                    Integer defaultEnumValue = 0;
-                    variables.put(varName, new Variable(varName, enumName, type, defaultEnumValue));
+                    Map<String, Integer> enumMap = enums.get(enumName);
+                    variables.put(varName, new Variable(varName, enumName, type, enumMap.entrySet().iterator().next().getValue()));
+                }
+            }
+            case STRUCTURE -> {
+                String structName = ctx.type_().IDENTIFIER().getText();
+
+                if (!structs.containsKey(structName)) {
+                    throw new RuntimeException("Struct type \"" + structName + "\" is not defined.");
+                }
+
+                else {
+                    Struct copy = utility.copyStruct(structs.get(structName));
+                    variables.put(varName, new Variable(varName, structName, copy, type));
                 }
             }
             default -> throw new RuntimeException("Unknown variable type given inside a declaration.");
@@ -638,304 +750,143 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         return null;
     }
 
+    private Object visitMemberAssignment(CZParser.Member_accessContext ctx, CZParser.ExpressionContext valueCtx) {
+        String structVarName = ctx.IDENTIFIER(0).getText();
+        String fieldName = ctx.IDENTIFIER(1).getText();
+
+        if (!variables.containsKey(structVarName)) {
+            throw new RuntimeException("Variable \"" + structVarName + "\" is not defined.");
+        }
+
+        Variable structVar = variables.get(structVarName);
+
+        if (structVar.getType() != VariableType.STRUCTURE || structVar.getValue() == null) {
+            throw new RuntimeException("Variable \"" + structVarName + "\" is not a valid struct.");
+        }
+
+        Struct structInstance = (Struct) structVar.getValue();
+
+        Variable targetField = null;
+
+        for (Variable field : structInstance.getFields()) {
+            if (field.getName().equals(fieldName)) {
+                targetField = field;
+                break;
+            }
+        }
+
+        if (targetField == null) {
+            throw new RuntimeException("Field \"" + fieldName + "\" not found in struct \"" + structVarName + "\".");
+        }
+
+        Object value = visit(valueCtx);
+        VariableType fieldType = targetField.getType();
+        Object coercedValue;
+
+        switch (fieldType) {
+            case INTEGER -> coercedValue = utility.coerceToInteger(value);
+            case DOUBLE -> coercedValue = utility.coerceToDouble(value);
+            case BOOLEAN -> coercedValue = utility.coerceToBoolean(value);
+            case CHARACTER -> coercedValue = utility.coerceToCharacter(value);
+            case STRING -> coercedValue = utility.coerceToString(value);
+            case ENUMERATION -> coercedValue = utility.coerceToEnum(value, targetField.getEnumName(), enums);
+            case INTEGER_ARRAY -> coercedValue = utility.coerceToTypedList(value, Integer.class, VariableType.INTEGER);
+            case DOUBLE_ARRAY -> coercedValue = utility.coerceToTypedList(value, Double.class, VariableType.DOUBLE);
+            case BOOLEAN_ARRAY -> coercedValue = utility.coerceToTypedList(value, Boolean.class, VariableType.BOOLEAN);
+            case STRING_ARRAY -> coercedValue = utility.coerceToTypedList(value, String.class, VariableType.STRING);
+            case STRUCTURE -> coercedValue = utility.coerceToStruct(value, targetField.getStructName(), structs);
+            default -> throw new RuntimeException("Unsupported field type: \"" + fieldType + "\" for assignment.");
+        }
+
+        targetField.setValue(coercedValue);
+        variables.put(structVarName, structVar);
+
+        return null;
+    }
+
     @Override
     public Object visitAssignment(CZParser.AssignmentContext ctx) {
+        ParseTree lhs = ctx.getChild(0);
+
+        if (lhs instanceof CZParser.Member_accessContext) {
+            return visitMemberAssignment((CZParser.Member_accessContext) lhs, ctx.expression());
+        }
+
         String varName = ctx.IDENTIFIER().getText();
         Object value = visit(ctx.expression());
         Variable var = variables.get(varName);
 
+        if (value instanceof Variable v) {
+            value = v.getValue();
+        }
+
+        if (value == null && var.getType() != VariableType.STRUCTURE) {
+            throw new RuntimeException("Type mismatch for variable \"" + varName + "\". Only structs can be assigned to null.");
+        }
+
         switch (var.getType()) {
-            case INTEGER: {
-                if (value instanceof Integer) {
-                    variables.put(varName, new Variable(varName, var.getType(), value));
-                }
-
-                else if (value instanceof Variable v && v.getType() == VariableType.INTEGER) {
-                    variables.put(varName, new Variable(varName, var.getType(), v.getValue()));
-                }
-
-                else if (value instanceof Variable v && v.getType() == VariableType.ENUMERATION) {
-                    variables.put(varName, new Variable(varName, var.getType(), v.getValue()));
-                }
-
-                else {
-                    VariableType valueType = (value instanceof Variable v) ? v.getType() : typeChecker.inferTypeFromValue(value);
-                    throw new RuntimeException("Type mismatch for variable \"" + varName + "\": expected " + VariableType.INTEGER + " but got " + valueType + ".");
-                }
-
-                break;
+            case INTEGER -> {
+                Integer coerced = utility.coerceToInteger(value);
+                variables.put(varName, new Variable(varName, VariableType.INTEGER, coerced));
             }
 
-            case DOUBLE: {
-                if (value instanceof Double) {
-                    variables.put(varName, new Variable(varName, var.getType(), value));
-                }
-
-                else if (value instanceof Variable v && v.getType() == VariableType.DOUBLE) {
-                    variables.put(varName, new Variable(varName, var.getType(), v.getValue()));
-                }
-
-                else {
-                    VariableType valueType = (value instanceof Variable v) ? v.getType() : typeChecker.inferTypeFromValue(value);
-                    throw new RuntimeException("Type mismatch for variable \"" + varName + "\": expected " + VariableType.DOUBLE + " but got " + valueType + ".");
-                }
-
-                break;
+            case DOUBLE -> {
+                Double coerced = utility.coerceToDouble(value);
+                variables.put(varName, new Variable(varName, VariableType.DOUBLE, coerced));
             }
 
-            case CHARACTER: {
-                if (value instanceof Character) {
-                    variables.put(varName, new Variable(varName, var.getType(), value));
-                }
-
-                else if (value instanceof Variable v && v.getType() == VariableType.CHARACTER) {
-                    variables.put(varName, new Variable(varName, var.getType(), v.getValue()));
-                }
-
-                else {
-                    VariableType valueType = (value instanceof Variable v) ? v.getType() : typeChecker.inferTypeFromValue(value);
-                    throw new RuntimeException("Type mismatch for variable \"" + varName + "\": expected " + VariableType.CHARACTER + " but got " + valueType + ".");
-                }
-
-                break;
+            case CHARACTER -> {
+                Character coerced = utility.coerceToCharacter(value);
+                variables.put(varName, new Variable(varName, VariableType.CHARACTER, coerced));
             }
 
-            case STRING: {
-                if (value instanceof String) {
-                    variables.put(varName, new Variable(varName, var.getType(), value));
-                }
-
-                else if (value instanceof Variable v && v.getType() == VariableType.STRING) {
-                    variables.put(varName, new Variable(varName, var.getType(), v.getValue()));
-                }
-
-                else {
-                    VariableType valueType = (value instanceof Variable v) ? v.getType() : typeChecker.inferTypeFromValue(value);
-                    throw new RuntimeException("Type mismatch for variable \"" + varName + "\": expected " + VariableType.STRING + " but got " + valueType + ".");
-                }
-
-                break;
+            case STRING -> {
+                String coerced = utility.coerceToString(value);
+                variables.put(varName, new Variable(varName, VariableType.STRING, coerced));
             }
 
-            case BOOLEAN: {
-                if (value instanceof Boolean) {
-                    variables.put(varName, new Variable(varName, var.getType(), value));
-                }
-
-                else if (value instanceof Variable v && v.getType() == VariableType.BOOLEAN) {
-                    variables.put(varName, new Variable(varName, var.getType(), v.getValue()));
-                }
-
-                else {
-                    VariableType valueType = (value instanceof Variable v) ? v.getType() : typeChecker.inferTypeFromValue(value);
-                    throw new RuntimeException("Type mismatch for variable \"" + varName + "\": expected " + VariableType.BOOLEAN + " but got " + valueType + ".");
-                }
-
-                break;
+            case BOOLEAN -> {
+                Boolean coerced = utility.coerceToBoolean(value);
+                variables.put(varName, new Variable(varName, VariableType.BOOLEAN, coerced));
             }
 
-            case ENUMERATION: {
-                if (value instanceof Variable v && v.getType() == VariableType.ENUMERATION && v.getEnumName().equals(variables.get(varName).getEnumName())) {
-                    variables.put(varName, new Variable(varName, v.getEnumName(), VariableType.ENUMERATION, (Integer) v.getValue()));
-                }
-
-                else if (value instanceof Integer intVal) {
-                    String enumName = var.getEnumName();
-
-                    if (enumName == null) {
-                        throw new RuntimeException("Cannot assign integer to enum without knowing the enum type.");
-                    }
-
-                    Map<String, Integer> memberMap = enums.get(enumName);
-
-                    if (memberMap == null || !memberMap.containsValue(intVal)) {
-                        throw new RuntimeException("Enum value " + intVal + " not valid for enum \"" + enumName + "\".");
-                    }
-
-                    variables.put(varName, new Variable(varName, enumName, VariableType.ENUMERATION, intVal));
-                }
-
-                else {
-                    throw new RuntimeException("Invalid enum assignment for variable \"" + varName + "\".");
-                }
-
-                break;
+            case ENUMERATION -> {
+                String enumName = var.getEnumName();
+                Integer coerced = utility.coerceToEnum(value, enumName, enums);
+                variables.put(varName, new Variable(varName, enumName, VariableType.ENUMERATION, coerced));
             }
 
-            case INTEGER_ARRAY: {
-                if (value instanceof Variable v && v.getType().equals(var.getType()) && v.getValue() instanceof List<?>) {
-                    value = v.getValue();
+            case STRUCTURE -> {
+                if (value == null) {
+                    variables.put(varName, new Variable(varName, var.getStructName(), null, VariableType.STRUCTURE));
                 }
 
-                if (value instanceof List<?> rawList) {
-                    if (rawList.isEmpty()) {
-                        variables.put(varName, new Variable(varName, var.getType(), new ArrayList<>()));
-                    }
-
-                    if (rawList.stream().allMatch(item ->
-                            item instanceof Integer ||
-                                    (item instanceof Variable v && v.getType().equals(VariableType.INTEGER) && v.getValue() instanceof Integer))) {
-
-                        List<Integer> extracted = new ArrayList<>();
-
-                        for (Object item : rawList) {
-                            if (item instanceof Integer i) {
-                                extracted.add(i);
-                            }
-
-                            else {
-                                Variable v = (Variable) item;
-                                extracted.add((Integer) v.getValue());
-                            }
-                        }
-
-                        variables.put(varName, new Variable(varName, var.getType(), extracted));
-                    }
-
-                    else {
-                        VariableType valueType = (value instanceof Variable v) ? v.getType() : typeChecker.inferTypeFromValue(value);
-                        throw new RuntimeException("Type mismatch for array \"" + varName + "\": expected " + VariableType.INTEGER_ARRAY + " but got " + valueType + ".");
-                    }
+                else if (value instanceof Struct s) {
+                    variables.put(varName, new Variable(varName, var.getStructName(), s, VariableType.STRUCTURE));
                 }
-
-                else {
-                    throw new RuntimeException("Invalid value: expected a list of elements for array \"" + varName + "\".");
-                }
-
-                break;
             }
 
-            case DOUBLE_ARRAY: {
-                if (value instanceof Variable v && v.getType().equals(var.getType()) && v.getValue() instanceof List<?>) {
-                    value = v.getValue();
-                }
-
-                if (value instanceof List<?> rawList) {
-                    if (rawList.isEmpty()) {
-                        variables.put(varName, new Variable(varName, var.getType(), new ArrayList<>()));
-                    }
-
-                    if (rawList.stream().allMatch(item ->
-                            item instanceof Double ||
-                                    (item instanceof Variable v && v.getType().equals(VariableType.DOUBLE) && v.getValue() instanceof Double))) {
-
-                        List<Double> extracted = new ArrayList<>();
-
-                        for (Object item : rawList) {
-                            if (item instanceof Double d) {
-                                extracted.add(d);
-                            }
-
-                            else {
-                                Variable v = (Variable) item;
-                                extracted.add((Double) v.getValue());
-                            }
-                        }
-
-                        variables.put(varName, new Variable(varName, var.getType(), extracted));
-                    }
-
-                    else {
-                        VariableType valueType = (value instanceof Variable v) ? v.getType() : typeChecker.inferTypeFromValue(value);
-                        throw new RuntimeException("Type mismatch for variable \"" + varName + "\": expected " + VariableType.DOUBLE_ARRAY + " but got " + valueType + ".");
-                    }
-                }
-
-                else {
-                    throw new RuntimeException("Invalid value: expected a list of elements for array \"" + varName + "\".");
-                }
-
-                break;
+            case INTEGER_ARRAY -> {
+                List<Integer> list = utility.coerceToTypedList(value, Integer.class, VariableType.INTEGER);
+                variables.put(varName, new Variable(varName, VariableType.INTEGER_ARRAY, list));
             }
 
-            case STRING_ARRAY: {
-                if (value instanceof Variable v && v.getType().equals(var.getType()) && v.getValue() instanceof List<?>) {
-                    value = v.getValue();
-                }
-
-                if (value instanceof List<?> rawList) {
-                    if (rawList.isEmpty()) {
-                        variables.put(varName, new Variable(varName, var.getType(), new ArrayList<>()));
-                    }
-
-                    if (rawList.stream().allMatch(item ->
-                            item instanceof String ||
-                                    (item instanceof Variable v && v.getType().equals(VariableType.STRING) && v.getValue() instanceof String))) {
-
-                        List<String> extracted = new ArrayList<>();
-
-                        for (Object item : rawList) {
-                            if (item instanceof String s) {
-                                extracted.add(s);
-                            }
-
-                            else {
-                                Variable v = (Variable) item;
-                                extracted.add((String) v.getValue());
-                            }
-                        }
-
-                        variables.put(varName, new Variable(varName, var.getType(), extracted));
-                    }
-
-                    else {
-                        VariableType valueType = (value instanceof Variable v) ? v.getType() : typeChecker.inferTypeFromValue(value);
-                        throw new RuntimeException("Type mismatch for array \"" + varName + "\": expected " + VariableType.STRING_ARRAY + " but got " + valueType + ".");
-                    }
-                }
-
-                else {
-                    throw new RuntimeException("Invalid value: expected a list for array \"" + varName + "\".");
-                }
-
-                break;
+            case DOUBLE_ARRAY -> {
+                List<Double> list = utility.coerceToTypedList(value, Double.class, VariableType.DOUBLE);
+                variables.put(varName, new Variable(varName, VariableType.DOUBLE_ARRAY, list));
             }
 
-            case BOOLEAN_ARRAY: {
-                if (value instanceof Variable v && v.getType().equals(var.getType()) && v.getValue() instanceof List<?>) {
-                    value = v.getValue();
-                }
-
-                if (value instanceof List<?> rawList) {
-                    if (rawList.isEmpty()) {
-                        variables.put(varName, new Variable(varName, var.getType(), new ArrayList<>()));
-                    }
-
-                    if (rawList.stream().allMatch(item ->
-                            item instanceof Boolean ||
-                                    (item instanceof Variable v && v.getType().equals(VariableType.BOOLEAN) && v.getValue() instanceof Boolean))) {
-
-                        List<Boolean> extracted = new ArrayList<>();
-
-                        for (Object item : rawList) {
-                            if (item instanceof Boolean b) {
-                                extracted.add(b);
-                            }
-
-                            else {
-                                Variable v = (Variable) item;
-                                extracted.add((Boolean) v.getValue());
-                            }
-                        }
-
-                        variables.put(varName, new Variable(varName, var.getType(), extracted));
-                    }
-
-                    else {
-                        VariableType valueType = (value instanceof Variable v) ? v.getType() : typeChecker.inferTypeFromValue(value);
-                        throw new RuntimeException("Type mismatch for variable \"" + varName + "\": expected " + VariableType.BOOLEAN_ARRAY + " but got " + valueType + ".");
-                    }
-                }
-
-                else {
-                    throw new RuntimeException("Invalid value: expected a list for array \"" + varName + "\".");
-                }
-
-                break;
+            case STRING_ARRAY -> {
+                List<String> list = utility.coerceToTypedList(value, String.class, VariableType.STRING);
+                variables.put(varName, new Variable(varName, VariableType.STRING_ARRAY, list));
             }
 
-            default:
-                throw new RuntimeException("Unsupported variable type: \"" + var.getType() + "\" for direct assignation.");
+            case BOOLEAN_ARRAY -> {
+                List<Boolean> list = utility.coerceToTypedList(value, Boolean.class, VariableType.BOOLEAN);
+                variables.put(varName, new Variable(varName, VariableType.BOOLEAN_ARRAY, list));
+            }
+
+            default -> throw new RuntimeException("Unsupported variable type: \"" + var.getType() + "\" for direct assignment.");
         }
 
         return null;
@@ -948,7 +899,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         if (ctx.arguments() != null) {
             for (CZParser.ExpressionContext exprCtx : ctx.arguments().expression()) {
                 Object value = visit(exprCtx);
-                output.append(utility.formatValueForPrinting(value));
+                output.append(utility.formatValueForPrinting(value, enums));
             }
         }
 
@@ -1138,21 +1089,38 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
     @Override
     public Object visitReturn_statement(CZParser.Return_statementContext ctx) {
-        Object value = visit(ctx.expression());
+        if (ctx.expression() != null) {
+            Object value = visit(ctx.expression());
 
-        String functionName = utility.findEnclosingFunctionName(ctx);
-        Function function = functions.get(functionName);
+            String functionName = utility.findEnclosingFunctionName(ctx);
+            Function function = functions.get(functionName);
 
-        if (function != null) {
-            VariableType declaredReturnType = function.getReturnType();
-            VariableType valueType = typeChecker.inferTypeFromValue(value);
+            if (function != null) {
+                VariableType declaredReturnType = function.getReturnType();
+                VariableType valueType = typeChecker.inferTypeFromValue(value);
 
-            if (!declaredReturnType.equals(valueType)) {
-                throw new RuntimeException("Return type mismatch for function \"" + functionName + "\": expected return type " + declaredReturnType + " but got " + valueType + ".");
+                if (!declaredReturnType.equals(valueType)) {
+                    throw new RuntimeException("Return type mismatch for function \"" + functionName + "\": expected return type " + declaredReturnType + " but got " + valueType + ".");
+                }
             }
+
+            throw new ReturnValue(value);
         }
 
-        throw new ReturnValue(value);
+        else {
+            String functionName = utility.findEnclosingFunctionName(ctx);
+            Function function = functions.get(functionName);
+
+            if (function != null) {
+                VariableType declaredReturnType = function.getReturnType();
+
+                if (!declaredReturnType.equals(VariableType.VOID)) {
+                    throw new RuntimeException("Function \"" + functionName + "\" must return a value of type " + declaredReturnType + ".");
+                }
+            }
+
+            throw new ReturnValue(null);
+        }
     }
 
     @Override
@@ -1219,6 +1187,11 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
     public Object visitLogicalExpression(CZParser.LogicalExpressionContext ctx) {
         Object left = visit(ctx.left);
         return expressionEvaluator.evaluateLogicalExpression(left, () -> visit(ctx.right), ctx.op.getType());
+    }
+
+    @Override
+    public Object visitNullExpression(CZParser.NullExpressionContext ctx) {
+        return null;
     }
 
     @Override
@@ -1462,7 +1435,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             }
 
             default: {
-                Map<String, Variable> functionVariables = new HashMap<>();
+                Map<String, Variable> functionVariables = new LinkedHashMap<>();
 
                 for (int i = 0; i < parameters.size(); i++) {
                     Variable param = parameters.get(i);
@@ -1476,7 +1449,11 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                                     + "\" in function \"" + functionName + "\": expected " + param.getType() + " but got " + argType + ".");
                         }
 
-                        if (param.getType().equals(VariableType.ENUMERATION)) {
+                        if (param.getType() == VariableType.STRUCTURE) {
+                            functionVariables.put(param.getName(), new Variable(param.getName(), param.getStructName(), variableArg.getValue(), VariableType.STRUCTURE));
+                        }
+
+                        else if (param.getType().equals(VariableType.ENUMERATION)) {
                             functionVariables.put(param.getName(), new Variable(param.getName(), param.getEnumName(), param.getType(), (Integer)variableArg.getValue()));
                         }
 
@@ -1493,7 +1470,11 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                                     + "\" in function \"" + functionName + "\": expected " + param.getType() + " but got " + argType + ".");
                         }
 
-                        if (param.getType().equals(VariableType.ENUMERATION)) {
+                        if (param.getType() == VariableType.STRUCTURE) {
+                            functionVariables.put(param.getName(), new Variable(param.getName(), param.getStructName(), argValue, VariableType.STRUCTURE));
+                        }
+
+                        else if (param.getType().equals(VariableType.ENUMERATION)) {
                             functionVariables.put(param.getName(), new Variable(param.getName(), param.getEnumName(), argType, (Integer)argValue));
                         }
 
@@ -1503,7 +1484,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                     }
                 }
 
-                Map<String, Variable> previousVariables = new HashMap<>(variables);
+                Map<String, Variable> previousVariables = new LinkedHashMap<>(variables);
                 variables.clear();
                 variables.putAll(functionVariables);
 
@@ -1556,6 +1537,42 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             }
 
             return enumMembers.get(memberName);
+        }
+
+        else if (structs.containsKey(containerName)) {
+            Struct struct = structs.get(containerName);
+            Variable found = null;
+
+            for (Variable var : struct.getFields()) {
+                if (var.getName().equals(memberName)) {
+                    found = var;
+                    break;
+                }
+            }
+
+            if (found == null) {
+                throw new RuntimeException("Struct member \"" + memberName + "\" not found in struct \"" + containerName + "\".");
+            }
+
+            return found;
+        }
+
+        else if (variables.containsKey(containerName)) {
+            Variable var = variables.get(containerName);
+
+            if (var.getType() != VariableType.STRUCTURE || var.getValue() == null) {
+                throw new RuntimeException("Variable \"" + containerName + "\" is not a valid struct instance.");
+            }
+
+            Struct structInstance = (Struct) var.getValue();
+
+            for (Variable field : structInstance.getFields()) {
+                if (field.getName().equals(memberName)) {
+                    return field;
+                }
+            }
+
+            throw new RuntimeException("Member \"" + memberName + "\" not found in struct instance \"" + containerName + "\".");
         }
 
         throw new RuntimeException("Member \"" + memberName + "\" not found" + ".");

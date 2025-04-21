@@ -1,0 +1,205 @@
+#include <MDA>
+
+struct ListNode = [
+    int key;
+    struct ListNode next;
+];
+
+struct ListNode create_node(int key);
+struct ListNode insert_first(int key, struct ListNode head);
+struct ListNode insert_last(int key, struct ListNode head);
+struct ListNode find(int key, struct ListNode head);
+int length(struct ListNode head);
+struct ListNode delete_first(struct ListNode head);
+struct ListNode delete_last(struct ListNode head);
+struct ListNode delete_key(int key, struct ListNode head);
+
+void print_list_iteratively(struct ListNode head);
+void print_list_recursively(struct ListNode head);
+
+int main() {
+    struct ListNode head = null;
+
+    head = insert_first(2, head);
+    head = insert_first(1, head);
+    head = insert_first(0, head);
+    print("After insert_first x3: \n");
+    print_list_iteratively(head);
+    print("\n");
+
+    head = insert_last(3, head);
+    head = insert_last(4, head);
+    print("After insert_last x2: \n");
+    print_list_iteratively(head);
+    print("\n");
+
+    struct ListNode found_node = find(3, head);
+    print("Found node with key 3: ", found_node, "\n");
+
+    int len = length(head);
+    print("List length: ", len, "\n");
+
+    head = delete_first(head);
+    print("After delete_first: \n");
+    print_list_iteratively(head);
+    print("\n");
+
+    head = delete_last(head);
+    print("After delete_last: \n");
+    print_list_iteratively(head);
+    print("\n");
+
+    head = delete_key(2, head);
+    print("After delete_key (2): \n");
+    print_list_recursively(head);
+    print("\n");
+
+    print(head, "\n");
+
+    return 0;
+}
+
+struct ListNode create_node(int key) {
+    struct ListNode new_node;
+
+    new_node.key = key;
+    new_node.next = null;
+
+    return new_node;
+}
+
+struct ListNode insert_first(int key, struct ListNode head) {
+    struct ListNode new_node = create_node(key);
+
+    if (head == null) {
+        return new_node;
+    }
+
+    new_node.next = head;
+
+    return new_node;
+}
+
+struct ListNode insert_last(int key, struct ListNode head) {
+    struct ListNode new_node = create_node(key);
+
+    if (head == null) {
+        return new_node;
+    }
+
+    struct ListNode current = head;
+
+    while (current.next != null) {
+        current = current.next;
+    }
+
+    current.next = new_node;
+    return head;
+}
+
+struct ListNode find(int key, struct ListNode head) {
+    struct ListNode current = head;
+
+    while (current != null) {
+        if (current.key == key) {
+            return current;
+        }
+
+        current = current.next;
+    }
+
+    return null;
+}
+
+int length(struct ListNode head) {
+    int count = 0;
+    struct ListNode current = head;
+
+    while (current != null) {
+        count = count + 1;
+        current = current.next;
+    }
+
+    return count;
+}
+
+struct ListNode delete_first(struct ListNode head) {
+    struct ListNode null_node = null;
+
+    if (head == null) {
+        return null_node;
+    }
+
+    struct ListNode new_head = head.next;
+    return new_head;
+}
+
+struct ListNode delete_last(struct ListNode head) {
+    struct ListNode null_node = null;
+
+    if (head == null || head.next == null) {
+        return null_node;
+    }
+
+    struct ListNode current = head;
+    struct ListNode current_next = head.next;
+    struct ListNode current_next_next = current_next.next;
+
+    while (current_next != null && current_next_next != null) {
+        current = current.next;
+        current_next = current.next;
+        current_next_next = current_next.next;
+    }
+
+    current.next = null;
+
+    return head;
+}
+
+struct ListNode delete_key(int key, struct ListNode head) {
+    struct ListNode null_node = null;
+
+    if (head == null) {
+        return null_node;
+    }
+
+    if (head.key == key) {
+        struct ListNode new_head = head.next;
+        return new_head;
+    }
+
+    struct ListNode current = head;
+    struct ListNode current_next = head.next;
+    struct ListNode current_next_next = current_next.next;
+
+    while (current_next != null) {
+        if (current_next.key == key) {
+            current.next = current_next_next;
+            return head;
+        }
+
+        current = current.next;
+        current_next = current.next;
+        current_next_next = current_next.next;
+    }
+
+    return head;
+}
+
+void print_list_iteratively(struct ListNode head) {
+    struct ListNode current = head;
+
+    while (current != null) {
+        print(current.key, " ");
+        current = current.next;
+    }
+}
+
+void print_list_recursively(struct ListNode head) {
+    if (head == null) {
+        return;
+    }
+
+    print(head.key, " ");
+    print_list_recursively(head.next);
+}

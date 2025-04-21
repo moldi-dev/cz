@@ -6,7 +6,7 @@ grammar CZ;
 
 // Parser rules
 program
-    : STANDARD_INCLUDE_DIRECTIVE constant_define_directive* enum_declaration* function_declaration* function* main_function function* EOF
+    : STANDARD_INCLUDE_DIRECTIVE constant_define_directive* enum_declaration* struct_declaration* function_declaration* function* main_function function* EOF
     ;
 
 constant_define_directive
@@ -19,6 +19,14 @@ main_function
 
 function
     : type_ IDENTIFIER LEFT_PARENTHESIS parameters? RIGHT_PARENTHESIS function_block
+    ;
+
+struct_declaration
+    : STRUCT IDENTIFIER ASSIGNMENT LEFT_BRACKET (struct_member SEMICOLON)+ RIGHT_BRACKET SEMICOLON
+    ;
+
+struct_member
+    : type_ IDENTIFIER
     ;
 
 enum_declaration
@@ -87,7 +95,7 @@ continue_statement
     ;
 
 return_statement
-    : RETURN expression
+    : RETURN expression?
     ;
 
 function_call
@@ -137,7 +145,7 @@ declaration
     ;
 
 assignment
-    : (IDENTIFIER) ASSIGNMENT expression
+    : (IDENTIFIER | member_access) ASSIGNMENT expression
     ;
 
 print_statement
@@ -192,6 +200,7 @@ expression
     | member_access                                                                                                              # memberAccessExpression
     | literal                                                                                                                    # literalExpression
     | array_literal                                                                                                              # arrayLiteralExpression
+    | NULL                                                                                                                       # nullExpression
     ;
 
 member_access
@@ -221,12 +230,14 @@ type_
     | ARRAY_INT
     | DOUBLE
     | BOOLEAN
+    | VOID
     | ARRAY_BOOLEAN
     | ARRAY_DOUBLE
     | CHAR
     | STRING
     | ARRAY_STRING
     | ENUM IDENTIFIER
+    | STRUCT IDENTIFIER
     ;
 
 // Keywords (both C and CZ versions)
@@ -258,6 +269,9 @@ DEFAULT: 'default' | 'deffie';
 CONSTANT_DEFINE: '#constant_define' | '#vibe_define';
 STANDARD_INCLUDE_DIRECTIVE: '#include <MDA>' | '#vibe_include <MDA>';
 ENUM: 'enum' | 'bae';
+STRUCT: 'struct' | 'strucey';
+NULL: 'null' | 'flop';
+VOID: 'void' | 'ghost';
 
 // Operators
 QUESTION: '?' | 'fr?';

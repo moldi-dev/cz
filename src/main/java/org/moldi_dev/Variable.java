@@ -4,9 +4,17 @@ public class Variable {
     private String name;
     private VariableType type;
     private String enumName;
+    private String structName;
     private Object value;
 
     public Variable() {}
+
+    public Variable(String name, String structName, Object structValue, VariableType type) {
+        this.name = name;
+        this.structName = structName;
+        this.type = type;
+        this.value = structValue;
+    }
 
     public Variable(String name, String enumName, VariableType type, Integer enumValue) {
         this.name = name;
@@ -39,6 +47,14 @@ public class Variable {
 
     public String getEnumName() {
         return enumName;
+    }
+
+    public void setStructName(String structName) {
+        this.structName = structName;
+    }
+
+    public String getStructName() {
+        return structName;
     }
 
     public void setType(VariableType type) {

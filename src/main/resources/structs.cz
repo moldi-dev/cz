@@ -1,0 +1,50 @@
+#include <MDA>
+
+enum COLOR = [
+    WHITE = 100,
+    RED = 200,
+    BLACK = 300,
+    BLUE = 400,
+    PINK = 500
+];
+
+struct Point2d = [
+    int x;
+    int y;
+    enum COLOR color;
+];
+
+struct Point2d initialize_point(int x, int y, int color);
+struct Point2d compute_sum(struct Point2d first_point, struct Point2d second_point);
+
+int main() {
+    struct Point2d p1 = initialize_point(1, 2, COLOR.RED);
+    struct Point2d p2 = initialize_point(3, 4, COLOR.BLUE);
+    struct Point2d result = compute_sum(p1, p2);
+
+    print("p1: ", p1, "\n");
+    print("p2: ", p2, "\n");
+    print("Sum: ", result, "\n");
+
+    return 0;
+}
+
+struct Point2d initialize_point(int x, int y, int color) {
+    struct Point2d result;
+
+    result.x = x;
+    result.y = y;
+    result.color = color;
+
+    return result;
+}
+
+struct Point2d compute_sum(struct Point2d first_point, struct Point2d second_point) {
+    struct Point2d result;
+
+    result.x = first_point.x + second_point.x;
+    result.y = first_point.y + second_point.y;
+    result.color = COLOR.PINK;
+
+    return result;
+}

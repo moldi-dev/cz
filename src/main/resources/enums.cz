@@ -1,0 +1,65 @@
+#include <MDA>
+
+enum BASE_DAMAGE = [
+    CIVILIAN,
+    WARRIOR = 100,
+    MAGE = 150,
+    JUNKEY
+];
+
+enum BOOL = [
+   FALSE = 0,
+   TRUE = 1
+];
+
+enum BOOL func() {
+    enum BOOL rez = BOOL.TRUE;
+    return rez;
+}
+
+int get_enum_value(enum BASE_DAMAGE damage) {
+    switch (damage) {
+        case BASE_DAMAGE.CIVILIAN:
+            return BASE_DAMAGE.CIVILIAN;
+            break;
+        case BASE_DAMAGE.WARRIOR:
+            return BASE_DAMAGE.WARRIOR;
+            break;
+        case BASE_DAMAGE.MAGE:
+            return BASE_DAMAGE.MAGE;
+            break;
+        case BASE_DAMAGE.JUNKEY:
+            return BASE_DAMAGE.JUNKEY;
+            break;
+        default:
+            return -1;
+    }
+}
+
+int main() {
+    enum BASE_DAMAGE damage = BASE_DAMAGE.MAGE;
+    enum BASE_DAMAGE damage2 = damage;
+    enum BOOL boolean = BOOL.FALSE;
+    enum BOOL boolean2 = 1;
+
+    int a = damage;
+    int b = func();
+    int c = get_enum_value(damage);
+
+    print("a = ", a, "\n");
+    print("b = ", b, "\n");
+    print("c = ", c, "\n");
+
+    print("BASE_DAMAGE.MAGE == a ? ", BASE_DAMAGE.MAGE == a, "\n");
+
+    print("BASE_DAMAGE.JUNKEY == a ? ", a == BASE_DAMAGE.JUNKEY ? "yes" : "no", "\n");
+
+    print("damage2 = ", damage2, "\n");
+
+    print("boolean = ", boolean, "\n");
+    print("boolean2 = ", boolean2, "\n");
+
+    print("BASE_DAMAGE.CIVILIAN == BOOL.FALSE ? ", BASE_DAMAGE.CIVILIAN == BOOL.FALSE, "\n");
+
+    return 0;
+}
