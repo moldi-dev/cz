@@ -1,0 +1,261 @@
+#include <MDA>
+
+struct BSTNode = [
+    int key;
+    struct BSTNode left;
+    struct BSTNode right;
+];
+
+int max(int a, int b);
+int abs(int a);
+
+struct BSTNode create_node(int key);
+struct BSTNode insert(struct BSTNode root, int key);
+bool search(struct BSTNode root, int key);
+struct BSTNode delete(struct BSTNode root, int key);
+int min_value(struct BSTNode node);
+int max_value(struct BSTNode node);
+int height(struct BSTNode root);
+bool is_balanced(struct BSTNode root);
+void inorder(struct BSTNode root);
+void preorder(struct BSTNode root);
+void postorder(struct BSTNode root);
+
+void pretty_print(struct BSTNode root);
+void pretty_print_helper(struct BSTNode root, int spaces);
+
+int main() {
+    struct BSTNode root = null;
+
+    root = insert(root, 50);
+    root = insert(root, 30);
+    root = insert(root, 70);
+    root = insert(root, 20);
+    root = insert(root, 40);
+    root = insert(root, 60);
+    root = insert(root, 80);
+
+    pretty_print(root);
+
+    print("Inorder traversal: ");
+    inorder(root);
+    print("\n");
+
+    print("Preorder traversal: ");
+    preorder(root);
+    print("\n");
+
+    print("Postorder traversal: ");
+    postorder(root);
+    print("\n");
+
+    print("Searching for 60: ", search(root, 60), "\n");
+    print("Searching for 100: ", search(root, 100), "\n");
+
+    root = delete(root, 70);
+    print("Inorder after deleting 70: ");
+    inorder(root);
+    print("\n");
+
+    print("Is the tree balanced ? ", is_balanced(root), "\n");
+
+    pretty_print(root);
+
+    return 0;
+}
+
+int max(int a, int b) {
+    if (a > b) {
+        return a;
+    }
+
+    return b;
+}
+
+int abs(int a) {
+    if (a < 0) {
+        return -1 * a;
+    }
+
+    return a;
+}
+
+struct BSTNode create_node(int key) {
+    struct BSTNode node;
+
+    node.key = key;
+    node.left = null;
+    node.right = null;
+
+    return node;
+}
+
+struct BSTNode insert(struct BSTNode root, int key) {
+    if (root == null) {
+        return create_node(key);
+    }
+
+    if (key < root.key) {
+        root.left = insert(root.left, key);
+    }
+
+    else if (key > root.key) {
+        root.right = insert(root.right, key);
+    }
+
+    return root;
+}
+
+bool search(struct BSTNode root, int key) {
+    if (root == null) {
+        return false;
+    }
+
+    if (key == root.key) {
+        return true;
+    }
+
+    else if (key < root.key) {
+        return search(root.left, key);
+    }
+
+    else {
+        return search(root.right, key);
+    }
+}
+
+int min_value(struct BSTNode node) {
+    struct BSTNode current = node;
+
+    while (current.left != null) {
+        current = current.left;
+    }
+
+    return current.key;
+}
+
+int max_value(struct BSTNode node) {
+    struct BSTNode current = node;
+
+    while (current.right != null) {
+        current = current.right;
+    }
+
+    return current.key;
+}
+
+int height(struct BSTNode root) {
+    if (root == null) {
+        return 0;
+    }
+
+    int height_left = height(root.left);
+    int height_right = height(root.right);
+
+    return 1 + max(height_left, height_right);
+}
+
+bool is_balanced(struct BSTNode root) {
+    if (root == null) {
+        return true;
+    }
+
+    int left_height = height(root.left);
+    int right_height = height(root.right);
+
+    if (abs(left_height - right_height) > 1) {
+        return false;
+    }
+
+    return is_balanced(root.left) && is_balanced(root.right);
+}
+
+struct BSTNode delete(struct BSTNode root, int key) {
+    struct BSTNode null_node = null;
+
+    if (root == null) {
+        return null_node;
+    }
+
+    if (key < root.key) {
+        root.left = delete(root.left, key);
+    }
+
+    else if (key > root.key) {
+        root.right = delete(root.right, key);
+    }
+
+    else {
+        if (root.left == null && root.right == null) {
+            return null_node;
+        }
+
+        else if (root.left == null) {
+            return root.right;
+        }
+
+        else if (root.right == null) {
+            return root.left;
+        }
+
+        int min_right = min_value(root.right);
+        root.key = min_right;
+        root.right = delete(root.right, min_right);
+    }
+
+    return root;
+}
+
+void inorder(struct BSTNode root) {
+    if (root == null) {
+        return;
+    }
+
+    inorder(root.left);
+    print(root.key, " ");
+    inorder(root.right);
+}
+
+void preorder(struct BSTNode root) {
+    if (root == null) {
+        return;
+    }
+
+    print(root.key, " ");
+    preorder(root.left);
+    preorder(root.right);
+}
+
+void postorder(struct BSTNode root) {
+    if (root == null) {
+        return;
+    }
+
+    postorder(root.left);
+    postorder(root.right);
+    print(root.key, " ");
+}
+
+void pretty_print(struct BSTNode root) {
+    print("Tree structure: \n");
+
+    pretty_print_helper(root, 0);
+}
+
+void pretty_print_helper(struct BSTNode root, int spaces) {
+    if (root == null) {
+        return;
+    }
+
+    int indent = 4;
+
+    pretty_print_helper(root.right, spaces + indent);
+
+    for (int i = 0; i < spaces; i = i + 1) {
+        print(" ");
+    }
+
+    print(root.key, "\n");
+
+    pretty_print_helper(root.left, spaces + indent);
+}
