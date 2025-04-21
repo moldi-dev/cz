@@ -1450,7 +1450,8 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                         }
 
                         if (param.getType() == VariableType.STRUCTURE) {
-                            functionVariables.put(param.getName(), new Variable(param.getName(), param.getStructName(), variableArg.getValue(), VariableType.STRUCTURE));
+                            Struct copied = utility.copyStruct((Struct) variableArg.getValue());
+                            functionVariables.put(param.getName(), new Variable(param.getName(), param.getStructName(), copied, VariableType.STRUCTURE));
                         }
 
                         else if (param.getType().equals(VariableType.ENUMERATION)) {
@@ -1471,7 +1472,8 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                         }
 
                         if (param.getType() == VariableType.STRUCTURE) {
-                            functionVariables.put(param.getName(), new Variable(param.getName(), param.getStructName(), argValue, VariableType.STRUCTURE));
+                            Struct copied = utility.copyStruct((Struct) argValue);
+                            functionVariables.put(param.getName(), new Variable(param.getName(), param.getStructName(), copied, VariableType.STRUCTURE));
                         }
 
                         else if (param.getType().equals(VariableType.ENUMERATION)) {
