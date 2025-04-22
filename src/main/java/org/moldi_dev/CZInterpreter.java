@@ -41,6 +41,8 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         constants.put("PI", String.valueOf(Math.PI));
 
         // Built-in functions (my standard library hehehe)
+
+        // ---------------------------------------- MATH -----------------------------------------------
         functions.put("<MDA>sine",
                 new Function("<MDA>sine",
                         List.of(new Variable("x", VariableType.DOUBLE, null)),
@@ -114,6 +116,8 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                         List.of(new Variable("x", VariableType.DOUBLE, null),
                                 new Variable("y", VariableType.DOUBLE, null)),
                         null, false, VariableType.DOUBLE));
+
+        // ---------------------------------------- ARRAYS -----------------------------------------------
 
         functions.put("<MDA>array_length",
                 new Function("<MDA>array_length",
@@ -254,6 +258,8 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                         List.of(new Variable("arr", VariableType.UNKNOWN, null)),
                         null, false, VariableType.UNKNOWN));
 
+        // ---------------------------------------- STRINGS -----------------------------------------------
+
         functions.put("<MDA>string_slice",
                 new Function("<MDA>string_slice",
                         List.of(new Variable("string", VariableType.STRING, null),
@@ -288,6 +294,8 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                         List.of(new Variable("string", VariableType.STRING, null),
                                 new Variable("substring", VariableType.STRING, null)),
                         null, false, VariableType.BOOLEAN));
+
+        // ---------------------------------------- DATA TYPES CONVERSIONS -----------------------------------------------
 
         functions.put("<MDA>int_to_double",
                 new Function("<MDA>int_to_double",
@@ -484,6 +492,10 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 nestedStructName = typeCtx.IDENTIFIER().getText();
             }
 
+            else if (typeCtx.struct_array_type() != null) {
+                nestedStructName = typeCtx.struct_array_type().IDENTIFIER().getText();
+            }
+
             Variable variable;
 
             if (varType == VariableType.ENUMERATION) {
@@ -502,6 +514,14 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 }
 
                 variable = new Variable(fieldName, nestedStructName, null, varType);
+            }
+
+            else if (varType == VariableType.STRUCTURE_ARRAY) {
+                if (!structs.containsKey(nestedStructName)) {
+                    throw new RuntimeException("Struct \"" + nestedStructName + "\" not defined.");
+                }
+
+                variable = new Variable(fieldName, nestedStructName, new ArrayList<Struct>(), varType);
             }
 
             else {
@@ -542,6 +562,10 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             ctxType = "struct";
         }
 
+        else if (ctx.type_().struct_array_type() != null) {
+            ctxType = "array<struct>";
+        }
+
         if (ctx.parameters() != null) {
             for (CZParser.ParameterContext paramCtx : ctx.parameters().parameter()) {
                 String paramCtxName = paramCtx.type_().getText();
@@ -554,6 +578,10 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                     paramCtxName = "struct";
                 }
 
+                else if (paramCtx.type_().struct_array_type() != null) {
+                    paramCtxName = "array<struct>";
+                }
+
                 VariableType type = typeMapper.toVariableType(paramCtxName);
                 String name = paramCtx.IDENTIFIER().getText();
 
@@ -563,6 +591,10 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
                 else if (paramCtx.type_().STRUCT() != null) {
                     parameters.add(new Variable(name, paramCtx.type_().IDENTIFIER().getText(), null, type));
+                }
+
+                else if (paramCtx.type_().struct_array_type() != null) {
+                    parameters.add(new Variable(name, paramCtx.type_().struct_array_type().IDENTIFIER().getText(), null, type));
                 }
 
                 else {
@@ -612,6 +644,10 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             ctxType = "struct";
         }
 
+        else if (ctx.type_().struct_array_type() != null) {
+            ctxType = "array<struct>";
+        }
+
         if (ctx.parameters() != null) {
             for (CZParser.ParameterContext paramCtx : ctx.parameters().parameter()) {
                 String typeName = paramCtx.type_().getText();
@@ -624,6 +660,10 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                     typeName = "struct";
                 }
 
+                else if (paramCtx.type_().struct_array_type() != null) {
+                    typeName = "array<struct>";
+                }
+
                 VariableType type = typeMapper.toVariableType(typeName);
                 String name = paramCtx.IDENTIFIER().getText();
 
@@ -633,6 +673,10 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
                 else if (paramCtx.type_().STRUCT() != null) {
                     parameters.add(new Variable(name, paramCtx.type_().IDENTIFIER().getText(), null, type));
+                }
+
+                else if (paramCtx.type_().struct_array_type() != null) {
+                    parameters.add(new Variable(name, paramCtx.type_().struct_array_type().IDENTIFIER().getText(), null, type));
                 }
 
                 else {
@@ -691,12 +735,16 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         String varName = ctx.IDENTIFIER().getText();
         String typeToken = ctx.type_().getText();
 
-        if (typeToken.contains("enum")) {
+        if (ctx.type_().ENUM() != null) {
             typeToken = "enum";
         }
 
-        else if (typeToken.contains("struct")) {
+        else if (ctx.type_().STRUCT() != null) {
             typeToken = "struct";
+        }
+
+        else if (ctx.type_().struct_array_type() != null) {
+            typeToken = "array<struct>";
         }
 
         VariableType type = typeMapper.toVariableType(typeToken);
@@ -733,6 +781,17 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 else {
                     Struct copy = utility.copyStruct(structs.get(structName));
                     variables.put(varName, new Variable(varName, structName, copy, type));
+                }
+            }
+            case STRUCTURE_ARRAY -> {
+                String structName = ctx.type_().struct_array_type().IDENTIFIER().getText();
+
+                if (!structs.containsKey(structName)) {
+                    throw new RuntimeException("Struct type \"" + structName + "\" is not defined.");
+                }
+
+                else {
+                    variables.put(varName, new Variable(varName, structName, new ArrayList<Struct>(), type));
                 }
             }
             default -> throw new RuntimeException("Unknown variable type given inside a declaration.");
@@ -795,6 +854,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
             case BOOLEAN_ARRAY -> coercedValue = utility.coerceToTypedList(value, Boolean.class, VariableType.BOOLEAN);
             case STRING_ARRAY -> coercedValue = utility.coerceToTypedList(value, String.class, VariableType.STRING);
             case STRUCTURE -> coercedValue = utility.coerceToStruct(value, targetField.getStructName(), structs);
+            case STRUCTURE_ARRAY -> coercedValue = utility.coerceToTypedList(value, Struct.class, VariableType.STRUCTURE);
             default -> throw new RuntimeException("Unsupported field type: \"" + fieldType + "\" for assignment.");
         }
 
@@ -866,6 +926,11 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 }
             }
 
+            case STRUCTURE_ARRAY -> {
+                List<Struct> list = utility.coerceToTypedList(value, Struct.class, VariableType.STRUCTURE);
+                variables.put(varName, new Variable(varName, var.getStructName(), list, VariableType.STRUCTURE_ARRAY));
+            }
+
             case INTEGER_ARRAY -> {
                 List<Integer> list = utility.coerceToTypedList(value, Integer.class, VariableType.INTEGER);
                 variables.put(varName, new Variable(varName, VariableType.INTEGER_ARRAY, list));
@@ -912,8 +977,6 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         String varName = ctx.IDENTIFIER().getText();
         Scanner scanner = new Scanner(System.in);
         Variable var = variables.get(varName);
-
-        System.out.print("\uD83D\uDCBB Enter a(n) " + typeMapper.toString(var.getType()) + " value for variable " + varName + ": ");
 
         switch (var.getType()) {
             case INTEGER: {

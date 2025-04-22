@@ -13,5 +13,6 @@ public enum VariableType {
     BOOLEAN_ARRAY,
     ENUMERATION,
     STRUCTURE,
+    STRUCTURE_ARRAY,
     UNKNOWN
 }

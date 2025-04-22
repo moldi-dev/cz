@@ -1,0 +1,146 @@
+#include <MDA>
+
+#constant_define TABLE_SIZE 10
+
+struct ListNode = [
+    int key;
+    struct ListNode next;
+];
+
+struct HashTable = [
+    array<struct ListNode> buckets;
+];
+
+struct HashTable create_table();
+int hash(int key);
+struct ListNode create_node(int key);
+struct HashTable insert(struct HashTable table, int key);
+int contains(struct HashTable table, int key);
+struct HashTable delete_key(struct HashTable table, int key);
+void print_table(struct HashTable table);
+
+int main() {
+    struct HashTable table = create_table();
+
+    table = insert(table, 5);
+    table = insert(table, 15);
+    table = insert(table, 25);
+    table = insert(table, 2);
+    table = insert(table, 12);
+    table = insert(table, 4);
+
+    print("After insertions: \n");
+    print_table(table);
+
+    print("\n\n");
+
+    print("Contains 15 ? ", contains(table, 15), "\n");
+    print("Contains 100 ? ", contains(table, 100), "\n\n");
+
+    table = delete_key(table, 15);
+    print("After deleting 15: \n");
+    print_table(table);
+
+    return 0;
+}
+
+struct HashTable create_table() {
+    struct ListNode null_node = null;
+    struct HashTable table;
+    array<struct ListNode> arr;
+
+    for (int i = 0; i < TABLE_SIZE; i = i + 1) {
+        <MDA>array_insert_last(arr, null_node);
+    }
+
+    table.buckets = <MDA>array_copy(arr);
+    return table;
+}
+
+int hash(int key) {
+    return key % TABLE_SIZE;
+}
+
+struct ListNode create_node(int key) {
+    struct ListNode node;
+
+    node.key = key;
+    node.next = null;
+
+    return node;
+}
+
+struct HashTable insert(struct HashTable table, int key) {
+    int index = hash(key);
+    struct ListNode head = <MDA>array_get_at(table.buckets, index);
+    struct ListNode new_node = create_node(key);
+
+    new_node.next = head;
+    table.buckets = <MDA>array_set_at(table.buckets, index, new_node);
+
+    return table;
+}
+
+int contains(struct HashTable table, int key) {
+    int index = hash(key);
+    struct ListNode current = <MDA>array_get_at(table.buckets, index);
+
+    while (current != null) {
+        if (current.key == key) {
+            return 1;
+        }
+
+        current = current.next;
+    }
+
+    return 0;
+}
+
+struct HashTable delete_key(struct HashTable table, int key) {
+    int index = hash(key);
+    struct ListNode head = <MDA>array_get_at(table.buckets, index);
+
+    if (head == null) {
+        return table;
+    }
+
+    if (head.key == key) {
+        table.buckets = <MDA>array_set_at(table.buckets, index, head.next);
+        return table;
+    }
+
+    struct ListNode current = head;
+    struct ListNode next = head.next;
+    struct ListNode next_next;
+
+    while (next != null) {
+        if (next.key == key) {
+            next_next = next.next;
+            current.next = next_next;
+            table.buckets = <MDA>array_set_at(table.buckets, index, head);
+            return table;
+        }
+
+        current = current.next;
+        next = current.next;
+    }
+
+    return table;
+}
+
+void print_table(struct HashTable table) {
+    int len = <MDA>array_length(table.buckets);
+
+    for (int i = 0; i < len; i = i + 1) {
+        struct ListNode current = <MDA>array_get_at(table.buckets, i);
+
+        print("Bucket ", i, ": ");
+
+        while (current != null) {
+            print(current.key, " ");
+            current = current.next;
+        }
+
+        print("\n");
+    }
+}

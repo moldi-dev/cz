@@ -128,6 +128,51 @@ public class Utility {
                 return "invalid struct";
             }
 
+            else if (variable.getType().equals(VariableType.STRUCTURE_ARRAY)) {
+                Object structArrayValue = variable.getValue();
+
+                if (!(structArrayValue instanceof List<?> structList)) {
+                    return "[]";
+                }
+
+                StringBuilder sb = new StringBuilder();
+                sb.append("[");
+
+                for (int i = 0; i < structList.size(); i++) {
+                    Struct struct = (Struct) structList.get(i);
+
+                    if (struct != null) {
+                        sb.append(struct.getStructName()).append(" = [");
+
+                        List<Variable> fields = struct.getFields();
+
+                        for (int j = 0; j < fields.size(); j++) {
+                            Variable field = fields.get(j);
+                            sb.append(field.getName())
+                                    .append(" = ")
+                                    .append(formatValueForPrinting(field, enums));
+
+                            if (j < fields.size() - 1) {
+                                sb.append(", ");
+                            }
+                        }
+
+                        sb.append("]");
+                    }
+
+                    else {
+                        sb.append("invalid struct");
+                    }
+
+                    if (i < structList.size() - 1) {
+                        sb.append(", ");
+                    }
+                }
+
+                sb.append("]");
+                return sb.toString();
+            }
+
             else {
                 value = variable.getValue();
             }
@@ -175,6 +220,7 @@ public class Utility {
 
         if (ctx.ENUM() != null) return VariableType.ENUMERATION;
         if (ctx.STRUCT() != null) return VariableType.STRUCTURE;
+        if (ctx.struct_array_type() != null) return VariableType.STRUCTURE_ARRAY;
 
         return VariableType.UNKNOWN;
     }
@@ -355,14 +401,22 @@ public class Utility {
                 coerced.add(elementType.cast(item));
             }
 
-            else if (item instanceof Variable var &&
-                    var.getType() == innerType &&
-                    elementType.isInstance(var.getValue())) {
+            else if (item instanceof Variable var && var.getType() == innerType && elementType.isInstance(var.getValue())) {
                 coerced.add(elementType.cast(var.getValue()));
             }
 
-            else {
-                throw new RuntimeException("Invalid element type in array: expected " + innerType);
+            else if (item instanceof Variable var && var.getType() == innerType && innerType == VariableType.STRUCTURE) {
+                coerced.add(elementType.cast(var.getValue()));
+            }
+
+            else if (item == null) {
+                if (elementType == Struct.class) {
+                    coerced.add(null);
+                }
+
+                else {
+                    throw new RuntimeException("Only structs can be null.");
+                }
             }
         }
 

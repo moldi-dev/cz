@@ -26,6 +26,7 @@ public class TypeChecker {
                 case DOUBLE -> VariableType.DOUBLE_ARRAY;
                 case STRING -> VariableType.STRING_ARRAY;
                 case BOOLEAN -> VariableType.BOOLEAN_ARRAY;
+                case STRUCTURE -> VariableType.STRUCTURE_ARRAY;
                 default -> VariableType.UNKNOWN;
             };
         }
@@ -37,8 +38,9 @@ public class TypeChecker {
         return switch (arrayType) {
             case INTEGER_ARRAY -> VariableType.INTEGER;
             case DOUBLE_ARRAY -> VariableType.DOUBLE;
-            case STRING_ARRAY -> VariableType.STRING_ARRAY;
-            case BOOLEAN_ARRAY -> VariableType.BOOLEAN_ARRAY;
+            case STRING_ARRAY -> VariableType.STRING;
+            case BOOLEAN_ARRAY -> VariableType.BOOLEAN;
+            case STRUCTURE_ARRAY -> VariableType.STRUCTURE;
             default -> VariableType.UNKNOWN;
         };
     }

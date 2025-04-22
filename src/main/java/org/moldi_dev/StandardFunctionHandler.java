@@ -179,8 +179,12 @@ public class StandardFunctionHandler {
             return throwParameterMismatchRuntimeException("<MDA>array_get_at", "second");
         }
 
-        if (idx < 0 || idx >= list.size()) {
+        if ((idx < 0 || idx >= list.size()) && var.getType() != VariableType.STRUCTURE_ARRAY) {
             return throwIndexOutOfBoundsRuntimeException("<MDA>array_get_at", idx, list.size());
+        }
+
+        else if ((idx < 0 || idx >= list.size()) && var.getType() == VariableType.STRUCTURE_ARRAY) {
+            return null;
         }
 
         return list.get(idx);
@@ -215,12 +219,35 @@ public class StandardFunctionHandler {
             return throwIndexOutOfBoundsRuntimeException("<MDA>array_set_at", idx, list.size());
         }
 
+        VariableType arrayType = variable.getType();
         VariableType expectedType = typeChecker.inferTypeFromArrayType(variable.getType());
-
         VariableType valueType = value instanceof Variable vValue ? vValue.getType() : typeChecker.inferTypeFromValue(value);
 
-        if (!valueType.equals(expectedType)) {
-            return throwParameterMismatchRuntimeException("<MDA>array_set_at", "third");
+        if (arrayType == VariableType.STRUCTURE_ARRAY) {
+            if (!(value instanceof Variable vValue)) {
+                return throwParameterMismatchRuntimeException("<MDA>array_set_at", "third (expected structure variable)");
+            }
+
+            if (vValue.getType() != VariableType.STRUCTURE) {
+                return throwParameterMismatchRuntimeException("<MDA>array_set_at", "third (expected structure type)");
+            }
+
+            String arrayStructName = variable.getStructName();
+            String valueStructName = vValue.getStructName();
+
+            if (!arrayStructName.equals(valueStructName)) {
+                return throwParameterMismatchRuntimeException("<MDA>array_set_at", "third (structure name mismatch)");
+            }
+        }
+
+        else {
+            if (!valueType.equals(expectedType)) {
+                return throwParameterMismatchRuntimeException("<MDA>array_set_at", "third");
+            }
+
+            if (value instanceof Variable vValue) {
+                value = vValue.getValue();
+            }
         }
 
         List<Object> typedList = (List<Object>) list;
@@ -248,12 +275,35 @@ public class StandardFunctionHandler {
             variable = var;
         }
 
+        VariableType arrayType = variable.getType();
         VariableType expectedType = typeChecker.inferTypeFromArrayType(variable.getType());
-
         VariableType valueType = value instanceof Variable vValue ? vValue.getType() : typeChecker.inferTypeFromValue(value);
 
-        if (!valueType.equals(expectedType)) {
-            return throwParameterMismatchRuntimeException("<MDA>array_contains", "second");
+        if (arrayType == VariableType.STRUCTURE_ARRAY) {
+            if (!(value instanceof Variable vValue)) {
+                return throwParameterMismatchRuntimeException("<MDA>array_contains", "second (expected structure variable)");
+            }
+
+            if (vValue.getType() != VariableType.STRUCTURE) {
+                return throwParameterMismatchRuntimeException("<MDA>array_contains", "second (expected structure type)");
+            }
+
+            String arrayStructName = variable.getStructName();
+            String valueStructName = vValue.getStructName();
+
+            if (!arrayStructName.equals(valueStructName)) {
+                return throwParameterMismatchRuntimeException("<MDA>array_contains", "second (structure name mismatch)");
+            }
+        }
+
+        else {
+            if (!valueType.equals(expectedType)) {
+                return throwParameterMismatchRuntimeException("<MDA>array_contains", "second");
+            }
+
+            if (value instanceof Variable vValue) {
+                value = vValue.getValue();
+            }
         }
 
         List<Object> typedList = (List<Object>) list;
@@ -276,12 +326,32 @@ public class StandardFunctionHandler {
             variable = var;
         }
 
+        VariableType arrayType = variable.getType();
         VariableType expectedType = typeChecker.inferTypeFromArrayType(variable.getType());
-
         VariableType valueType = value instanceof Variable vValue ? vValue.getType() : typeChecker.inferTypeFromValue(value);
 
-        if (!valueType.equals(expectedType)) {
-            return throwParameterMismatchRuntimeException("<MDA>array_index_of", "second");
+        if (arrayType == VariableType.STRUCTURE_ARRAY) {
+            if (!(value instanceof Variable vValue)) {
+                return throwParameterMismatchRuntimeException("<MDA>array_index_of", "second (expected structure variable)");
+            }
+
+            if (vValue.getType() != VariableType.STRUCTURE) {
+                return throwParameterMismatchRuntimeException("<MDA>array_index_of", "second (expected structure type)");
+            }
+
+            if (!variable.getStructName().equals(vValue.getStructName())) {
+                return throwParameterMismatchRuntimeException("<MDA>array_index_of", "second (structure name mismatch)");
+            }
+        }
+
+        else {
+            if (!valueType.equals(expectedType)) {
+                return throwParameterMismatchRuntimeException("<MDA>array_index_of", "second");
+            }
+
+            if (value instanceof Variable vValue) {
+                value = vValue.getValue();
+            }
         }
 
         List<Object> typedList = (List<Object>) list;
@@ -304,12 +374,32 @@ public class StandardFunctionHandler {
             variable = var;
         }
 
+        VariableType arrayType = variable.getType();
         VariableType expectedType = typeChecker.inferTypeFromArrayType(variable.getType());
-
         VariableType valueType = value instanceof Variable vValue ? vValue.getType() : typeChecker.inferTypeFromValue(value);
 
-        if (!valueType.equals(expectedType)) {
-            return throwParameterMismatchRuntimeException("<MDA>array_count", "second");
+        if (arrayType == VariableType.STRUCTURE_ARRAY) {
+            if (!(value instanceof Variable vValue)) {
+                return throwParameterMismatchRuntimeException("<MDA>array_count", "second (expected structure variable)");
+            }
+
+            if (vValue.getType() != VariableType.STRUCTURE) {
+                return throwParameterMismatchRuntimeException("<MDA>array_count", "second (expected structure type)");
+            }
+
+            if (!variable.getStructName().equals(vValue.getStructName())) {
+                return throwParameterMismatchRuntimeException("<MDA>array_count", "second (structure name mismatch)");
+            }
+        }
+
+        else {
+            if (!valueType.equals(expectedType)) {
+                return throwParameterMismatchRuntimeException("<MDA>array_count", "second");
+            }
+
+            if (value instanceof Variable vValue) {
+                value = vValue.getValue();
+            }
         }
 
         List<Object> typedList = (List<Object>) list;
@@ -340,11 +430,32 @@ public class StandardFunctionHandler {
             variable = var;
         }
 
+        VariableType arrayType = variable.getType();
         VariableType expectedType = typeChecker.inferTypeFromArrayType(variable.getType());
         VariableType valueType = value instanceof Variable vValue ? vValue.getType() : typeChecker.inferTypeFromValue(value);
 
-        if (!valueType.equals(expectedType)) {
-            return throwParameterMismatchRuntimeException("<MDA>array_insert_first", "second");
+        if (arrayType == VariableType.STRUCTURE_ARRAY) {
+            if (!(value instanceof Variable vValue)) {
+                return throwParameterMismatchRuntimeException("<MDA>array_insert_first", "second (expected structure variable)");
+            }
+
+            if (vValue.getType() != VariableType.STRUCTURE) {
+                return throwParameterMismatchRuntimeException("<MDA>array_insert_first", "second (expected structure type)");
+            }
+
+            if (!variable.getStructName().equals(vValue.getStructName())) {
+                return throwParameterMismatchRuntimeException("<MDA>array_insert_first", "second (structure name mismatch)");
+            }
+        }
+
+        else {
+            if (!valueType.equals(expectedType)) {
+                return throwParameterMismatchRuntimeException("<MDA>array_insert_first", "second");
+            }
+
+            if (value instanceof Variable vValue) {
+                value = vValue.getValue();
+            }
         }
 
         List<Object> typedList = (List<Object>) list;
@@ -387,11 +498,32 @@ public class StandardFunctionHandler {
             return throwIndexOutOfBoundsRuntimeException("<MDA>array_insert_at", idx, list.size());
         }
 
+        VariableType arrayType = variable.getType();
         VariableType expectedType = typeChecker.inferTypeFromArrayType(variable.getType());
-        VariableType actualType = (value instanceof Variable vValue) ? vValue.getType() : typeChecker.inferTypeFromValue(value);
+        VariableType valueType = (value instanceof Variable vValue) ? vValue.getType() : typeChecker.inferTypeFromValue(value);
 
-        if (!actualType.equals(expectedType)) {
-            return throwParameterMismatchRuntimeException("<MDA>array_insert_at", "third");
+        if (arrayType == VariableType.STRUCTURE_ARRAY) {
+            if (!(value instanceof Variable vValue)) {
+                return throwParameterMismatchRuntimeException("<MDA>array_insert_at", "third (expected structure variable)");
+            }
+
+            if (vValue.getType() != VariableType.STRUCTURE) {
+                return throwParameterMismatchRuntimeException("<MDA>array_insert_at", "third (expected structure type)");
+            }
+
+            if (!variable.getStructName().equals(vValue.getStructName())) {
+                return throwParameterMismatchRuntimeException("<MDA>array_insert_at", "third (structure name mismatch)");
+            }
+        }
+
+        else {
+            if (!valueType.equals(expectedType)) {
+                return throwParameterMismatchRuntimeException("<MDA>array_insert_at", "third");
+            }
+
+            if (value instanceof Variable vValue) {
+                value = vValue.getValue();
+            }
         }
 
         List<Object> typedList = (List<Object>) list;
@@ -416,19 +548,38 @@ public class StandardFunctionHandler {
             variable = var;
         }
 
+        VariableType arrayType = variable.getType();
         VariableType expectedType = typeChecker.inferTypeFromArrayType(variable.getType());
         VariableType valueType = (value instanceof Variable v) ? v.getType() : typeChecker.inferTypeFromValue(value);
 
-        if (!valueType.equals(expectedType)) {
-            return throwParameterMismatchRuntimeException("<MDA>array_insert_last", "second");
+        if (arrayType == VariableType.STRUCTURE_ARRAY) {
+            if (!(value instanceof Variable vValue)) {
+                return throwParameterMismatchRuntimeException("<MDA>array_insert_last", "second (expected structure variable)");
+            }
+
+            if (vValue.getType() != VariableType.STRUCTURE) {
+                return throwParameterMismatchRuntimeException("<MDA>array_insert_last", "second (expected structure type)");
+            }
+
+            String arrayStructName = variable.getStructName();
+            String valueStructName = vValue.getStructName();
+
+            if (!arrayStructName.equals(valueStructName)) {
+                return throwParameterMismatchRuntimeException("<MDA>array_insert_last", "second (structure name mismatch)");
+            }
+        }
+
+        else {
+            if (!valueType.equals(expectedType)) {
+                return throwParameterMismatchRuntimeException("<MDA>array_insert_last", "second");
+            }
+
+            if (value instanceof Variable vValue) {
+                value = vValue.getValue();
+            }
         }
 
         List<Object> typedList = (List<Object>) list;
-
-        if (value instanceof Variable vValue) {
-            value = vValue.getValue();
-        }
-
         typedList.add(value);
 
         return typedList;

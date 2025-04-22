@@ -4,6 +4,10 @@ public class TypeMapper {
     public TypeMapper() {}
 
     public VariableType toVariableType(String token) {
+        if (token.contains("array<struct>")) {
+            token = "<STRUCT_ARRAY>";
+        }
+
         return switch (token) {
             case "int", "rizz" -> VariableType.INTEGER;
             case "double", "g" -> VariableType.DOUBLE;
@@ -17,25 +21,8 @@ public class TypeMapper {
             case "enum", "bae" -> VariableType.ENUMERATION;
             case "struct", "strucey" -> VariableType.STRUCTURE;
             case "void", "ghost" -> VariableType.VOID;
+            case "<STRUCT_ARRAY>" -> VariableType.STRUCTURE_ARRAY;
             default -> VariableType.UNKNOWN;
-        };
-    }
-
-    public String toString(VariableType type) {
-        return switch (type) {
-            case INTEGER -> "int";
-            case DOUBLE -> "double";
-            case CHARACTER -> "char";
-            case STRING -> "string";
-            case BOOLEAN -> "bool";
-            case INTEGER_ARRAY -> "array<int>";
-            case DOUBLE_ARRAY -> "array<double>";
-            case STRING_ARRAY -> "array<string>";
-            case BOOLEAN_ARRAY -> "array<bool>";
-            case ENUMERATION -> "enum";
-            case STRUCTURE -> "struct";
-            case VOID -> "void";
-            case UNKNOWN -> "";
         };
     }
 }

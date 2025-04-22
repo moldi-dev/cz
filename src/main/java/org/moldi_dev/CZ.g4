@@ -238,6 +238,12 @@ type_
     | ARRAY_STRING
     | ENUM IDENTIFIER
     | STRUCT IDENTIFIER
+    | struct_array_type
+    ;
+
+struct_array_type
+    : 'array<struct' IDENTIFIER GREATER_THAN
+    | 'squad<strucey' IDENTIFIER GREATER_THAN
     ;
 
 // Keywords (both C and CZ versions)
@@ -309,6 +315,8 @@ SHIFT_RIGHT: '>>' | 'rightslide';
 DOT: '.' | 'bougie';
 
 // Built-in functions (my own standard library bestie)
+
+// Math functions
 SINE: '<MDA>sine' | '<MDA>vibe_sway'; // <MDA>sine :: DOUBLE => DOUBLE
 COSINE: '<MDA>cosine' | '<MDA>side_chill'; // <MDA>cosine :: DOUBLE => DOUBLE
 HYPERBOLIC_SINE: '<MDA>hyperbolic_sine' | '<MDA>vibe_overload'; // <MDA>hyperbolic_sine :: DOUBLE => DOUBLE
@@ -318,6 +326,7 @@ RADIANS_TO_DEGREES: '<MDA>radians_to_degrees' | '<MDA>radz2degz'; // <MDA>radian
 EXPONENTIAL: '<MDA>exponential' | '<MDA>brr_brr_patapim'; // <MDA>exponential :: DOUBLE => DOUBLE
 LOGARITHM: '<MDA>logarithm' | '<MDA>vibe_log'; // <MDA>logarithm :: DOUBLE, DOUBLE => DOUBLE
 
+// Standard functions for arrays of data types
 ARRAY_LENGTH: '<MDA>array_length' | '<MDA>squad_countdown'; // <MDA>array_length :: array<T> => INTEGER
 ARRAY_GET_AT: '<MDA>array_get_at' | '<MDA>squad_peep'; // <MDA>array_get_at :: array<T>, INTEGER => T
 ARRAY_SET_AT: '<MDA>array_set_at' | '<MDA>squad_seep'; // <MDA>array_set_at :: array<T>, INTEGER, T => array<T>
@@ -332,10 +341,12 @@ ARRAY_DELETE_FIRST: '<MDA>array_delete_first' | '<MDA>squad_chopfirst'; // <MDA>
 ARRAY_DELETE_AT: '<MDA>array_delete_at' | '<MDA>squad_chopspot'; // <MDA>array_delete_at :: array<T>, INTEGER => array<T>
 ARRAY_DELETE_LAST: '<MDA>array_delete_last' | '<MDA>squad_choplast'; // <MDA>array_delete_last :: array<T> => array<T>
 
+// Standard functions for the primitive STRING data type
 STRING_SLICE: '<MDA>string_slice' | '<MDA>squad_cut'; // <MDA>string_slice :: STRING, INTEGER, INTEGER => STRING
 STRING_SPLIT: '<MDA>string_split' | '<MDA>squad_slay'; // <MDA>string_split :: STRING, CHARACTER => array<STRING>
 STRING_SUBSTRING: '<MDA>string_substring' | '<MDA>squad_subquad'; // <MDA>string_substring :: STRING, STRING => BOOLEAN
 
+// Standard functions for type conversions
 INT_TO_DOUBLE: '<MDA>int_to_double' | '<MDA>rizz2g'; // <MDA>int_to_double :: INTEGER => DOUBLE
 DOUBLE_TO_INT: '<MDA>double_to_int' | '<MDA>g2rizz'; // <MDA>double_to_int :: DOUBLE => INTEGER
 BOOLEAN_TO_INT: '<MDA>boolean_to_int' | '<MDA>cappin2rizz'; // <MDA>boolean_to_int :: BOOLEAN => INTEGER

@@ -1,35 +1,7 @@
 #include <MDA>
 
-enum COLOR = [
-    WHITE,
-    RED,
-    BLUE
-];
-
-struct Point2d = [
-    int x;
-    int y;
-    enum COLOR color;
-];
-
 int main() {
-    struct Point2d p1;
-
-    p1.x = 1;
-    p1.y = 1;
-    p1.color = COLOR.RED;
-
-    print(p1, "\n");
-
-    func(p1);
-
-    print(p1, "\n");
+    print("Hello World! \n");
 
     return 0;
-}
-
-void func(struct Point2d p) {
-    p.x = 5;
-    p.y = 10;
-    p.color = COLOR.BLUE;
 }

@@ -1,0 +1,59 @@
+#include <MDA>
+
+#constant_define MAX_PEOPLE 3
+
+struct Person = [
+    string name;
+    int age;
+    double height;
+];
+
+struct Person create_person();
+void print_person(struct Person p);
+
+int main() {
+    array<struct Person> people;
+
+    for (int i = 0; i < MAX_PEOPLE; i = i + 1) {
+        struct Person p = create_person();
+        <MDA>array_insert_last(people, p);
+    }
+
+    for (int i = 0; i < MAX_PEOPLE; i = i + 1) {
+        struct Person p = <MDA>array_get_at(people, i);
+        print_person(p);
+    }
+
+    return 0;
+}
+
+struct Person create_person() {
+    struct Person p;
+
+    string name;
+    int age;
+    double height;
+
+    print("Enter the person's name: ");
+    read(name);
+
+    print("Enter the person's age: ");
+    read(age);
+
+    print("Enter the person's height (in meters): ");
+    read(height);
+
+    p.name = name;
+    p.age = age;
+    p.height = height;
+
+    print("\n");
+
+    return p;
+}
+
+void print_person(struct Person p) {
+    print("Name: ", p.name, "\n");
+    print("Age: ", p.age, "\n");
+    print("Height: ", p.height, " meters\n\n");
+}

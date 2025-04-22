@@ -1,0 +1,160 @@
+#include <MDA>
+
+struct Node = [
+    int id;
+    array<int> neighbors;
+];
+
+struct Graph = [
+    array<struct Node> nodes;
+];
+
+struct Graph create_graph();
+struct Node create_node(int id);
+struct Graph add_node(struct Graph graph, int id);
+struct Graph add_edge(struct Graph graph, int from, int to);
+void bfs(struct Graph graph, int start);
+
+void dfs(struct Graph graph, int start);
+void dfs_helper(struct Graph graph, int current, array<int> visited);
+
+int main() {
+    struct Graph graph = create_graph();
+
+    graph = add_node(graph, 0);
+    graph = add_node(graph, 1);
+    graph = add_node(graph, 2);
+    graph = add_node(graph, 3);
+    graph = add_node(graph, 4);
+    graph = add_node(graph, 5);
+
+    graph = add_edge(graph, 0, 1);
+    graph = add_edge(graph, 0, 2);
+    graph = add_edge(graph, 1, 2);
+    graph = add_edge(graph, 2, 3);
+    graph = add_edge(graph, 0, 4);
+
+    print("BFS from node 0: \n");
+    bfs(graph, 0);
+
+    print("DFS from node 0: \n");
+    dfs(graph, 0);
+
+    return 0;
+}
+
+struct Graph create_graph() {
+    struct Graph graph;
+    array<struct Node> arr;
+
+    graph.nodes = <MDA>array_copy(arr);
+
+    return graph;
+}
+
+struct Node create_node(int id) {
+    struct Node n;
+    array<int> neighbors;
+
+    n.id = id;
+    n.neighbors = <MDA>array_copy(neighbors);
+
+    return n;
+}
+
+struct Graph add_node(struct Graph graph, int id) {
+    struct Node n = create_node(id);
+    <MDA>array_insert_last(graph.nodes, n);
+
+    return graph;
+}
+
+struct Graph add_edge(struct Graph graph, int from, int to) {
+    int len = <MDA>array_length(graph.nodes);
+
+    for (int i = 0; i < len; i = i + 1) {
+        struct Node node = <MDA>array_get_at(graph.nodes, i);
+
+        if (node.id == from) {
+            <MDA>array_insert_last(node.neighbors, to);
+            graph.nodes = <MDA>array_set_at(graph.nodes, i, node);
+            break;
+        }
+    }
+
+    return graph;
+}
+
+void bfs(struct Graph graph, int start) {
+    array<int> queue;
+    array<bool> visited;
+
+    int node_count = <MDA>array_length(graph.nodes);
+
+    for (int i = 0; i < node_count; i = i + 1) {
+        visited = <MDA>array_insert_last(visited, false);
+    }
+
+    queue = <MDA>array_insert_last(queue, start);
+    visited = <MDA>array_set_at(visited, start, true);
+
+    while (<MDA>array_length(queue) > 0) {
+        int current = <MDA>array_get_at(queue, 0);
+        queue = <MDA>array_delete_at(queue, 0);
+
+        print(current, " ");
+
+        struct Node current_node;
+
+        for (int i = 0; i < node_count; i = i + 1) {
+            struct Node node = <MDA>array_get_at(graph.nodes, i);
+
+            if (node.id == current) {
+                current_node = node;
+                break;
+            }
+        }
+
+        int neighbor_count = <MDA>array_length(current_node.neighbors);
+
+        for (int i = 0; i < neighbor_count; i = i + 1) {
+            int neighbor = <MDA>array_get_at(current_node.neighbors, i);
+
+            if (<MDA>array_get_at(visited, neighbor) == false) {
+                queue = <MDA>array_insert_last(queue, neighbor);
+                visited = <MDA>array_set_at(visited, neighbor, true);
+            }
+        }
+    }
+
+    print("\n");
+}
+
+void dfs(struct Graph graph, int start) {
+    array<int> visited;
+    dfs_helper(graph, start, visited);
+}
+
+void dfs_helper(struct Graph graph, int current, array<int> visited) {
+    if (<MDA>array_contains(visited, current)) {
+        return;
+    }
+
+    print(current, " ");
+    <MDA>array_insert_last(visited, current);
+
+    int len = <MDA>array_length(graph.nodes);
+
+    for (int i = 0; i < len; i = i + 1) {
+        struct Node node = <MDA>array_get_at(graph.nodes, i);
+
+        if (node.id == current) {
+            int n_len = <MDA>array_length(node.neighbors);
+
+            for (int j = 0; j < n_len; j = j + 1) {
+                int neighbor = <MDA>array_get_at(node.neighbors, j);
+                dfs_helper(graph, neighbor, visited);
+            }
+        }
+    }
+}
