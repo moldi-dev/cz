@@ -5,6 +5,8 @@ import java.util.List;
 
 public class Function {
     private String functionName;
+    private String enumName;
+    private String structName;
     private List<Variable> parameters;
     private CZParser.Function_blockContext body;
     private boolean isDeclaredOnly;
@@ -20,6 +22,14 @@ public class Function {
 
     public String getFunctionName() {
         return functionName;
+    }
+
+    public String getEnumName() {
+        return enumName;
+    }
+
+    public String getStructName() {
+        return structName;
     }
 
     public List<Variable> getParameters() {
@@ -40,6 +50,14 @@ public class Function {
 
     public void setFunctionName(String functionName) {
         this.functionName = functionName;
+    }
+
+    public void setEnumName(String enumName) {
+        this.enumName = enumName;
+    }
+
+    public void setStructName(String structName) {
+        this.structName = structName;
     }
 
     public void setParameters(List<Variable> parameters) {

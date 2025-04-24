@@ -552,18 +552,24 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
         String functionName = ctx.IDENTIFIER().getText();
         List<Variable> parameters = new ArrayList<>();
 
+        String enumName = null;
+        String structName = null;
+
         String ctxType = ctx.type_().getText();
 
         if (ctx.type_().ENUM() != null) {
             ctxType = "enum";
+            enumName = ctx.type_().IDENTIFIER().getText();
         }
 
         else if (ctx.type_().STRUCT() != null) {
             ctxType = "struct";
+            structName = ctx.type_().IDENTIFIER().getText();
         }
 
         else if (ctx.type_().struct_array_type() != null) {
             ctxType = "array<struct>";
+            structName = ctx.type_().struct_array_type().IDENTIFIER().getText();
         }
 
         if (ctx.parameters() != null) {
@@ -609,6 +615,15 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
         if (existing == null) {
             Function prototype = new Function(functionName, parameters, null, true, returnType);
+
+            if (enumName != null) {
+                prototype.setEnumName(enumName);
+            }
+
+            else if (structName != null) {
+                prototype.setStructName(structName);
+            }
+
             functions.put(functionName, prototype);
         }
 
@@ -636,16 +651,22 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
         String ctxType = ctx.type_().getText();
 
+        String enumName = null;
+        String structName = null;
+
         if (ctx.type_().ENUM() != null) {
             ctxType = "enum";
+            enumName = ctx.type_().IDENTIFIER().getText();
         }
 
         else if (ctx.type_().STRUCT() != null) {
             ctxType = "struct";
+            structName = ctx.type_().IDENTIFIER().getText();
         }
 
         else if (ctx.type_().struct_array_type() != null) {
             ctxType = "array<struct>";
+            structName = ctx.type_().struct_array_type().IDENTIFIER().getText();
         }
 
         if (ctx.parameters() != null) {
@@ -690,6 +711,15 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
         if (existing == null) {
             Function function = new Function(functionName, parameters, ctx.function_block(), false, returnType);
+
+            if (enumName != null) {
+                function.setEnumName(enumName);
+            }
+
+            else if (structName != null) {
+                function.setStructName(structName);
+            }
+
             functions.put(functionName, function);
         }
 
@@ -923,6 +953,10 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
                 else if (value instanceof Struct s) {
                     variables.put(varName, new Variable(varName, var.getStructName(), s, VariableType.STRUCTURE));
+                }
+
+                else {
+                    throw new RuntimeException("Type mismatch for variable \"" + varName + "\" for assignment.");
                 }
             }
 
@@ -1164,6 +1198,18 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
 
                 if (!declaredReturnType.equals(valueType)) {
                     throw new RuntimeException("Return type mismatch for function \"" + functionName + "\": expected return type " + declaredReturnType + " but got " + valueType + ".");
+                }
+
+                else if (value instanceof Variable var && var.getType() == VariableType.ENUMERATION && !var.getEnumName().equals(function.getEnumName())) {
+                    throw new RuntimeException("Return type mismatch for function \"" + functionName + "\": expected return type ENUMERATION " + function.getEnumName() + " but got ENUMERATION " + var.getEnumName() + ".");
+                }
+
+                else if (value instanceof Variable var && var.getType() == VariableType.STRUCTURE && !var.getStructName().equals(function.getStructName())) {
+                    throw new RuntimeException("Return type mismatch for function \"" + functionName + "\": expected return type STRUCTURE " + function.getStructName() + " but got STRUCTURE " + var.getStructName() + ".");
+                }
+
+                else if (value instanceof Variable var && var.getType() == VariableType.STRUCTURE_ARRAY && !var.getStructName().equals(function.getStructName())) {
+                    throw new RuntimeException("Return type mismatch for function \"" + functionName + "\": expected return type STRUCTURE_ARRAY " + function.getStructName() + " but got STRUCTURE_ARRAY " + var.getStructName() + ".");
                 }
             }
 
