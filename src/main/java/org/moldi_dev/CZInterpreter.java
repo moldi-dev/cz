@@ -632,7 +632,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 throw new RuntimeException("Return type mismatch in function declaration of \"" + functionName + "\".");
             }
 
-            if (utility.parametersMatch(existing.getParameters(), parameters)) {
+            if (!utility.parametersMatch(existing.getParameters(), parameters)) {
                 throw new RuntimeException("Parameter mismatch in function declaration of \"" + functionName + "\".");
             }
         }
@@ -728,7 +728,7 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                 throw new RuntimeException("Return type mismatch in function definition of \"" + functionName + "\".");
             }
 
-            if (utility.parametersMatch(existing.getParameters(), parameters)) {
+            if (!utility.parametersMatch(existing.getParameters(), parameters)) {
                 throw new RuntimeException("Parameter mismatch in function definition of \"" + functionName + "\".");
             }
 
@@ -1556,6 +1556,21 @@ public class CZInterpreter extends CZBaseVisitor<Object> {
                         if (!param.getType().equals(argType)) {
                             throw new RuntimeException("Type mismatch for parameter \"" + param.getName()
                                     + "\" in function \"" + functionName + "\": expected " + param.getType() + " but got " + argType + ".");
+                        }
+
+                        if (param.getType() == VariableType.ENUMERATION && !variableArg.getEnumName().equals(param.getEnumName())) {
+                            throw new RuntimeException("Type mismatch for parameter \"" + param.getName()
+                                    + "\" in function \"" + functionName + "\": expected ENUMERATION " + param.getEnumName() + " but got ENUMERATION " + ((Variable) argValue).getEnumName() + ".");
+                        }
+
+                        if (param.getType() == VariableType.STRUCTURE && !variableArg.getStructName().equals(param.getStructName())) {
+                            throw new RuntimeException("Type mismatch for parameter \"" + param.getName()
+                                    + "\" in function \"" + functionName + "\": expected STRUCTURE " + param.getStructName() + " but got STRUCTURE " + ((Variable) argValue).getStructName() + ".");
+                        }
+
+                        if (param.getType() == VariableType.STRUCTURE_ARRAY && !variableArg.getStructName().equals(param.getStructName())) {
+                            throw new RuntimeException("Type mismatch for parameter \"" + param.getName()
+                                    + "\" in function \"" + functionName + "\": expected STRUCTURE_ARRAY " + param.getStructName() + " but got STRUCTURE_ARRAY " + ((Variable) argValue).getStructName() + ".");
                         }
 
                         if (param.getType() == VariableType.STRUCTURE) {

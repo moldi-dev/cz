@@ -16,19 +16,31 @@ public class Utility {
     }
 
     public boolean parametersMatch(List<Variable> a, List<Variable> b) {
-        if (a.size() != b.size()) return true;
+        if (a.size() != b.size()) return false;
 
         for (int i = 0; i < a.size(); i++) {
             if (!a.get(i).getType().equals(b.get(i).getType())) {
-                return true;
+                return false;
+            }
+
+            if (a.get(i).getType() == VariableType.STRUCTURE && !b.get(i).getStructName().equals(a.get(i).getStructName())) {
+                return false;
+            }
+
+            if (a.get(i).getType() == VariableType.ENUMERATION && !b.get(i).getEnumName().equals(a.get(i).getEnumName())) {
+                return false;
+            }
+
+            if (a.get(i).getType() == VariableType.STRUCTURE_ARRAY && !b.get(i).getStructName().equals(a.get(i).getStructName())) {
+                return false;
             }
 
             if (!a.get(i).getName().equals(b.get(i).getName())) {
-                return true;
+                return false;
             }
         }
 
-        return false;
+        return true;
     }
 
     public String findEnclosingFunctionName(ParserRuleContext ctx) {
